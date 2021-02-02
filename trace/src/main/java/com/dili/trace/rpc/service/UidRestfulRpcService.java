@@ -35,14 +35,20 @@ public class UidRestfulRpcService {
      * @return
      */
     public String bizNumber(String type) {
-        BaseOutput<String> out = this.uidRestfulRpc.bizNumber(type);
+        String bizType=StringUtils.trimToNull(type);
+        if(bizType==null){
+            logger.error("bizType ={}",bizType);
+            throw new TraceBizException("生成编号出错");
+        }
+        BaseOutput<String> out = this.uidRestfulRpc.bizNumber(bizType);
         if (out!=null&&out.isSuccess()&& StringUtils.isNotBlank(out.getData())){
             return out.getData().trim();
         } else {
             if (out != null) {
-                logger.error("生成编号出错：{}--{}--{}", out.getCode(), out.getMessage(), out.getErrorData());
+                logger.error("生成编号出错：bizType={},{}--{}--{}", bizType,out.getCode(), out.getMessage(), out.getErrorData());
             }
         }
+        logger.error("生成编号出错 bizType ={}",bizType);
         throw new TraceBizException("生成编号出错");
     }
 
