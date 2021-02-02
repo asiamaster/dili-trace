@@ -88,11 +88,14 @@ public class CheckSheetController {
         modelMap.put("createdStart", now.withYear(2019).withMonth(1).withDayOfMonth(1)
                 .format(DateTimeFormatter.ofPattern("yyyy-MM-dd 00:00:00")));
         modelMap.put("createdEnd", now.format(DateTimeFormatter.ofPattern("yyyy-MM-dd 23:59:59")));
-        if (StringUtils.isBlank(billType)) {
-            billType = BillTypeEnum.REGISTER_BILL.getCode().toString();
-        } else {
-            modelMap.put("billType", billType);
+
+        try{
+            BillTypeEnum billTypeEnum= BillTypeEnum.fromCode(Integer.parseInt(billType)).orElse(BillTypeEnum.REGISTER_BILL);
+            modelMap.put("billType", billTypeEnum.getCode());
+        }catch (Exception e){
+            modelMap.put("billType", BillTypeEnum.REGISTER_BILL.getCode());
         }
+
         if(billType.equalsIgnoreCase(BillTypeEnum.REGISTER_BILL.getCode().toString())){
             modelMap.put("gridTitle", "进场检测报告");
         }else{
