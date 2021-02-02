@@ -187,7 +187,9 @@ public class UpStreamController {
             });
             if (CollectionUtils.isNotEmpty(customerExtendDtoList)) {
                 //用户id，name组成用户map
-                Map<Long, String> userMap = customerExtendDtoList.stream().collect(Collectors.toMap(CustomerExtendDto::getId, CustomerExtendDto::getName, (a, b) -> a));
+                Map<Long, String> userMap = StreamEx.of(customerExtendDtoList)
+                        .nonNull().mapToEntry(CustomerExtendDto::getId, CustomerExtendDto::getName)
+                        .filterKeys(Objects::nonNull).toMap();
                 //根据上游企业id 分组 用户id，组成按上游企业id分组的用户集合
                 Map<Long, List<RUserUpstream>> upStreamUserMap = upstreamsRefs.stream().collect(Collectors.groupingBy(RUserUpstream::getUpstreamId));
                 //遍历上游企业集合，将用户map名称与上游企业用户集合关联
