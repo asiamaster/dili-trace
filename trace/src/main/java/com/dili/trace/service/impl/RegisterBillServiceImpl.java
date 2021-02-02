@@ -666,11 +666,10 @@ public class RegisterBillServiceImpl extends BaseServiceImpl<RegisterBill, Long>
                         || RegistTypeEnum.SUPPLEMENT.equalsToCode(billItem.getRegistType())) {
             throw new TraceBizException("补单或已进门报备单,只能场内审核");
         }
-
-        this.doVerify(billItem, input.getVerifyStatus(), input.getReason(), operatorUser);
-
         BillVerifyStatusEnum toVerifyState = BillVerifyStatusEnum.fromCode(input.getVerifyStatus())
                 .orElseThrow(() -> new TraceBizException("参数错误"));
+        this.doVerify(billItem, toVerifyState, input.getReason(), operatorUser);
+
         if (BillVerifyStatusEnum.PASSED == toVerifyState) {
             processService.afterBillPassed(billItem.getId(), billItem.getMarketId(), operatorUser);
         }
@@ -687,7 +686,8 @@ public class RegisterBillServiceImpl extends BaseServiceImpl<RegisterBill, Long>
         if (billId == null || verifyStatus == null) {
             throw new TraceBizException("参数错误");
         }
-
+        BillVerifyStatusEnum toVerifyState = BillVerifyStatusEnum.fromCode(verifyStatus)
+                .orElseThrow(() -> new TraceBizException("参数错误"));
         RegisterBill billItem = this.getAndCheckById(billId).orElseThrow(() -> new TraceBizException("数据不存在"));
 
 //        if (!YesOrNoEnum.YES.getCode().equals(billItem.getIsCheckin())
@@ -699,7 +699,7 @@ public class RegisterBillServiceImpl extends BaseServiceImpl<RegisterBill, Long>
             this.checkinOutRecordService.doCheckin(operatorUser, Lists.newArrayList(billItem.getBillId()),
                     CheckinStatusEnum.ALLOWED);
         }
-        this.doVerify(billItem, verifyStatus, reason, operatorUser);
+        this.doVerify(billItem, toVerifyState, reason, operatorUser);
         //新增消息
         addMessage(billItem, MessageTypeEnum.BILLPASS.getCode(), MessageStateEnum.BUSINESS_TYPE_BILL.getCode(), MessageReceiverEnum.MESSAGE_RECEIVER_TYPE_NORMAL.getCode(), billItem.getMarketId());
         return billItem.getId();
@@ -747,13 +747,11 @@ public class RegisterBillServiceImpl extends BaseServiceImpl<RegisterBill, Long>
         return smsMap;
     }
 
-    private void doVerify(RegisterBill billItem, Integer verifyStatus, String reason,
+    private void doVerify(RegisterBill billItem, BillVerifyStatusEnum toVerifyState, String reason,
                           Optional<OperatorUser> operatorUser) {
         BillVerifyStatusEnum fromVerifyState = BillVerifyStatusEnum.fromCode(billItem.getVerifyStatus())
                 .orElseThrow(() -> new TraceBizException("数据错误"));
 
-        BillVerifyStatusEnum toVerifyState = BillVerifyStatusEnum.fromCode(verifyStatus)
-                .orElseThrow(() -> new TraceBizException("参数错误"));
 
         logger.info("审核: billId: {} from {} to {}", billItem.getBillId(), fromVerifyState.getName(),
                 toVerifyState.getName());
@@ -793,10 +791,9 @@ public class RegisterBillServiceImpl extends BaseServiceImpl<RegisterBill, Long>
         this.billVerifyHistoryService.createVerifyHistory(fromVerifyState, bill.getBillId(), operatorUser);
 
         // 创建相关的tradeDetail及batchStock数据
-        this.tradeDetailService.findBilledTradeDetailByBillId(billItem.getBillId()).ifPresent(tradeDetailItem -> {
-            this.tradeService.createBatchStockAfterVerifiedAndCheckin(billItem.getId(),
-                    operatorUser);
-        });
+
+        this.tradeService.createBatchStockAfterVerifiedAndCheckin(billItem.getId(),
+                operatorUser);
 
         // 更新用户颜色码
         this.updateUserQrStatusByUserId(billItem.getBillId(), billItem.getUserId());
