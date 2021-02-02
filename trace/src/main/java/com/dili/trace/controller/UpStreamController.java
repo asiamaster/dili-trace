@@ -26,6 +26,7 @@ import com.dili.uap.sdk.domain.UserTicket;
 import com.dili.uap.sdk.domain.dto.UserQuery;
 import com.dili.uap.sdk.rpc.UserRpc;
 import com.dili.uap.sdk.session.SessionContext;
+import com.google.common.collect.Lists;
 import io.swagger.annotations.Api;
 import one.util.streamex.StreamEx;
 import org.apache.commons.collections.CollectionUtils;
@@ -136,20 +137,7 @@ public class UpStreamController {
         BasePage<UpStream> streamBasePage = upStreamService.listPageByExample(upStreamDto);
         Long totalItem = streamBasePage.getTotalItem();
         List<UpStream> upStreams = streamBasePage.getDatas();
-        List<UpStreamDto> upStreamDtos = new ArrayList<>();
-        if (!upStreams.isEmpty()) {
-            //构建上游企业用户map
-            Map<Long, List<String>> upUserMap = buildUpUserMap(upStreams);
-            upStreams.forEach(o -> {
-                UpStreamDto usd = new UpStreamDto();
-                BeanUtils.copyProperties(o, usd);
-                List<String> nameList = upUserMap.get(o.getId());
-                usd.setUserNames(nameList.isEmpty()? "" : StringUtils.strip(String.join(",",nameList), "[]"));
-                upStreamDtos.add(usd);
-            });
-        } else {
-            return new EasyuiPageOutput(0L, Collections.emptyList()).toString();
-        }
+        List<UpStreamDto> upStreamDtos = this. buildUpUserMap(upStreams);
         List results = ValueProviderUtils.buildDataByProvider(upStreamDto, upStreamDtos);
         return new EasyuiPageOutput(totalItem, results).toString();
 
@@ -161,16 +149,29 @@ public class UpStreamController {
      * @param upStreams
      * @return
      */
-    private Map<Long, List<String>> buildUpUserMap(List<UpStream> upStreams) {
+    private   List<UpStreamDto> buildUpUserMap(List<UpStream> upStreams) {
+        if(upStreams==null||upStreams.isEmpty()){
+            return Lists.newArrayList();
+        }
         //查询上游企业关联用户列表
         RUserUpstreamDto rUserUpstreamDto = new RUserUpstreamDto();
-        rUserUpstreamDto.setUpstreamIds(upStreams.stream().map(o -> o.getId()).collect(Collectors.toList()));
+        rUserUpstreamDto.setUpstreamIds(StreamEx.of(upStreams).nonNull().map(o -> o.getId()).distinct().toList());
         List<RUserUpstream> upstreamsRefs = rUserUpStreamService.listByExample(rUserUpstreamDto);
         //用户id，name组成用户map
         Map<Long, List<String>> userMap = StreamEx.of(upstreamsRefs)
                 .nonNull().mapToEntry(RUserUpstream::getUpstreamId, RUserUpstream::getUserName)
                 .filterKeys(Objects::nonNull).grouping();
-        return userMap;
+        List<UpStreamDto> upStreamDtos = new ArrayList<>();
+
+        upStreams.forEach(o -> {
+            UpStreamDto usd = new UpStreamDto();
+            BeanUtils.copyProperties(o, usd);
+            List<String> nameList = userMap.get(o.getId());
+            usd.setUserNames(nameList.isEmpty()? "" : StringUtils.strip(String.join(",",nameList), "[]"));
+            upStreamDtos.add(usd);
+        });
+
+        return upStreamDtos;
     }
 
 
