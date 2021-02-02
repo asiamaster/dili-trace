@@ -48,13 +48,13 @@
     <hr>
     <div>
         <div id="toolbar" class="btn-group" role="group" aria-label="工具栏">
-            <#resource code="checkSheet#view">
+            <#resource code="checkSheet#view-bill,checkSheet#view-comm,">
                 <button id="detail-btn" type="button" class="btn btn-primary"><i class="fa fa-eye"></i> 查看</button>
             </#resource>
-            <#resource code="checkSheet#reprint">
+            <#resource code="checkSheet#reprint-bill,checkSheet#reprint-comm">
                 <button id="reprint-btn" type="button" class="btn btn-primary"><i class="fa fa-plus"></i> 补打</button>
             </#resource>
-            <#resource code="checkSheet#export">
+            <#resource code="checkSheet#export-bill,checkSheet#export-comm">
                 <button id="export" type="button" class="btn btn-primary"><i class="fa fa-download"></i> 导出</button>
             </#resource>
         </div>
