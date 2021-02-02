@@ -191,7 +191,16 @@ public class TradeOrderService extends BaseServiceImpl<TradeOrder, Long> {
      * @param registerBill
      * @return
      */
-    public TradeOrder createTradeFromRegisterBill(RegisterBill registerBill) {
+    public Optional<TradeOrder> createTradeFromRegisterBill(RegisterBill registerBill) {
+        TradeDetail tdq=new TradeDetail();
+        tdq.setBillId(registerBill.getBillId());
+        tdq.setTradeType(TradeTypeEnum.NONE.getCode());
+        boolean hasTD=this.tradeDetailService.listByExample(tdq).size()>0;
+        if(hasTD){
+            return Optional.empty();
+        }
+
+
         TradeDto tradeDto = new TradeDto();
         tradeDto.setTradeOrderType(TradeOrderTypeEnum.NONE);
         tradeDto.setMarketId(registerBill.getMarketId());
@@ -236,7 +245,7 @@ public class TradeOrderService extends BaseServiceImpl<TradeOrder, Long> {
 
         this.dealTradeOrder(tradeOrder.getTradeOrderId(), TradeOrderStatusEnum.FINISHED);
 //        this.productRpcService.create(registerBill, Optional.empty());
-        return tradeOrder;
+        return Optional.of(tradeOrder);
 
     }
 
