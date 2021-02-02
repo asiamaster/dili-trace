@@ -529,12 +529,18 @@ public class NewRegisterBillController {
         modelMap.put("detectRequest", detectRequest);
         if (null != registerBill.getPieceNum()) {
             modelMap.put("pieceNum", registerBill.getPieceNum().setScale(0, BigDecimal.ROUND_DOWN));
+        }else{
+            modelMap.put("pieceNum", null);
         }
         if (null != registerBill.getPieceWeight()) {
             modelMap.put("pieceWeight", registerBill.getPieceWeight().setScale(0, BigDecimal.ROUND_DOWN));
+        }else{
+            modelMap.put("pieceWeight", null);
         }
         if (null != registerBill.getTruckTareWeight()) {
             modelMap.put("truckTareWeight", registerBill.getTruckTareWeight().setScale(0, BigDecimal.ROUND_DOWN));
+        }else{
+            modelMap.put("truckTareWeight", null);
         }
         if (null != registerBill.getUpStreamId()) {
             UpStream upStream = upStreamService.get(registerBill.getUpStreamId());

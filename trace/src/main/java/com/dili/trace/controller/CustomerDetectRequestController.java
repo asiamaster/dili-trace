@@ -282,9 +282,13 @@ public class CustomerDetectRequestController {
 
         if (null != item.getPieceNum()) {
             modelMap.put("pieceNum", item.getPieceNum().setScale(0, BigDecimal.ROUND_DOWN));
+        }else{
+            modelMap.put("pieceNum", null);
         }
         if (null != item.getPieceWeight()) {
             modelMap.put("pieceWeight", item.getPieceWeight().setScale(0, BigDecimal.ROUND_DOWN));
+        }else{
+            modelMap.put("pieceWeight", null);
         }
 
         DetectRequest detectRequest = detectRequestService.get(item.getDetectRequestId());
