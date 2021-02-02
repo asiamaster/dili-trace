@@ -417,10 +417,13 @@ public class ProductRpcService {
         });
         // 库存系统要校验InStockNo字段唯一，传报备单主键交易场景有问题，所以生成个唯一单号
         createDto.setInStockNo(uidRestfulRpcService.bizNumber(BizNumberType.STOCK_CODE.getType()));
-        optUser.ifPresent(o -> {
-            createDto.setOperatorId(o.getId());
-            createDto.setOperatorName(o.getName());
-        });
+        if(optUser.isPresent()){
+            createDto.setOperatorId(optUser.get().getId());
+            createDto.setOperatorName(optUser.get().getName());
+        }else{
+            createDto.setOperatorId(buyerProductStock.getUserId());
+            createDto.setOperatorName(buyerProductStock.getUserName());
+        }
         createDto.setPlateNo(registerBill.getPlate());
 
         createDto.setRegDetailDtos(regDetailDtoList);
