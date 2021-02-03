@@ -111,7 +111,7 @@ export class PurchaseIntentionRecordGrid extends ListPage {
             isIframe: true,
             closeBtn: true,
             backdrop: 'static',
-            width: '68%',
+            width: '88%',
             height: '58%',
             btns: []
         });
