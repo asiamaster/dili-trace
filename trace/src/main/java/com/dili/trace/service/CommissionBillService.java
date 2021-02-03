@@ -1,6 +1,7 @@
 package com.dili.trace.service;
 
 import com.dili.common.exception.TraceBizException;
+import com.dili.commons.glossary.YesOrNoEnum;
 import com.dili.ss.base.BaseServiceImpl;
 import com.dili.ss.domain.BaseOutput;
 import com.dili.trace.dao.RegisterBillMapper;
@@ -289,6 +290,7 @@ public class CommissionBillService extends BaseServiceImpl<RegisterBill, Long> {
         bill.setModified(new Date());
         bill.setMarketId(bill.getMarketId());
         bill.setPlate("");
+        bill.setIsPrintCheckSheet(YesOrNoEnum.NO.getCode());
         //同步uap商品、经营户
         syncCategoryService.saveAndSyncGoodInfo(bill.getProductId(),bill.getMarketId());
         syncUserInfoService.saveAndSyncUserInfo(bill.getUserId(),bill.getMarketId());
