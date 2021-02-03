@@ -10,7 +10,7 @@
       FROM trade_request r,trade_order o WHERE o.id = r.trade_order_Id
       AND (r.buyer_id = #{buyerId} OR r.seller_id = #{buyerId})
       and (r.created >= #{createdStart} and r.created <=#{createdEnd})
-      and o.order_status = #{orderStatus}
+      and r.order_status = #{orderStatus}
       and r.seller_id is not null
      ]]>
   </select>
