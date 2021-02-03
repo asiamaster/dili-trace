@@ -186,7 +186,7 @@ public class TradeOrderServiceTest extends AutoWiredBaseTest {
 
     @Test
     public void createTradeFromRegisterBill() {
-        TradeOrder tradeOrder = this.tradeOrderService.createTradeFromRegisterBill(this.registerBillService.get(4L));
+        Optional<TradeOrder> tradeOrder = this.tradeOrderService.createTradeFromRegisterBill(this.registerBillService.get(4L));
         Assertions.assertNotNull(tradeOrder);
     }
 }
