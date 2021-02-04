@@ -3,6 +3,7 @@ package com.dili.trace.service;
 import cn.hutool.db.sql.SqlFormatter;
 import com.dili.customer.sdk.domain.dto.CustomerExtendDto;
 import com.dili.customer.sdk.rpc.CustomerRpc;
+import com.dili.ss.domain.BaseOutput;
 import com.dili.trace.AutoWiredBaseTest;
 import com.dili.trace.api.input.ProductStockInput;
 import com.dili.trace.domain.TradeOrder;
@@ -26,7 +27,6 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-
 @EnableDiscoveryClient
 public class TradeOrderServiceTest extends AutoWiredBaseTest {
     @Autowired
@@ -49,6 +49,8 @@ public class TradeOrderServiceTest extends AutoWiredBaseTest {
 
     @Test
     public void findCustomerById() {
+        //当调用方法时直接调用真实方法,之后返回thenreturn的值(只对mockbean有效,不能对spy的bean使用)
+        Mockito.when(this.customerRpc.get(1L, 8L)).thenReturn(BaseOutput.failure());
         System.out.println(this.customerRpc);
         //当调用方法时直接返回doreturn的值 ，而不调用真实方法
         Mockito.doReturn(Optional.empty()).when(customerRpcService).findCustomerById(1L, 8L);
@@ -60,8 +62,7 @@ public class TradeOrderServiceTest extends AutoWiredBaseTest {
         this.customerRpcService.findCustomerById(1L, 8L).ifPresent(c -> {
             System.out.println(c);
         });
-        //当调用方法时直接调用真实方法,之后返回thenreturn的值
-        Mockito.when(this.customerRpcService.findCustomerById(1L, 8L)).thenReturn(Optional.empty());
+
 
     }
 
