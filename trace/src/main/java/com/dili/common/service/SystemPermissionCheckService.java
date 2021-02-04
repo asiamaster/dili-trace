@@ -54,6 +54,13 @@ public class SystemPermissionCheckService {
         }
     }
 
+    /**
+     * SB
+     * @param <T>
+     * @param obj
+     * @param clazz
+     * @return 
+     */
     public static <T> Set<T> castSet(Object obj, Class<T> clazz)
     {
         Set<T> result = new HashSet<T>();

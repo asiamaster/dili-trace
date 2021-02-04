@@ -18,9 +18,18 @@ import com.github.pagehelper.PageHelper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+/**
+ * 用户登录信息
+ * @author admin
+ */
 @Service
 @Transactional
 public class UserLoginHistoryService extends BaseServiceImpl<UserLoginHistory, Long> {
+    /**
+     * createLoginHistory
+     * @param user
+     * @return 
+     */
     public UserLoginHistory createLoginHistory(UserInfo user) {
         UserLoginHistory loginHistory = new UserLoginHistory();
 
@@ -32,6 +41,12 @@ public class UserLoginHistoryService extends BaseServiceImpl<UserLoginHistory, L
         return loginHistory;
     }
 
+    /**
+     * listEasyuiPageByExample
+     * @param domain
+     * @return
+     * @throws Exception 
+     */
     public EasyuiPageOutput listEasyuiPageByExample(UserLoginHistoryQueryDto domain) throws Exception {
         UserLoginHistoryMapper dao = (UserLoginHistoryMapper) this.getDao();
 

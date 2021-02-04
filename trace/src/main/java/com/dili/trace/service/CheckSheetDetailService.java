@@ -7,7 +7,10 @@ import org.springframework.stereotype.Service;
 
 import com.dili.ss.base.BaseServiceImpl;
 import com.dili.trace.domain.CheckSheetDetail;
-
+/**
+ * SB
+ * @author admin
+ */
 @Service
 public class CheckSheetDetailService extends BaseServiceImpl<CheckSheetDetail, Long> {
 

@@ -24,8 +24,14 @@ import org.springframework.stereotype.Service;
 import one.util.streamex.EntryStream;
 import one.util.streamex.StreamEx;
 
+/**
+ * 理货区号
+ *
+ * @author admin
+ */
 @Service
 public class TallyAreaNoService extends BaseServiceImpl<TallyAreaNo, Long> {//implements CommandLineRunner {
+
     private static final Logger logger = LoggerFactory.getLogger(TallyAreaNoService.class);
     private Map<String, List<String>> areaAndNumMap = new HashMap<>();
 
@@ -52,7 +58,6 @@ public class TallyAreaNoService extends BaseServiceImpl<TallyAreaNo, Long> {//im
     //     uq.setRows(200);
     //     while (true) {
     //         List<User> userList = StreamEx.of(this.userService.listPageByExample(uq).getDatas()).map(userItem -> {
-
     //             String parsedTallyAreaNos = StringUtils
     //                     .trimToNull(this.parseAndConvertTallyAreaNos(userItem.getTallyAreaNos()));
     //             if (!Objects.equals(parsedTallyAreaNos, StringUtils.trimToNull(userItem.getTallyAreaNos()))) {
@@ -63,7 +68,6 @@ public class TallyAreaNoService extends BaseServiceImpl<TallyAreaNo, Long> {//im
     //                 return this.userService.get(u.getId());
     //             }
     //             return userItem;
-
     //         }).toList();
     //         if (userList.isEmpty()) {
     //             return;
@@ -86,30 +90,54 @@ public class TallyAreaNoService extends BaseServiceImpl<TallyAreaNo, Long> {//im
     //         } catch (Exception e) {
     //             logger.error(e.getMessage(), e);
     //         }
-
     //         uq.setPage(uq.getPage() + 1);
     //     }
     // }
-
+    /**
+     * 理货区号转换
+     *
+     * @param tallyAreaNos
+     * @return
+     */
     public String parseAndConvertTallyAreaNos(String tallyAreaNos) {
         return StreamEx.of(this.parseAndConvert(tallyAreaNos)).joining(",");
 
     }
 
+    /**
+     * 理货区号转换
+     *
+     * @param tallyAreaNos
+     * @return
+     */
     private List<String> parseAndConvert(String tallyAreaNos) {
         return StreamEx.ofNullable(tallyAreaNos).map(StringUtils::trimToNull).nonNull().flatArray(str -> str.split(","))
                 .map(StringUtils::trimToNull).map(str -> {
-                    return StringUtils.remove(str, " ");
-                }).nonNull().distinct().toList();
+            return StringUtils.remove(str, " ");
+        }).nonNull().distinct().toList();
 
     }
 
+    /**
+     * saveOrUpdateTallyAreaNo
+     *
+     * @param userId
+     * @param tallyAreaNos
+     * @return
+     */
     public List<TallyAreaNo> saveOrUpdateTallyAreaNo(Long userId, String tallyAreaNos) {
         List<String> tallyAreaNoList = this.parseAndConvert(tallyAreaNos);
         return this.saveOrUpdateTallyAreaNo(userId, tallyAreaNoList);
 
     }
 
+    /**
+     * saveOrUpdateTallyAreaNo
+     *
+     * @param userId
+     * @param tallyAreaNoList
+     * @return
+     */
     public List<TallyAreaNo> saveOrUpdateTallyAreaNo(Long userId, List<String> tallyAreaNoList) {
         if (userId == null) {
             return Lists.newArrayList();
@@ -138,6 +166,12 @@ public class TallyAreaNoService extends BaseServiceImpl<TallyAreaNo, Long> {//im
 
     }
 
+    /**
+     * parseAndSave
+     *
+     * @param number
+     * @return
+     */
     private TallyAreaNo parseAndSave(String number) {
         String area = EntryStream.of(areaAndNumMap).filterValues(list -> {
             return StreamEx.of(list).anyMatch(flag -> {

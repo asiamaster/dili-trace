@@ -10,13 +10,20 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-
+/**
+ * SB
+ * @author admin
+ */
 @Service
 public class CarTypeRpcService {
     private static final Logger logger = LoggerFactory.getLogger(CarTypeRpcService.class);
     @Autowired
     CarTypeRpc carTypeRpc;
 
+    /**
+     * 查询所有车型
+     * @return 
+     */
     public List<CarTypeDTO> listCarType() {
         try {
             BaseOutput<List<CarTypeDTO>> out = this.carTypeRpc.listCarType();

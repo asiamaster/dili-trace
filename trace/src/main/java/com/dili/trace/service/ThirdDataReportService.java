@@ -78,6 +78,11 @@ public class ThirdDataReportService {
         return reportUser;
     }
 
+    /**
+     * SB
+     * @param info
+     * @return 
+     */
     private List<ReportUserImgDto> getBlAccountImgList(UserInfo info) {
         List<ReportUserImgDto> userImgList = new ArrayList<>();
         //生产许可证
@@ -143,6 +148,9 @@ public class ThirdDataReportService {
         return userImgList;
     }
 
+    /**
+     * reprocessUserQrCode
+     */
     public List<ReportQrCodeDto> reprocessUserQrCode(List<UserQrHistory> list, Long platformMarketId) {
         Map<Long, List<UserQrHistory>> groupByPriceMap = StreamEx.of(list).nonNull().collect(Collectors.groupingBy(UserQrHistory::getUserId));
         List<ReportQrCodeDto> qrCodeDtos = new ArrayList<>();
