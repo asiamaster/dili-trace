@@ -68,11 +68,11 @@ public class ThirdPartyReportJob implements CommandLineRunner {
     @Override
     public void run(String... args) throws Exception {
         logger.info("===启动时刷新Token===");
-        this.execute();
+//        this.execute();
     }
 
     // 每115分钟执行一次(token是两小时有效时间)
-    @Scheduled(fixedRate = 1000L * 60L * 115)
+//    @Scheduled(fixedRate = 1000L * 60L * 115)
     public void execute() {
         logger.info("---开始刷新Token---");
         try {
