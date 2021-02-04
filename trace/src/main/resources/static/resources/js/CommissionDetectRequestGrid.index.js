@@ -112,7 +112,7 @@ class CommissionDetectRequestGrid extends ListPage {
         });
         let param = $.param({ idList: idList }, true);
         let url = this.toUrl("/checkSheet/edit.html?" + param);
-        var audit_dia = bs4pop.dialog({
+        window.dia = bs4pop.dialog({
             title: '创建打印报告单',
             content: url,
             isIframe: true,
