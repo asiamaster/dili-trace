@@ -183,10 +183,11 @@
 
     /* 货品表格 */
     $('.main-container').on('click', '#addGoodsItem', function () {
-        $('#goodsTable tbody').append(template('goodsItem', {index: ++goodsItemCount}));
-        initFileUpload1('#originCertifiyUrl_'+goodsItemCount);
-        initAutoComplete('#productName_'+goodsItemCount,'/toll/category');
-        initAutoComplete('#originName_'+goodsItemCount,'/toll/city');
+        createAndAppendTemplate();
+        // $('#goodsTable tbody').append(template('goodsItem', {index: ++goodsItemCount}));
+        // initFileUpload1('#originCertifiyUrl_'+goodsItemCount);
+        // initAutoComplete('#productName_'+goodsItemCount,'/toll/category');
+        // initAutoComplete('#originName_'+goodsItemCount,'/toll/city');
     });
 
 
