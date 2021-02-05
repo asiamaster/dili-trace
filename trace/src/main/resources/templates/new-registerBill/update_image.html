@@ -385,10 +385,9 @@
         if(getDetectReportCount(selector)==10){
             return;
         }
-        // $("[href$='.jpg']")
-        selector.find("[name$='[certType]']").val(certType);
         var tempHtml=$(template('imageCertItem', {index: imageItemCount++}));
         $(selector).append(tempHtml);
+        selector.find("[name$='[certType]']").val(certType);
         var fileEl=tempHtml.find('input[type="file"]');
         initFileUpload(fileEl,function(){createDetectReportAndAppendTemplate(selector, certType);});
         initImageBtns(tempHtml, certType);
