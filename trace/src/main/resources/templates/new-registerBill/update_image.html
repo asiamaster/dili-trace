@@ -385,9 +385,9 @@
         if(getDetectReportCount(selector)==10){
             return;
         }
-        var tempHtml=$(template('imageCertItem', {index: imageItemCount++}));
+        var tempHtml=$(template('imageCertItem', {index: imageItemCount++,certType:certType}));
         $(selector).append(tempHtml);
-        selector.find("[name$='[certType]']").val(certType);
+        //selector.find("[name$='[certType]']").val(certType);
         var fileEl=tempHtml.find('input[type="file"]');
         initFileUpload(fileEl,function(){createDetectReportAndAppendTemplate(selector, certType);});
         initImageBtns(tempHtml, certType);
@@ -689,7 +689,7 @@ var currentUser={"depId":"${user.departmentId!}"
         <span class="fileimg-des">点击上传</span>
         <input type="file" name="file" data-url="${contextPath!}/uploader/uploadImage.action" multiple="multipart/form-data"/>
         <input type="hidden" name="imageCertList[{{index}}][uid]">
-        <input type="hidden" name="imageCertList[{{index}}][certType]" value="${@com.dili.trace.enums.ImageCertTypeEnum.DETECT_REPORT.getCode()}">
+        <input type="hidden" name="imageCertList[{{index}}][certType]" value="{{certType}}">
         <img class="magnifying">
         <div class="fileimg-cover" style="display: none;"></div>
         <div class="fileimg-edit" style="display: none;">
