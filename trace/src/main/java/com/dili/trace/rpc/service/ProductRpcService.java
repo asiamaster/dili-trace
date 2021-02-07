@@ -295,6 +295,7 @@ public class ProductRpcService {
 
 
         try {
+            logger.debug("incByStockIds obj={}",JSON.toJSONString(obj));
             BaseOutput<List<StockReductResultDto>> out = this.productRpc.incByStockIds(obj);
             if (out.isSuccess()) {
                 return;
@@ -343,6 +344,7 @@ public class ProductRpcService {
 
 
         try {
+            logger.debug("reduceByStockIds obj={}",JSON.toJSONString(obj));
             BaseOutput<List<StockReductResultDto>> out = this.productRpc.reduceByStockIds(obj);
             if (out.isSuccess()) {
                 return;
@@ -366,7 +368,7 @@ public class ProductRpcService {
         this.buildCreateDtoFromBill(buyerTradeDetailId, buyerMarketId, optUser).ifPresent(createDto -> {
 
             try {
-                logger.debug("createDto={}", JSON.toJSONString(createDto));
+                logger.debug("create={}", JSON.toJSONString(createDto));
                 BaseOutput<RegCreateResultDto> out = this.productRpc.create(createDto);
                 if (out.isSuccess() && out.getData() != null && out.getData().getRegDetailDtos() != null) {
                     List<RegDetailDto> regDetailDtoList = out.getData().getRegDetailDtos();
