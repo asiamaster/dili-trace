@@ -1,5 +1,6 @@
 package com.dili.trace.rpc.service;
 
+import com.alibaba.fastjson.JSON;
 import com.dili.common.exception.TraceBizException;
 import com.dili.ss.domain.BaseOutput;
 import com.dili.trace.domain.ProductStock;
@@ -365,6 +366,7 @@ public class ProductRpcService {
         this.buildCreateDtoFromBill(buyerTradeDetailId, buyerMarketId, optUser).ifPresent(createDto -> {
 
             try {
+                logger.debug("createDto={}", JSON.toJSONString(createDto));
                 BaseOutput<RegCreateResultDto> out = this.productRpc.create(createDto);
                 if (out.isSuccess() && out.getData() != null && out.getData().getRegDetailDtos() != null) {
                     List<RegDetailDto> regDetailDtoList = out.getData().getRegDetailDtos();
@@ -400,7 +402,9 @@ public class ProductRpcService {
         TradeDetail tradeDetail = this.tradeDetailService.get(buyerTradeDetailId);
         RegisterBill registerBill = this.billService.get(tradeDetail.getBillId());
         ProductStock buyerProductStock = this.productStockService.get(tradeDetail.getProductStockId());
-
+        if(buyerProductStock==null){
+            return Optional.empty();
+        }
 
         List<RegDetailDto> regDetailDtoList = StreamEx.of(this.buildRegDetailDto(tradeDetail, registerBill, buyerProductStock)).toList();
         if (regDetailDtoList.isEmpty()) {
