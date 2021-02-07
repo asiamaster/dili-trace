@@ -1,5 +1,6 @@
 package com.dili.trace.rpc.service;
 
+import com.alibaba.fastjson.JSON;
 import com.dili.common.exception.TraceBizException;
 import com.dili.ss.domain.BaseOutput;
 import com.dili.trace.domain.ProductStock;
@@ -269,7 +270,7 @@ public class ProductRpcService {
         if(tradeDetail==null){
             return;
         }
-        logger.debug("tradeDetailId={},thirdPartyStockId={}",tradeDetailId,tradeDetail.getThirdPartyStockId());
+        logger.debug("increaseRegDetail tradeDetailId={},thirdPartyStockId={}",tradeDetailId,tradeDetail.getThirdPartyStockId());
         if(tradeDetail.getThirdPartyStockId()==null){
             return;
         }
@@ -294,6 +295,7 @@ public class ProductRpcService {
 
 
         try {
+            logger.debug("incByStockIds obj={}",JSON.toJSONString(obj));
             BaseOutput<List<StockReductResultDto>> out = this.productRpc.incByStockIds(obj);
             if (out.isSuccess()) {
                 return;
@@ -319,7 +321,7 @@ public class ProductRpcService {
         if(tradeDetail==null){
             return;
         }
-        logger.debug("tradeDetailId={},thirdPartyStockId={}",tradeDetailId,tradeDetail.getThirdPartyStockId());
+        logger.debug("deductRegDetail tradeDetailId={},thirdPartyStockId={}",tradeDetailId,tradeDetail.getThirdPartyStockId());
         if(tradeDetail.getThirdPartyStockId()==null){
             return;
         }
@@ -342,6 +344,7 @@ public class ProductRpcService {
 
 
         try {
+            logger.debug("reduceByStockIds obj={}",JSON.toJSONString(obj));
             BaseOutput<List<StockReductResultDto>> out = this.productRpc.reduceByStockIds(obj);
             if (out.isSuccess()) {
                 return;
@@ -365,6 +368,7 @@ public class ProductRpcService {
         this.buildCreateDtoFromBill(buyerTradeDetailId, buyerMarketId, optUser).ifPresent(createDto -> {
 
             try {
+                logger.debug("create={}", JSON.toJSONString(createDto));
                 BaseOutput<RegCreateResultDto> out = this.productRpc.create(createDto);
                 if (out.isSuccess() && out.getData() != null && out.getData().getRegDetailDtos() != null) {
                     List<RegDetailDto> regDetailDtoList = out.getData().getRegDetailDtos();
@@ -374,6 +378,7 @@ public class ProductRpcService {
                         condition.setId(createDto.getTradeDetailId());
                         condition.setThirdPartyStockId(detailDto.getStockId());
                         tradeDetailService.updateSelective(condition);
+                        logger.debug("createRegCreate tradeDetailId={},thirdPartyStockId={}",condition.getId(),condition.getThirdPartyStockId());
                         return;
                     }
                     logger.error("返回的数据不符合接口");
@@ -399,7 +404,9 @@ public class ProductRpcService {
         TradeDetail tradeDetail = this.tradeDetailService.get(buyerTradeDetailId);
         RegisterBill registerBill = this.billService.get(tradeDetail.getBillId());
         ProductStock buyerProductStock = this.productStockService.get(tradeDetail.getProductStockId());
-
+        if(buyerProductStock==null){
+            return Optional.empty();
+        }
 
         List<RegDetailDto> regDetailDtoList = StreamEx.of(this.buildRegDetailDto(tradeDetail, registerBill, buyerProductStock)).toList();
         if (regDetailDtoList.isEmpty()) {
