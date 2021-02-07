@@ -269,7 +269,7 @@ public class ProductRpcService {
         if(tradeDetail==null){
             return;
         }
-        logger.debug("tradeDetailId={},thirdPartyStockId={}",tradeDetailId,tradeDetail.getThirdPartyStockId());
+        logger.debug("increaseRegDetail tradeDetailId={},thirdPartyStockId={}",tradeDetailId,tradeDetail.getThirdPartyStockId());
         if(tradeDetail.getThirdPartyStockId()==null){
             return;
         }
@@ -319,7 +319,7 @@ public class ProductRpcService {
         if(tradeDetail==null){
             return;
         }
-        logger.debug("tradeDetailId={},thirdPartyStockId={}",tradeDetailId,tradeDetail.getThirdPartyStockId());
+        logger.debug("deductRegDetail tradeDetailId={},thirdPartyStockId={}",tradeDetailId,tradeDetail.getThirdPartyStockId());
         if(tradeDetail.getThirdPartyStockId()==null){
             return;
         }
@@ -374,6 +374,7 @@ public class ProductRpcService {
                         condition.setId(createDto.getTradeDetailId());
                         condition.setThirdPartyStockId(detailDto.getStockId());
                         tradeDetailService.updateSelective(condition);
+                        logger.debug("createRegCreate tradeDetailId={},thirdPartyStockId={}",condition.getId(),condition.getThirdPartyStockId());
                         return;
                     }
                     logger.error("返回的数据不符合接口");
