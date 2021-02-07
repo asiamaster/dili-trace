@@ -15,6 +15,7 @@ import com.dili.ss.domain.BaseOutput;
 import com.dili.ss.domain.EasyuiPageOutput;
 import com.dili.ss.dto.DTO;
 import com.dili.ss.dto.DTOUtils;
+import com.dili.ss.dto.IDTO;
 import com.dili.trace.api.input.UserQueryDto;
 import com.dili.trace.api.output.UserQrOutput;
 import com.dili.trace.domain.Market;
@@ -330,6 +331,7 @@ public class UserController {
         try {
             CustomerQueryInput queryInput = new CustomerQueryInput();
             queryInput.setName(name);
+            //queryInput.setContactsPhone(name);
             queryInput.setMarketId(MarketUtil.returnMarket());
             BaseOutput<List<CustomerExtendDto>> listByExample = customerRpc.list(queryInput);
             List<Map<String, Object>> list = Lists.newArrayList();
@@ -371,7 +373,7 @@ public class UserController {
             showVal.append("(无市场)");
         }
         showVal.append("  |  ");
-        showVal.append(user.getCorporationName());
+        showVal.append(null == user.getCorporationName()?"(无)":user.getCorporationName());
         return showVal.toString();
     }
 }

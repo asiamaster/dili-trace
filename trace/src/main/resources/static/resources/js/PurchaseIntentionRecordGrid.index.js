@@ -9,7 +9,6 @@
 })(function (require, exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
-    exports.PurchaseIntentionRecordGrid = void 0;
     class PurchaseIntentionRecordGrid extends ListPage {
         constructor(grid, queryform, toolbar) {
             super(grid, queryform, queryform.find('#query'), "/purchaseIntentionRecord/listPage.action");

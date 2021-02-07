@@ -1,5 +1,10 @@
 <#bodyOrigin>
-<div class="main-container" style="padding: 0">
+<style>
+    .form-group{
+        margin-bottom: 5px;
+    }
+</style>
+<div class="main-container" style="width:100%;margin:0;padding: 0">
     <div class="form-box border">
         <form id="updateForm" class="form-inline" role="form">
             <div class="form-item-group">
@@ -7,7 +12,7 @@
                 <div class="form-group">
                     <label class="label-title text-right">
                         <span class="red">&lowast;</span>买家名称</label>
-                    <input style="width: 355px" type="text" name="buyerName" class="form-control input-sm"   required />
+                    <input type="text" name="buyerName" class="form-control input-sm"   required />
                     <input type="hidden" name="buyerId">
                 </div>
                 <#resource code="purchaseIntentionRecord#addBuyer">
@@ -32,17 +37,18 @@
                         <option value="2">公斤</option>
                     </select>
                 </div>
+                <br>
                 <div class="form-group">
                     <label class="label-title text-right">
-                        <span class="red">&lowast;</span>车牌</label>
-                    <input  class="form-control input-sm editableSelect isPlate" id = "plate" name="plate" data-options="['a','b']" required />
+                        车牌</label>
+                    <input  class="form-control input-sm editableSelect isPlate" id = "plate" name="plate" data-options="['a','b']" />
                 </div>
                 <br>
             </div>
         </form>
         <div class="text-center mt30">
             <button class="btn-main2 btn-sm" onclick="create()">提交</button>&nbsp;&nbsp;
-            <button class="btn-greyweak btn-sm" onclick="parent.bs4pop.removeAll()">取消</button>
+            <button style="word-break: keep-all" class="btn-greyweak btn-sm"  onclick="parent.bs4pop.removeAll()">取消</button>
         </div>
     </div>
 </div>

@@ -1,6 +1,12 @@
 <#bodyOrigin>
-<div class="main-container" style="padding: 0">
-    <div class="form-box border">
+<style>
+    .label-title.text-right{
+        float: left;
+        line-height: 30px;
+    }
+</style>
+<div class="main-container" style="width:100%;margin: 0;padding: 0">
+    <div class="form-box border" style="width: 100%">
         <form id="updateForm" class="form-inline" role="form">
             <div class="form-item-group">
                 <h4 class="form-item-title">基础信息</h4>
@@ -8,7 +14,7 @@
                 <div class="form-group">
                     <label class="label-title text-right">
                         <span class="red">&lowast;</span>司机名称</label>
-                    <input style="width: 355px" type="text" name="driverName" class="form-control input-sm"
+                    <input  type="text" name="driverName" class="form-control input-sm"
                     <%if(null!=truckEnterRecord) {%> value="${truckEnterRecord.driverName}" <%}%>
                            required />
                     <input type="hidden"
@@ -34,16 +40,18 @@
                 <div class="form-group">
                     <label class="label-title text-right">
                         <span class="red">&lowast;</span>车型</label>
-                    <select class="form-control input-sm" required>
+                    <select class="form-control input-sm" name="truckTypeId"  required>
+                    </select>
+                    <!--<select class="form-control input-sm"  required>
                         <option value="10" >整车</option>
                         <option value="20">拼车</option>
-                    </select>
+                    </select>-->
                 </div>
             </div>
         </form>
         <div class="text-center mt30">
             <button class="btn-main2 btn-sm" onclick="create()">提交</button>&nbsp;&nbsp;
-            <button class="btn-greyweak btn-sm" onclick="parent.bs4pop.removeAll()">取消</button>
+            <button style="word-break: keep-all" class="btn-greyweak btn-sm" onclick="parent.bs4pop.removeAll()">取消</button>
         </div>
     </div>
 </div>
@@ -63,7 +71,9 @@
 <script>
     $(function(){
         let selector= $('input[name="driverName"]');
+        let carSelector= $('select[name="truckTypeId"]');
         initUserInfo(selector);
+        initCarType(carSelector);
         $("#addBuyer-btn").on("click",function(){
             goAddBuyer();
         });
@@ -94,6 +104,43 @@
             width: '68%',
             height: '88%',
             btns: []
+        });
+    }
+    function initCarType(selector) {
+        let tyl=${truckEnterRecord.truckTypeId};
+        console.log(tyl);
+        // 产地联系输入
+        $.ajax({
+            type: "POST",
+            url: "carTypeList.action",
+            dataType: "json",
+            async: false,
+            contentType: "application/json; charset=utf-8",
+            success: function (ret) {
+                console.log(ret);
+                if(ret.code=="200"){
+                    let resObj=ret.data;
+                    let opt="";
+                    for(let r=0;r<resObj.length;r++){
+                        console.log(resObj[r]);
+
+                        if(tyl==resObj[r].id){
+                            opt+='<option value="'+resObj[r].id+'" selected>'+resObj[r].name+'</option>';
+                        }else{
+                            opt+='<option value="'+resObj[r].id+'">'+resObj[r].name+'</option>';
+                        }
+                    }
+                    selector.html(opt);
+                }
+            },
+            error: function () {
+                resubmit = 0;
+                swal(
+                    '错误',
+                    '远程访问失败',
+                    'error'
+                );
+            }
         });
     }
 
@@ -147,6 +194,7 @@
             return;
         }
         var data=$('#updateForm').serializeJSON({useIntKeysAsArrayIndex:true});
+        data.truckTypeName=$("[name='truckTypeId']").find("option:selected").text();
         $.ajax({
             type: "POST",
             url: "${contextPath}/truckEnterRecord/save.action",
