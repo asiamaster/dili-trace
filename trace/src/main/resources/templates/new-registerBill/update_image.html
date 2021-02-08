@@ -352,46 +352,46 @@
 <script type="text/javascript" src="${contextPath!}/resources/js/jquery.serializejson.js"></script>
 <script type="text/javascript">
     let imageItemCount = '${registerBill.imageCertList.~size!0}';
-    function getDetectReportCount(selector){
+
+    function hasEmptyImageBox(selector){
+        var count=$(selector).find('.fileimg-box').length;
+        var notEmptyLength=$(selector).find('.fileimg-box .magnifying[src][src!=""]').length;
+        return count>notEmptyLength;
+    }
+    function getImageBoxCount(selector){
         var count=$(selector).find('.fileimg-box').length;
         return count;
     }
-    function initImageBtns(selector, certType){
-        var tempHtml=$(selector)
-        var deleteImg=tempHtml.find('.fileimg-delete');
-        var viewImg=tempHtml.find('.fileimg-view');
+    function bindDeleteBtn(deleteImg){
         deleteImg.on('click', function () {
+            var selector=$(this).parents('.fileimg-box').parent();
+            var certType=selector.find('input[name*="[certType]"]').val()
             $(this).parents('.fileimg-box').remove();
-            if(getDetectReportCount(selector)==0){
+            if(getImageBoxCount(selector)<10&&!hasEmptyImageBox(selector)){
                 createDetectReportAndAppendTemplate(selector, certType);
             }
         });
-        viewImg.on('click',function () {
-            var url = $(this).parent().siblings(".magnifying").attr('src');
-            if(url){
-                layer.open({
-                    title:'图片',
-                    type: 1,
-                    skin: 'layui-layer-rim',
-                    closeBtn: 2,
-                    area: ['90%', '90%'], // 宽高
-                    content: '<p style="text-align:center"><img src="' + url + '" alt="" class="show-image-zoom"></p>'
-                });
-            }
-        });
+
+    }
+    function initImageBtns(){
+        var imgBoxParentList=$('.fileimg-box').parent();
+        for(var i=0;i<imgBoxParentList.length;i++){
+            var deleteImg=$(imgBoxParentList[i]).find('.fileimg-delete');
+            bindDeleteBtn(deleteImg);
+        }
     }
 
     function createDetectReportAndAppendTemplate(selector, certType){
-        if(getDetectReportCount(selector)==10){
+
+        if(getImageBoxCount(selector)==10){
             return;
         }
         var tempHtml=$(template('imageCertItem', {index: imageItemCount++,certType:certType}));
         $(selector).append(tempHtml);
-        //selector.find("[name$='[certType]']").val(certType);
         var fileEl=tempHtml.find('input[type="file"]');
+        var deleteImg=tempHtml.find('.fileimg-delete');
         initFileUpload(fileEl,function(){createDetectReportAndAppendTemplate(selector, certType);});
-        initImageBtns(tempHtml, certType);
-
+        bindDeleteBtn(deleteImg);
     }
     // 文件上传组件初始化
     function initFileUpload(selecter,success) {
@@ -483,38 +483,39 @@ var currentUser={"depId":"${user.departmentId!}"
 
 	}
    $(function () {
-       initImageBtns($(document.body));
        //检测报告图片
        createDetectReportAndAppendTemplate($('#detectReportDiv'), 1);
        //处理结果图片
        createDetectReportAndAppendTemplate($('#handleResultContainer').find('#handleResultDiv'), 8);
        //产地证明图片
        createDetectReportAndAppendTemplate($('#originCertifiyDiv'), 2);
-
-       //检疫合格证-3
+       //
+       // //检疫合格证-3
        createDetectReportAndAppendTemplate($('#quarantineDiv'), 3);
-       //购货凭证-4
+       // //购货凭证-4
        createDetectReportAndAppendTemplate($('#purchaseDiv'), 4);
-       //报关单-5
+       // //报关单-5
        createDetectReportAndAppendTemplate($('#customsDeclarationDiv'), 5);
-       //采购协议-6
+       // //采购协议-6
        createDetectReportAndAppendTemplate($('#purchaseAgreementDiv'), 6);
-       //服务证明-9
+       // //服务证明-9
        createDetectReportAndAppendTemplate($('#serviceCertificateDiv'), 9);
-       //资产证明-10
+       // //资产证明-10
        createDetectReportAndAppendTemplate($('#assetsCertificateDiv'), 10);
-       //销售证明-11
+       // //销售证明-11
        createDetectReportAndAppendTemplate($('#salesCertificateDiv'), 11);
-       //身份证明-12
+       // //身份证明-12
        createDetectReportAndAppendTemplate($('#idCertificateDiv'), 12);
-       //爱好证明-13
+       // //爱好证明-13
        createDetectReportAndAppendTemplate($('#habitCertificateDiv'), 13);
-       //星级证明-14
+       // //星级证明-14
        createDetectReportAndAppendTemplate($('#starCertificateDiv'), 14);
-       //品牌证明-15
+       // //品牌证明-15
        createDetectReportAndAppendTemplate($('#brandCertificateDiv'), 15);
-       //其他-99
+       // //其他-99
        createDetectReportAndAppendTemplate($('#othersDiv'), 99);
+
+       initImageBtns();
 
 	     $('#goodsTable').find('input[name="productName_1"]').val('${registerBill.productName!}');
 	     $('#goodsTable').find('input[name="productId_1"]').val(${registerBill.productId});
