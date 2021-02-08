@@ -109,7 +109,7 @@ public class RegisterHeadServiceImpl extends BaseServiceImpl<RegisterHead, Long>
         this.checkRegisterHead(registerHead);
 
         registerHead.setRemainWeight(registerHead.getWeight());
-        registerHead.setCode(uidRestfulRpcService.bizNumber(BizNumberType.REGISTER_HEAD.getType()));
+        registerHead.setCode(uidRestfulRpcService.bizNumber(BizNumberType.REGISTER_HEAD));
         operatorUser.ifPresent(op -> {
             registerHead.setCreateUser(op.getName());
             registerHead.setCreated(new Date());

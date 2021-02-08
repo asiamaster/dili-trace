@@ -83,7 +83,7 @@ public class ManagerPurchaseIntentionRecordApi {
         input.setMarketId(sessionData.getMarketId());
         input.setCreated(new Date());
         input.setModified(new Date());
-        input.setCode(uidRestfulRpcService.bizNumber(BizNumberType.PURCHASE_INTENTION_RECORD_CODE.getType()));
+        input.setCode(uidRestfulRpcService.bizNumber(BizNumberType.PURCHASE_INTENTION_RECORD_CODE));
         this.purchaseIntentionRecordService.insertSelective(input);
         return BaseOutput.successData(input.getId());
     }

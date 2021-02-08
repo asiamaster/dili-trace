@@ -46,7 +46,7 @@ public class UidRestfulRpcService {
      * @param type
      * @return
      */
-    public String bizNumber(String type) {
+    private String bizNumber(String type) {
         String bizType = StringUtils.trimToNull(type);
         if (bizType == null) {
             logger.error("bizType ={}", bizType);

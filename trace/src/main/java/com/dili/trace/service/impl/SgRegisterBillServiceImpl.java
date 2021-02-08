@@ -105,7 +105,7 @@ public class SgRegisterBillServiceImpl implements SgRegisterBillService {
         }
 //        inputBill.setState(RegisterBillStateEnum.WAIT_AUDIT.getCode());
 
-        String code = uidRestfulRpcService.bizNumber(BizNumberType.REGISTER_BILL.getType());
+        String code = uidRestfulRpcService.bizNumber(BizNumberType.REGISTER_BILL);
         logger.debug("registerBill.code={}", code);
         inputBill.setCode(code);
 
