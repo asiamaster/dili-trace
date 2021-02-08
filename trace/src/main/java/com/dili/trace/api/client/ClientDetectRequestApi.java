@@ -345,10 +345,12 @@ public class ClientDetectRequestApi {
             if (null == detectRequestDto.getDetectTime()) {
                 detectRequestDto.setDetectTime(DateUtils.getCurrentDate());
             }
+            SessionData sessionData = this.sessionContext.getSessionData();
+
             //未填写检测人员时设置为当前登录人
             if (null == detectRequestDto.getDetectorId()) {
-                detectRequestDto.setDetectorId(sessionContext.getAccountId());
-                detectRequestDto.setDetectorName(sessionContext.getUserName());
+                detectRequestDto.setDetectorId(sessionData.getUserId());
+                detectRequestDto.setDetectorName(sessionData.getUserName());
             }
             detectRequestService.receiveDetectRequest(bill.getId(), detectRequestDto);
         } catch (TraceBizException e) {

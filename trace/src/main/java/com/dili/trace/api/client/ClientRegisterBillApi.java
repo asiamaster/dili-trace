@@ -260,10 +260,6 @@ public class ClientRegisterBillApi {
 
         logger.info("获取登记单详细信息->marketId:{},billId:{},tradeDetailId:{}", inputDto.getMarketId(),inputDto.getBillId(), inputDto.getTradeDetailId());
         try {
-            Long userId = this.sessionContext.getAccountId();
-            if (userId == null) {
-                return BaseOutput.failure("你还未登录");
-            }
             RegisterBillOutputDto registerBill = this.registerBillService.viewTradeDetailBill(inputDto);
 
 

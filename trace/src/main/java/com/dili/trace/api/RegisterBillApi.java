@@ -6,6 +6,7 @@ import com.dili.assets.sdk.dto.CusCategoryDTO;
 import com.dili.common.annotation.AppAccess;
 import com.dili.common.annotation.Role;
 import com.dili.common.entity.LoginSessionContext;
+import com.dili.common.entity.SessionData;
 import com.dili.common.exception.TraceBizException;
 import com.dili.commons.glossary.YesOrNoEnum;
 import com.dili.ss.domain.BaseOutput;
@@ -70,7 +71,8 @@ public class RegisterBillApi {
 
         logger.info("获取登记单详细信息->marketId:{},billId:{},tradeDetailId:{}", inputDto.getMarketId(), inputDto.getBillId(), inputDto.getTradeDetailId());
         try {
-            Long userId = this.sessionContext.getAccountId();
+            SessionData sessionData=this.sessionContext.getSessionData();
+            Long userId=sessionData.getUserId();
             if (userId == null) {
                 return BaseOutput.failure("你还未登录");
             }

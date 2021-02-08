@@ -110,7 +110,7 @@ public class ManagerCheckinOutRecordApi {
 			OperatorUser operatorUser = new OperatorUser(sessionData.getUserId(), sessionData.getUserName());
 
 			List<CheckinOutRecord> checkinRecordList = this.checkinOutRecordService
-					.doCheckout(new OperatorUser(sessionContext.getAccountId(), ""), input);
+					.doCheckout(new OperatorUser(sessionData.getUserId(), sessionData.getUserName()), input);
 			return BaseOutput.success();
 		} catch (TraceBizException e) {
 			return BaseOutput.failure(e.getMessage());

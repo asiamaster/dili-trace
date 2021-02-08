@@ -36,8 +36,8 @@ public class ManagerRegisterBillApiTest extends AutoWiredBaseTest {
         MockitoAnnotations.initMocks(this);
         userItem = super.findUser();
         assertNotNull(userItem);
-        Mockito.doReturn(userItem.getId()).when(sessionContext).getAccountId();
-        Mockito.doReturn(userItem.getName()).when(sessionContext).getUserName();
+//        Mockito.doReturn(userItem.getId()).when(sessionContext).getAccountId();
+//        Mockito.doReturn(userItem.getName()).when(sessionContext).getUserName();
     }
 
     // @Test

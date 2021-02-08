@@ -12,15 +12,15 @@ public class LoginSessionContext implements Serializable {
     private static final long serialVersionUID = 1L;
     private SessionData sessionData;
 
-    public String getUserName() {
+//    public String getUserName() {
+//
+//        return this.sessionData == null ? null : this.sessionData.getUserName();
+//    }
 
-        return this.sessionData == null ? null : this.sessionData.getUserName();
-    }
-
-    public Long getAccountId() {
-
-        return this.sessionData == null ? null : this.getSessionData().getUserId();
-    }
+//    public Long getAccountId() {
+//
+//        return this.sessionData == null ? null : this.getSessionData().getUserId();
+//    }
     /**
      * @return SessionData return the sessionData
      */

@@ -110,9 +110,7 @@ public class ClientProductStockApi {
 	@SuppressWarnings("unchecked")
 	@RequestMapping(value = "/listTradeDetailForSaleByProductStoreId.api", method = { RequestMethod.POST })
 	public BaseOutput<List<TradeDetail>> listTradeDetailForSaleByProductStoreId(@RequestBody ProductStockInput inputDto) {
-		if (sessionContext.getAccountId() == null) {
-			return BaseOutput.failure("未登陆用户");
-		}
+
 		if (inputDto == null || inputDto.getProductStockId() == null) {
 			return BaseOutput.failure("参数错误");
 		}

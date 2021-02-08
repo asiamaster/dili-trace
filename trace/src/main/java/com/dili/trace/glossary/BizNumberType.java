@@ -31,7 +31,7 @@ public enum BizNumberType {
     ECOMMERCE_BILL("ecommerce_bill","电商单编号", "SGDSD", "yyyyMMdd", 5, "1"),
     REGISTER_BILL_CHECKSHEET_CODE("register_bill_checksheet_code", "检测报告编号", "SGJC", "yyyyMMdd", 5, "1"),
     COMMISSION_BILL_CHECKSHEET_CODE("commission_bill_checksheet_code", "检测报告编号","SGJCW", "yyyyMMdd",6, "1"),
-    TRADE_REQUEST_CODE("trade_request_code", "交易单编号","HZSY", "yyyyMMddHH",5, "1"),
+    TRADE_REQUEST_CODE("trade_request_code", "交易单编号","HZSY", "yyyyMMdd",5, "1"),
     ECOMMERCE_BILL_SEPERATE_REPORT_CODE("ecommerce_bill_seperate_report_code", "电商单分销打印编号", "SGDSR", "yyyyMMdd", 5, "1"),
     COMMISSION_BILL_CODE("commission_bill_code", "委托单编号", "dw","yyyyMMdd",  5, "1"),
     STOCK_CODE("stock_code", "库存编号", "st","yyyyMMdd",  5, "1"),

@@ -93,12 +93,14 @@ public class ClientTradeRequestApi {
     public BaseOutput<BasePage<TradeRequest>> listPage(@RequestBody TradeRequestListInput condition) {
 
         try {
-            Long userId = this.sessionContext.getSessionData().getUserId();
+            SessionData sessionData=this.sessionContext.getSessionData();
+            Long userId = sessionData.getUserId();
+
             if (condition.getBuyerId() == null && condition.getSellerId() == null) {
                 return BaseOutput.failure("参数错误");
             }
-            if (!sessionContext.getAccountId().equals(condition.getBuyerId())
-                    && !sessionContext.getAccountId().equals(condition.getSellerId())) {
+            if (!userId.equals(condition.getBuyerId())
+                    && !userId.equals(condition.getSellerId())) {
                 return BaseOutput.failure("参数错误");
             }
             if (condition.getBuyerId() != null) {
@@ -129,9 +131,7 @@ public class ClientTradeRequestApi {
     @SuppressWarnings("unchecked")
     @RequestMapping(value = "/viewTradeDetail.api", method = {RequestMethod.POST})
     public BaseOutput<CheckInApiDetailOutput> viewTradeDetail(@RequestBody TradeRequestInputDto inputDto) {
-        if (sessionContext.getAccountId() == null) {
-            return BaseOutput.failure("未登陆用户");
-        }
+
         if (inputDto == null || inputDto.getTradeRequestId() == null) {
             return BaseOutput.failure("参数错误");
         }

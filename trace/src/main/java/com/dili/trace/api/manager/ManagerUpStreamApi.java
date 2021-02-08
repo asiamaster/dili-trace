@@ -3,6 +3,7 @@ package com.dili.trace.api.manager;
 import com.dili.common.annotation.AppAccess;
 import com.dili.common.annotation.Role;
 import com.dili.common.entity.LoginSessionContext;
+import com.dili.common.entity.SessionData;
 import com.dili.common.exception.TraceBizException;
 import com.dili.ss.domain.BaseOutput;
 import com.dili.ss.domain.BasePage;
@@ -64,7 +65,9 @@ public class ManagerUpStreamApi {
     public BaseOutput<Long> deleteUpStream(@RequestBody UpStream input) {
 
         try {
-            this.upStreamService.deleteUpstream(sessionContext.getAccountId(), input.getId());
+            SessionData sessionData=this.sessionContext.getSessionData();
+            Long userId = sessionData.getUserId();
+            this.upStreamService.deleteUpstream(userId, input.getId());
             return BaseOutput.success();
         } catch (TraceBizException e) {
             return BaseOutput.failure(e.getMessage());
@@ -87,12 +90,14 @@ public class ManagerUpStreamApi {
             userId = input.getSourceUserId();
         }
 
+        SessionData sessionData=this.sessionContext.getSessionData();
+
         try {
             input.setUserIds(Arrays.asList(userId));
             input.setSourceUserId(userId);
             //市场id
-            input.setMarketId(sessionContext.getSessionData().getMarketId());
-            return this.upStreamService.addUpstream(input,new OperatorUser(userId,sessionContext.getUserName()),true);
+            input.setMarketId(sessionData.getMarketId());
+            return this.upStreamService.addUpstream(input,new OperatorUser(userId,sessionData.getUserName()),true);
         } catch (TraceBizException e) {
             return BaseOutput.failure(e.getMessage());
         } catch (Exception e) {
@@ -106,11 +111,12 @@ public class ManagerUpStreamApi {
      */
     @RequestMapping(value = "/doModifyUpStream.api", method = RequestMethod.POST)
     public BaseOutput doModifyUpStream(@RequestBody UpStreamDto input) {
-        Long userId=sessionContext.getAccountId();
+        SessionData sessionData=this.sessionContext.getSessionData();
+        Long userId=sessionData.getUserId();
 
         try {
             input.setUserIds(Arrays.asList(userId));
-            return this.upStreamService.updateUpstream(input,new OperatorUser(userId,sessionContext.getUserName()));
+            return this.upStreamService.updateUpstream(input,new OperatorUser(userId,sessionData.getUserName()));
         } catch (TraceBizException e) {
             return BaseOutput.failure(e.getMessage());
         } catch (Exception e) {

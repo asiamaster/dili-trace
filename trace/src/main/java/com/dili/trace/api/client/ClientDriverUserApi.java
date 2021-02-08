@@ -3,6 +3,7 @@ package com.dili.trace.api.client;
 import com.dili.common.annotation.AppAccess;
 import com.dili.common.annotation.Role;
 import com.dili.common.entity.LoginSessionContext;
+import com.dili.common.entity.SessionData;
 import com.dili.common.exception.TraceBizException;
 import com.dili.customer.sdk.enums.CustomerEnum;
 import com.dili.ss.domain.BaseOutput;
@@ -67,7 +68,8 @@ public class ClientDriverUserApi {
     @RequestMapping(value = "/listPagedEnterRecord.api", method = RequestMethod.POST)
     public BaseOutput listPagedEnterRecord(@RequestBody TruckEnterRecordQueryDto queryDto) {
         try {
-            queryDto.setDriverId(this.sessionContext.getAccountId());
+            SessionData sessionData = this.sessionContext.getSessionData();
+            queryDto.setDriverId(sessionData.getUserId());
             BasePage<TruckEnterRecord> page = this.truckEnterRecordService.listPageByExample(queryDto);
             return BaseOutput.successData(page);
         } catch (TraceBizException e) {

@@ -3,6 +3,7 @@ package com.dili.trace.api.client;
 import com.dili.common.annotation.AppAccess;
 import com.dili.common.annotation.Role;
 import com.dili.common.entity.LoginSessionContext;
+import com.dili.common.entity.SessionData;
 import com.dili.common.exception.TraceBizException;
 import com.dili.ss.domain.BaseOutput;
 import com.dili.ss.domain.BasePage;
@@ -64,7 +65,9 @@ public class ClientUpStreamApi {
     public BaseOutput<Long> deleteUpStream(@RequestBody UpStream input) {
 
         try {
-            this.upStreamService.deleteUpstream(sessionContext.getAccountId(), input.getId());
+            SessionData sessionData=this.sessionContext.getSessionData();
+            Long userId = sessionData.getUserId();
+            this.upStreamService.deleteUpstream(userId, input.getId());
             return BaseOutput.success();
         } catch (TraceBizException e) {
             return BaseOutput.failure(e.getMessage());
@@ -79,7 +82,10 @@ public class ClientUpStreamApi {
      */
     @RequestMapping(value = "/doCreateUpStream.api", method = RequestMethod.POST)
     public BaseOutput<Long> doCreateUpStream(@RequestBody UpStreamDto input) {
-        Long userId = sessionContext.getAccountId();
+        SessionData sessionData=this.sessionContext.getSessionData();
+        Long userId = sessionData.getUserId();
+        String userName = sessionData.getUserName();
+
         if(input.getSourceUserId() != null){
             userId = input.getSourceUserId();
         }
@@ -89,7 +95,7 @@ public class ClientUpStreamApi {
             input.setSourceUserId(userId);
             //市场id
             input.setMarketId(sessionContext.getSessionData().getMarketId());
-            return this.upStreamService.addUpstream(input,new OperatorUser(userId,sessionContext.getUserName()),true);
+            return this.upStreamService.addUpstream(input,new OperatorUser(userId,userName),true);
         } catch (TraceBizException e) {
             return BaseOutput.failure(e.getMessage());
         } catch (Exception e) {
@@ -103,11 +109,13 @@ public class ClientUpStreamApi {
      */
     @RequestMapping(value = "/doModifyUpStream.api", method = RequestMethod.POST)
     public BaseOutput doModifyUpStream(@RequestBody UpStreamDto input) {
-        Long userId=sessionContext.getAccountId();
+        SessionData sessionData=this.sessionContext.getSessionData();
+        Long userId = sessionData.getUserId();
+        String userName = sessionData.getUserName();
 
         try {
             input.setUserIds(Arrays.asList(userId));
-            return this.upStreamService.updateUpstream(input,new OperatorUser(userId,sessionContext.getUserName()));
+            return this.upStreamService.updateUpstream(input,new OperatorUser(userId,userName));
         } catch (TraceBizException e) {
             return BaseOutput.failure(e.getMessage());
         } catch (Exception e) {

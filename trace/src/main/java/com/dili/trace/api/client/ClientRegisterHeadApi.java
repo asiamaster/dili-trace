@@ -159,8 +159,9 @@ public class ClientRegisterHeadApi {
             return BaseOutput.failure("参数错误");
         }
         try {
-            Long userId = sessionContext.getAccountId();
-            String userName = sessionContext.getUserName();
+            SessionData sessionData=this.sessionContext.getSessionData();
+            Long userId = sessionData.getUserId();
+            String userName = sessionData.getUserName();
 
             List<CreateRegisterHeadInputDto> registerHeads = StreamEx.of(createListRegisterHeadParam.getRegisterBills())
                     .nonNull().map(dto -> {
