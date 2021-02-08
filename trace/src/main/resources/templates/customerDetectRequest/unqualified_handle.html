@@ -1,13 +1,10 @@
 <#bodyOrigin>
 <style>
-    .input-sm{
-        width:368px !important;
-    }
     .form-inline .form-item-group {
         margin-top: 0px !important;
     }
 </style>
-<div class="main-container" style="margin: 0;padding: 0;">
+<div class="main-container" style="width:100%;margin: 0;padding: 0;">
 
     <div class="form-box border">
         <form id="modifyRegisterBillForm" class="form-inline" role="form">
@@ -57,7 +54,7 @@
     <!--<h5 class="mt10 red">操作员：陈良芳</h5>-->
     <div class="text-center mt30" style="width: 50%">
         <button class="btn-main2 btn-sm" onclick="doModifyRegisterBill()">提交</button>&nbsp;&nbsp;
-        <button class="btn-greyweak btn-sm" onclick="parent.bs4pop.removeAll()">取消</button>
+        <button style="word-break: keep-all" class="btn-greyweak btn-sm" onclick="parent.bs4pop.removeAll()">取消</button>
     </div>
 </div>
 </#bodyOrigin>

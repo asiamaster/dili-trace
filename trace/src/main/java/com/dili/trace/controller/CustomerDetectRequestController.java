@@ -426,7 +426,7 @@ public class CustomerDetectRequestController {
      */
     @RequestMapping(value = "/uploadUnqualifiedHandle.action", method = RequestMethod.POST)
     public @ResponseBody
-    BaseOutput uploadUnqualifiedHandle(RegisterBillOutputDto bill) {
+    BaseOutput uploadUnqualifiedHandle(@RequestBody  RegisterBillOutputDto bill) {
         try {
             UserTicket userTicket = SessionContext.getSessionContext().getUserTicket();
             this.detectRequestService.uploadUnqualifiedHandle(bill, userTicket);

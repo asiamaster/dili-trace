@@ -3,6 +3,7 @@ package com.dili.trace.controller;
 import com.alibaba.fastjson.JSON;
 import com.dili.assets.sdk.dto.CarTypeDTO;
 import com.dili.assets.sdk.dto.CarTypePublicDTO;
+import com.dili.assets.sdk.rpc.CarTypeRpc;
 import com.dili.common.exception.TraceBizException;
 import com.dili.commons.glossary.EnabledStateEnum;
 import com.dili.customer.sdk.domain.VehicleInfo;
@@ -31,6 +32,8 @@ import com.dili.uap.sdk.domain.UserTicket;
 import com.dili.uap.sdk.domain.dto.FirmDto;
 import com.dili.uap.sdk.rpc.FirmRpc;
 import com.dili.uap.sdk.session.SessionContext;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
@@ -45,6 +48,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 司机进门信息
@@ -66,7 +70,8 @@ public class TruckEnterRecordController {
     CustomerRpc customerRpc;
     @Resource
     VehicleRpc vehicleRpc;
-
+    @Resource
+    CarTypeRpc carTypeRpc;
 
     /**
      * 跳转到TruckEnterRecord页面
@@ -146,6 +151,7 @@ public class TruckEnterRecordController {
                 return BaseOutput.failure("未登录或登录过期");
             }
             if (null == truckEnterRecord.getId()) {
+                truckEnterRecord.setMarketId(MarketUtil.returnMarket());
                return truckEnterRecordService.addTruckEnterRecord(truckEnterRecord);
             } else {
                return truckEnterRecordService.updateTruckEnterRecord(truckEnterRecord);
@@ -204,14 +210,30 @@ public class TruckEnterRecordController {
      * @throws Exception
      */
     @RequestMapping(value = "/doAddDriver.action", method = {RequestMethod.GET, RequestMethod.POST})
-    public @ResponseBody
-    BaseOutput doAddDriver(@RequestBody IndividualCustomerInput customer,HttpServletRequest request) {
+    @ResponseBody
+    public BaseOutput doAddDriver(@RequestBody IndividualCustomerInput customer,HttpServletRequest request) {
         try {
             BaseOutput<CustomerExtendDto> baseOutput = customerRpc.registerIndividual(customer,request.getHeader("UAP_SessionId"));
             return baseOutput;
         } catch (TraceBizException e) {
             return BaseOutput.failure().setErrorData(e.getMessage());
         } catch (Exception e){
+            return BaseOutput.failure().setErrorData(e.getMessage());
+        }
+    }
+
+    /**
+     * 根据名字查询品类信息
+     *
+     * @return
+     */
+    @RequestMapping("/carTypeList.action")
+    @ResponseBody
+    public BaseOutput carTypeList() {
+        try {
+            return  carTypeRpc.listCarType();
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage());
             return BaseOutput.failure().setErrorData(e.getMessage());
         }
     }
