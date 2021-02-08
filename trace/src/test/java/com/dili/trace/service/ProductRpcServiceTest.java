@@ -1,101 +1,162 @@
 package com.dili.trace.service;
 
-import com.dili.ss.retrofitful.annotation.RestfulScan;
+import com.dili.trace.AutoWiredBaseTest;
+import com.dili.trace.domain.ProductStock;
 import com.dili.trace.domain.RegisterBill;
-import com.dili.trace.dto.OperatorUser;
-import com.dili.trace.rpc.dto.RegCreateResultDto;
+import com.dili.trace.domain.TradeDetail;
+import com.dili.trace.enums.*;
+import com.dili.trace.glossary.RegisterSourceEnum;
 import com.dili.trace.rpc.service.ProductRpcService;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.boot.web.servlet.ServletComponentScan;
-import org.springframework.boot.web.servlet.error.ErrorAttributes;
 import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
-import org.springframework.cloud.openfeign.EnableFeignClients;
-import org.springframework.cloud.openfeign.FeignClientsConfiguration;
-import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.EnableAspectJAutoProxy;
-import org.springframework.context.annotation.Import;
-import org.springframework.scheduling.annotation.EnableAsync;
-import org.springframework.scheduling.annotation.EnableScheduling;
-import org.springframework.test.annotation.Rollback;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
-import org.springframework.test.context.web.WebAppConfiguration;
-import org.springframework.transaction.annotation.EnableTransactionManagement;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
-import tk.mybatis.spring.annotation.MapperScan;
 
-import javax.servlet.ServletContext;
 import java.math.BigDecimal;
 import java.util.Optional;
 
-@ExtendWith(SpringExtension.class)
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
-@ActiveProfiles("dev")
-@WebAppConfiguration("src/main/resources")
-@EnableTransactionManagement
-@Transactional(propagation = Propagation.NEVER)
-@Rollback
-//@MapperScan(basePackages = {"com.dili.trace.dao", "com.dili.ss.dao", "com.dili.ss.uid.dao"})
-//@ComponentScan(basePackages = {"com.dili.ss", "com.dili.trace", "com.dili.common", "com.dili.commons", "com.dili.uap.sdk"})
-//@RestfulScan({"com.dili.trace.rpc", "com.dili.uap.sdk.rpc","com.dili.bpmc.sdk.rpc"})
-
-
-//处理事务支持
-@EnableAspectJAutoProxy(proxyTargetClass = true)
-@MapperScan(basePackages = {"com.dili.ss.uid.mapper","com.dili.trace.dao", "com.dili.ss.dao"})
-@ComponentScan(basePackages = {"com.dili.ss.uid","com.dili.ss", "com.dili.trace", "com.dili.common", "com.dili.commons", "com.dili.uap.sdk"})
-@RestfulScan({"com.dili.ss.uid","com.dili.trace.rpc", "com.dili.uap.sdk.rpc", "com.dili.bpmc.sdk.rpc"})
-//@DTOScan({"com.dili.trace","com.dili.ss"})
-//@Import(DynamicRoutingDataSourceRegister.class)
-@EnableScheduling
-
-@EnableAsync
-@EnableFeignClients(basePackages = {"com.dili.ss.uid","com.dili.assets.sdk.rpc"
-        , "com.dili.customer.sdk.rpc"
-        , "com.dili.trace.rpc"
-        , "com.dili.bpmc.sdk.rpc"})
-@Import(FeignClientsConfiguration.class)
-@ServletComponentScan
 @EnableDiscoveryClient
-public class ProductRpcServiceTest {
-    @MockBean
-    ErrorAttributes attributes;
-    @MockBean
-    ServletContext servletContext;
+public class ProductRpcServiceTest extends AutoWiredBaseTest {
+
 
     @Autowired
     ProductRpcService productRpcService;
     @Autowired
     BillService billService;
+    @Autowired
+    TradeDetailService tradeDetailService;
+    @Autowired
+    ProductStockService productStockService;
 
     /**
      * test
      */
-//    @Test
-//    public void createTest() {
-//        RegisterBill bill = billService.get(127L);
-//        OperatorUser operatorUser = new OperatorUser(31L, "悟空");
-//        Optional<OperatorUser > opt = Optional.of(operatorUser);
-//        RegCreateResultDto result = productRpcService.create(bill, opt);
-//    }
+    @Test
+    public void createRegCreate() {
+        RegisterBill rb = new RegisterBill();
+        rb.setUserId(287L);
+        rb.setWeight(BigDecimal.valueOf(100));
+        rb.setWeightUnit(WeightUnitEnum.KILO.getCode());
+        rb.setProductId(61L);
+        rb.setProductName("玉米");
+        rb.setCode(String.valueOf(System.currentTimeMillis()));
+        rb.setVerifyStatus(BillVerifyStatusEnum.PASSED.getCode());
+        rb.setRegisterSource(RegisterSourceEnum.OTHERS.getCode());
 
-    /**
-     * test
-     */
-//    @Test
-//    public void reduceTest() {
-//        Long stockId = 20201223000015L;
-//        OperatorUser operatorUser = new OperatorUser(31L, "悟空");
-//        Optional<OperatorUser > opt = Optional.of(operatorUser);
-//        RegisterBill bill = billService.get(127L);
-//        bill.setWeight(BigDecimal.ONE);
-//        productRpcService.reduceByStockIds(stockId, bill, opt);
-//    }
+        this.billService.insertSelective(rb);
+        ProductStock ps = new ProductStock();
+        ps.setStockWeight(BigDecimal.valueOf(100));
+        ps.setUserId(287L);
+        ps.setUserName("德华物流信息");
+        ps.setWeightUnit(WeightUnitEnum.KILO.getCode());
+        ps.setProductId(61L);
+        ps.setProductName("玉米");
+
+        this.productStockService.insertSelective(ps);
+
+
+        TradeDetail tradeDetail = new TradeDetail();
+        tradeDetail.setBuyerId(287L);
+        tradeDetail.setProductStockId(ps.getProductStockId());
+        tradeDetail.setBillId(rb.getBillId());
+        tradeDetail.setWeightUnit(WeightUnitEnum.KILO.getCode());
+        tradeDetail.setStockWeight(BigDecimal.valueOf(100));
+        tradeDetail.setTotalWeight(BigDecimal.valueOf(100));
+        tradeDetail.setCheckinStatus(CheckinStatusEnum.ALLOWED.getCode());
+        tradeDetail.setCheckoutStatus(CheckoutStatusEnum.NONE.getCode());
+        tradeDetail.setSaleStatus(SaleStatusEnum.FOR_SALE.getCode());
+        tradeDetail.setTradeType(TradeTypeEnum.NONE.getCode());
+        tradeDetail.setProductName("玉米");
+        this.tradeDetailService.insertSelective(tradeDetail);
+
+        this.productRpcService.createRegCreate(tradeDetail.getId(), 8L, Optional.empty());
+
+    }
+
+    @Test
+    public void deductRegDetail() {
+
+        RegisterBill rb = new RegisterBill();
+        rb.setUserId(287L);
+        rb.setWeight(BigDecimal.valueOf(30));
+        rb.setWeightUnit(WeightUnitEnum.KILO.getCode());
+        rb.setProductId(61L);
+        rb.setProductName("玉米");
+        rb.setCode(String.valueOf(System.currentTimeMillis()));
+        rb.setVerifyStatus(BillVerifyStatusEnum.PASSED.getCode());
+        rb.setRegisterSource(RegisterSourceEnum.OTHERS.getCode());
+
+        this.billService.insertSelective(rb);
+        ProductStock ps = new ProductStock();
+        ps.setStockWeight(BigDecimal.valueOf(30));
+        ps.setUserId(287L);
+        ps.setUserName("德华物流信息");
+        ps.setWeightUnit(WeightUnitEnum.KILO.getCode());
+        ps.setProductId(61L);
+        ps.setProductName("玉米");
+
+        this.productStockService.insertSelective(ps);
+
+
+        TradeDetail tradeDetail = new TradeDetail();
+        tradeDetail.setBuyerId(287L);
+        tradeDetail.setProductStockId(ps.getProductStockId());
+        tradeDetail.setBillId(rb.getBillId());
+        tradeDetail.setWeightUnit(WeightUnitEnum.KILO.getCode());
+        tradeDetail.setStockWeight(BigDecimal.valueOf(10));
+        tradeDetail.setTotalWeight(BigDecimal.valueOf(100));
+        tradeDetail.setCheckinStatus(CheckinStatusEnum.ALLOWED.getCode());
+        tradeDetail.setCheckoutStatus(CheckoutStatusEnum.NONE.getCode());
+        tradeDetail.setSaleStatus(SaleStatusEnum.FOR_SALE.getCode());
+        tradeDetail.setTradeType(TradeTypeEnum.NONE.getCode());
+        tradeDetail.setProductName("玉米");
+        tradeDetail.setThirdPartyStockId(20210207000007L);
+        this.tradeDetailService.insertSelective(tradeDetail);
+
+        this.productRpcService.deductRegDetail(tradeDetail.getTradeDetailId(), 8L, BigDecimal.valueOf(10), Optional.empty());
+    }
+
+    @Test
+    public void increaseRegDetail() {
+
+        RegisterBill rb = new RegisterBill();
+        rb.setUserId(287L);
+        rb.setWeight(BigDecimal.valueOf(30));
+        rb.setWeightUnit(WeightUnitEnum.KILO.getCode());
+        rb.setProductId(61L);
+        rb.setProductName("玉米");
+        rb.setCode(String.valueOf(System.currentTimeMillis()));
+        rb.setVerifyStatus(BillVerifyStatusEnum.PASSED.getCode());
+        rb.setRegisterSource(RegisterSourceEnum.OTHERS.getCode());
+
+        this.billService.insertSelective(rb);
+        ProductStock ps = new ProductStock();
+        ps.setStockWeight(BigDecimal.valueOf(30));
+        ps.setUserId(287L);
+        ps.setUserName("德华物流信息");
+        ps.setWeightUnit(WeightUnitEnum.KILO.getCode());
+        ps.setProductId(61L);
+        ps.setProductName("玉米");
+
+        this.productStockService.insertSelective(ps);
+
+
+        TradeDetail tradeDetail = new TradeDetail();
+        tradeDetail.setBuyerId(287L);
+        tradeDetail.setProductStockId(ps.getProductStockId());
+        tradeDetail.setBillId(rb.getBillId());
+        tradeDetail.setWeightUnit(WeightUnitEnum.KILO.getCode());
+        tradeDetail.setStockWeight(BigDecimal.valueOf(5));
+        tradeDetail.setTotalWeight(BigDecimal.valueOf(100));
+        tradeDetail.setCheckinStatus(CheckinStatusEnum.ALLOWED.getCode());
+        tradeDetail.setCheckoutStatus(CheckoutStatusEnum.NONE.getCode());
+        tradeDetail.setSaleStatus(SaleStatusEnum.FOR_SALE.getCode());
+        tradeDetail.setTradeType(TradeTypeEnum.NONE.getCode());
+        tradeDetail.setProductName("玉米");
+        tradeDetail.setThirdPartyStockId(20210207000007L);
+        this.tradeDetailService.insertSelective(tradeDetail);
+
+        this.productRpcService.increaseRegDetail(tradeDetail.getTradeDetailId(), 8L, BigDecimal.valueOf(5), Optional.empty());
+    }
+
 
 }

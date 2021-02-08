@@ -49,7 +49,7 @@ public class TradeOrderServiceTest extends AutoWiredBaseTest {
 
     @Test
     public void findCustomerById() {
-        //当调用方法时直接调用真实方法,之后返回thenreturn的值(只对mockbean有效,不能对spy的bean使用)
+        //当调用方法时直接调用真实方法,之后返回thenreturn的值(只对mockbean有效,不能对spy的bean使用)?真的吗？
         Mockito.when(this.customerRpc.get(1L, 8L)).thenReturn(BaseOutput.failure());
         System.out.println(this.customerRpc);
         //当调用方法时直接返回doreturn的值 ，而不调用真实方法

@@ -15,7 +15,6 @@ import org.springframework.stereotype.Service;
 
 /**
  * 生成编号服务
- *
  */
 @Service
 public class UidRestfulRpcService {
@@ -26,47 +25,62 @@ public class UidRestfulRpcService {
 
     @Autowired(required = false)
     UidRestfulRpc uidRestfulRpc;
-    @Autowired
-    private LoginSessionContext sessionContext;
 
     /**
      * 生成编号
+     *
+     * @param bizNumberTypeEnum
+     * @return
+     */
+    public String bizNumber(BizNumberType bizNumberTypeEnum) {
+        if (bizNumberTypeEnum == null) {
+            logger.error("bizNumberTypeEnum ={}", bizNumberTypeEnum);
+            throw new TraceBizException("生成编号出错");
+        }
+        return this.bizNumber(bizNumberTypeEnum.getType());
+    }
+
+    /**
+     * 生成编号
+     *
      * @param type
      * @return
      */
     public String bizNumber(String type) {
-        String bizType=StringUtils.trimToNull(type);
-        if(bizType==null){
-            logger.error("bizType ={}",bizType);
+        String bizType = StringUtils.trimToNull(type);
+        if (bizType == null) {
+            logger.error("bizType ={}", bizType);
             throw new TraceBizException("生成编号出错");
         }
         BaseOutput<String> out = this.uidRestfulRpc.bizNumber(bizType);
-        if (out!=null&&out.isSuccess()&& StringUtils.isNotBlank(out.getData())){
+        if (out != null && out.isSuccess() && StringUtils.isNotBlank(out.getData())) {
             return out.getData().trim();
         } else {
             if (out != null) {
-                logger.error("生成编号出错：bizType={},{}--{}--{}", bizType,out.getCode(), out.getMessage(), out.getErrorData());
+                logger.error("生成编号出错：bizType={},{}--{}--{}", bizType, out.getCode(), out.getMessage(), out.getErrorData());
             }
         }
-        logger.error("生成编号出错 bizType ={}",bizType);
+        logger.error("生成编号出错 bizType ={}", bizType);
         throw new TraceBizException("生成编号出错");
     }
 
     /**
      * 查询下一个traderequest code
+     *
      * @return
      */
-    public String nextTradeRequestCode(){
-            return this.bizNumber(BizNumberType.TRADE_REQUEST_CODE.getType());
+    public String nextTradeRequestCode() {
+        return this.bizNumber(BizNumberType.TRADE_REQUEST_CODE);
     }
 
     /**
      * 生成检测单编号
+     *
      * @return
      */
     public String detectRequestBizNumber(String marketName) {
 
-        String detectCode = this.bizNumber(BizNumberType.DETECT_REQUEST.getType());
+        String detectCode = this.bizNumber(BizNumberType.DETECT_REQUEST);
         StringBuilder returnCode = new StringBuilder(detectCode);
 
         if (!detectCode.contains(DETECT_CODE_PREFIX)) {
@@ -80,36 +94,38 @@ public class UidRestfulRpcService {
         } else {
             logger.error("生成检测编号出错：获取市场失败");
         }
-        logger.debug("生成的检测编号为:{}",returnCode.toString());
+        logger.debug("生成的检测编号为:{}", returnCode.toString());
         return returnCode.toString();
     }
 
     /**
      * 生成 CheckSheet 编号
+     *
      * @param taskTypeEnum
      * @return
      */
     public String nextCheckSheetCode(BillTypeEnum taskTypeEnum) {
-        if (BillTypeEnum.REGISTER_BILL==taskTypeEnum) {
-            return this.bizNumber(BizNumberType.REGISTER_BILL_CHECKSHEET_CODE.getType());
-        }else if (BillTypeEnum.COMMISSION_BILL==taskTypeEnum) {
-            return this.bizNumber(BizNumberType.COMMISSION_BILL_CHECKSHEET_CODE.getType());
-        }else {
+        if (BillTypeEnum.REGISTER_BILL == taskTypeEnum) {
+            return this.bizNumber(BizNumberType.REGISTER_BILL_CHECKSHEET_CODE);
+        } else if (BillTypeEnum.COMMISSION_BILL == taskTypeEnum) {
+            return this.bizNumber(BizNumberType.COMMISSION_BILL_CHECKSHEET_CODE);
+        } else {
             throw new TraceBizException("不支持的类型");
         }
     }
 
     /**
      * CheckSheet 保密编号
+     *
      * @param taskTypeEnum
      * @return
      */
     public String getMaskCheckSheetCode(BillTypeEnum taskTypeEnum) {
 
-        if (BillTypeEnum.REGISTER_BILL==taskTypeEnum) {
-            return BizNumberType.REGISTER_BILL_CHECKSHEET_CODE.getPrefix()+"******";
-        } else if (BillTypeEnum.COMMISSION_BILL==taskTypeEnum) {
-            return BizNumberType.COMMISSION_BILL_CHECKSHEET_CODE.getPrefix()+"******";
+        if (BillTypeEnum.REGISTER_BILL == taskTypeEnum) {
+            return BizNumberType.REGISTER_BILL_CHECKSHEET_CODE.getPrefix() + "******";
+        } else if (BillTypeEnum.COMMISSION_BILL == taskTypeEnum) {
+            return BizNumberType.COMMISSION_BILL_CHECKSHEET_CODE.getPrefix() + "******";
         } else {
             throw new TraceBizException("不支持的类型");
         }
@@ -117,9 +133,10 @@ public class UidRestfulRpcService {
 
     /**
      * TRUCK_ENTER_RECORD_BILL 司机报备单
+     *
      * @return
      */
     public String getTruckEnterRecordCode() {
-        return this.bizNumber(BizNumberType.TRUCK_ENTER_RECORD_CODE.getType());
+        return this.bizNumber(BizNumberType.TRUCK_ENTER_RECORD_CODE);
     }
 }

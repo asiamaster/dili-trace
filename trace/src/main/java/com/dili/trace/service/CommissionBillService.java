@@ -283,7 +283,7 @@ public class CommissionBillService extends BaseServiceImpl<RegisterBill, Long> {
      * @return
      */
     private  RegisterBill createCommissionBill(RegisterBill bill){
-        bill.setCode(this.uidRestfulRpcService.bizNumber(BizNumberType.COMMISSION_BILL_CODE.getType()));
+        bill.setCode(this.uidRestfulRpcService.bizNumber(BizNumberType.COMMISSION_BILL_CODE));
         bill.setDetectStatus(DetectStatusEnum.WAIT_DESIGNATED.getCode());
         bill.setBillType(this.supportedBillType().getCode());
         bill.setCreated(new Date());

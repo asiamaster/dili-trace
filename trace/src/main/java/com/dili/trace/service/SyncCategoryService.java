@@ -19,7 +19,7 @@ public class SyncCategoryService {
     AsyncService asyncService;
 
     /**
-     * 保存并同步商品信息
+     * 保存并同步商品信息(提交报备信息时触发)
      *
      * @param categoryId
      * @param marketId

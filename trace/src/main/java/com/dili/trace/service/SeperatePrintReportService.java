@@ -68,7 +68,7 @@ public class SeperatePrintReportService extends BaseServiceImpl<SeperatePrintRep
 				r.setModified(new Date());
 				r.setOperatorId(operatorUser.getId());
 				r.setOperatorName(operatorUser.getName());
-				r.setCode(this.uidRestfulRpcService.bizNumber(BizNumberType.ECOMMERCE_BILL_SEPERATE_REPORT_CODE.getType()));
+				r.setCode(this.uidRestfulRpcService.bizNumber(BizNumberType.ECOMMERCE_BILL_SEPERATE_REPORT_CODE));
 				this.insertSelective(r);
 				return r;
 			});

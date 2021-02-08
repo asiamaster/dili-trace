@@ -659,7 +659,7 @@ public class TradeOrderService extends BaseServiceImpl<TradeOrder, Long> {
      * @return
      */
     private String getNextCode() {
-        return this.uidRestfulRpcService.bizNumber(BizNumberType.TRADE_REQUEST_CODE.getType());
+        return this.uidRestfulRpcService.bizNumber(BizNumberType.TRADE_REQUEST_CODE);
     }
 
     /**

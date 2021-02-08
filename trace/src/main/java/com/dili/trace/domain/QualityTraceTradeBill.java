@@ -277,11 +277,11 @@ public interface QualityTraceTradeBill extends IBaseDomain {
 	void setMatchStatus(Integer matchStatus);
 	
 	
-	@ApiModelProperty(value = "交易单版本")
-	@Column(name = "`order_version`")
-	@FieldDef(label = "交易单版本")
-	@EditMode(editor = FieldEditor.Number, required = true)
-	Integer getOrderVersion();
-
-	void setOrderVersion(Integer orderVersion);
+//	@ApiModelProperty(value = "交易单版本")
+//	@Column(name = "`order_version`")
+//	@FieldDef(label = "交易单版本")
+//	@EditMode(editor = FieldEditor.Number, required = true)
+//	Integer getOrderVersion();
+//
+//	void setOrderVersion(Integer orderVersion);
 }

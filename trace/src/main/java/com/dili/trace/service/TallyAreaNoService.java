@@ -113,8 +113,8 @@ public class TallyAreaNoService extends BaseServiceImpl<TallyAreaNo, Long> {//im
     private List<String> parseAndConvert(String tallyAreaNos) {
         return StreamEx.ofNullable(tallyAreaNos).map(StringUtils::trimToNull).nonNull().flatArray(str -> str.split(","))
                 .map(StringUtils::trimToNull).map(str -> {
-            return StringUtils.remove(str, " ");
-        }).nonNull().distinct().toList();
+                    return StringUtils.remove(str, " ");
+                }).nonNull().distinct().toList();
 
     }
 

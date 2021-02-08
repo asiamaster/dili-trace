@@ -423,7 +423,7 @@ public class ProductRpcService {
             createDto.setFirmName(firm.getName());
         });
         // 库存系统要校验InStockNo字段唯一，传报备单主键交易场景有问题，所以生成个唯一单号
-        createDto.setInStockNo(uidRestfulRpcService.bizNumber(BizNumberType.STOCK_CODE.getType()));
+        createDto.setInStockNo(uidRestfulRpcService.bizNumber(BizNumberType.STOCK_CODE));
         if(optUser.isPresent()){
             createDto.setOperatorId(optUser.get().getId());
             createDto.setOperatorName(optUser.get().getName());

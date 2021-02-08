@@ -55,7 +55,7 @@ public class PurchaseIntentionRecordService extends BaseServiceImpl<PurchaseInte
         //createAddBill(bill);
         //record.setCode(bill.getCode());
         //新增买家报备记录
-        record.setCode(this.uidRestfulRpcService.bizNumber(BizNumberType.PURCHASE_INTENTION_RECORD_CODE.getType()));
+        record.setCode(this.uidRestfulRpcService.bizNumber(BizNumberType.PURCHASE_INTENTION_RECORD_CODE));
         record.setCreated(DateUtils.getCurrentDate());
         record.setModified(DateUtils.getCurrentDate());
         insertSelective(record);
@@ -83,7 +83,7 @@ public class PurchaseIntentionRecordService extends BaseServiceImpl<PurchaseInte
                 bill.setPhone(user.getContactsPhone());
             }
         }
-        bill.setCode(this.uidRestfulRpcService.bizNumber(BizNumberType.PURCHASE_INTENTION_RECORD_CODE.getType()));
+        bill.setCode(this.uidRestfulRpcService.bizNumber(BizNumberType.PURCHASE_INTENTION_RECORD_CODE));
         bill.setBillType(BillTypeEnum.REGISTER_BILL.getCode());
         bill.setDetectStatus(DetectStatusEnum.WAIT_DESIGNATED.getCode());
         bill.setRegisterSource(RegisterSourceEnum.OTHERS.getCode());

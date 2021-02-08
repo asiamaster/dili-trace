@@ -24,7 +24,7 @@ import java.util.List;
 )
 public interface ProductRpc {
     /**
-     * 库存扣减
+     * 批次库存增加
      *
      * @param obj
      * @return
@@ -33,7 +33,7 @@ public interface ProductRpc {
     public BaseOutput<List<StockReductResultDto>> incByStockIds(@VOBody StockReduceRequestDto obj);
 
     /**
-     * 库存扣减
+     * 批次库存扣减
      *
      * @param obj
      * @return

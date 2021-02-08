@@ -177,7 +177,7 @@ public interface RegisterBillService extends BaseService<RegisterBill, Long> {
 	 * 创建多个进门登记单
 	 *
 	 * @param registerBills
-	 * @param user
+	 * @param customerId
 	 * @param operatorUser
 	 * @param marketId
 	 * @return

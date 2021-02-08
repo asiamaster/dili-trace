@@ -34,7 +34,7 @@ public class TruckEnterRecordService extends BaseServiceImpl<TruckEnterRecord, L
             if(StringUtils.isBlank(truckEnterRecord.getTruckPlate())){
                 return BaseOutput.failure("车牌不能为空");
             }
-            truckEnterRecord.setCode(this.uidRestfulRpcService.bizNumber(BizNumberType.TRUCK_ENTER_RECORD_CODE.getType()));
+            truckEnterRecord.setCode(this.uidRestfulRpcService.bizNumber(BizNumberType.TRUCK_ENTER_RECORD_CODE));
             truckEnterRecord.setCreated(DateUtils.getCurrentDate());
             truckEnterRecordMapper.insertSelective(truckEnterRecord);
 

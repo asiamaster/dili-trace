@@ -304,7 +304,7 @@ public class TradeRequestService extends BaseServiceImpl<TradeRequest, Long> {
      * @return
      */
     private String getNextCode() {
-        return this.uidRestfulRpcService.bizNumber(BizNumberType.TRADE_REQUEST_CODE.getType());
+        return this.uidRestfulRpcService.bizNumber(BizNumberType.TRADE_REQUEST_CODE);
     }
 
     /**

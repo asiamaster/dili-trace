@@ -1,7 +1,6 @@
 package com.dili.trace.service.impl;
 
 import com.dili.common.exception.TraceBizException;
-import com.dili.sg.trace.glossary.OrderVersionEnum;
 import com.dili.ss.base.BaseServiceImpl;
 import com.dili.ss.dto.DTOUtils;
 import com.dili.trace.dao.QualityTraceTradeBillSyncPointMapper;
@@ -58,7 +57,7 @@ public class QualityTraceTradeBillSyncPointServiceImpl extends BaseServiceImpl<Q
 			point.setBillId(bill.getBillId());
 			point.setOrderId(bill.getOrderId());
 			this.updateSelective(point);
-			bill.setOrderVersion(item.getOrderVersion());
+//			bill.setOrderVersion(item.getOrderVersion());
 			this.qualityTraceTradeBillService.insertSelective(bill);
 		}
 
@@ -71,7 +70,7 @@ public class QualityTraceTradeBillSyncPointServiceImpl extends BaseServiceImpl<Q
 		int count = 	this.listByExample(example).size();
 		if (count == 0) {
 			QualityTraceTradeBillSyncPoint item = DTOUtils.newDTO(QualityTraceTradeBillSyncPoint.class);
-			item.setOrderVersion(OrderVersionEnum.VERSION.getCode());
+//			item.setOrderVersion(OrderVersionEnum.VERSION.getCode());
 			this.insertSelective(item);
 
 		}
