@@ -7,6 +7,7 @@ import com.dili.trace.domain.*;
 import com.dili.trace.enums.PushTypeEnum;
 import com.dili.trace.enums.SaleStatusEnum;
 import com.dili.trace.enums.TradeTypeEnum;
+import com.dili.trace.rpc.service.ProductRpcService;
 import com.dili.trace.service.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.Date;
+import java.util.Optional;
 
 @Service
 @EnableRetry
@@ -35,6 +37,9 @@ public class TradePushServiceImpl extends BaseServiceImpl<TradePushLog, Long> im
 
     @Autowired
     private RegisterBillService registerBillService;
+
+    @Autowired
+    ProductRpcService productRpcService;
 
     @Override
     @Transactional
@@ -118,5 +123,17 @@ public class TradePushServiceImpl extends BaseServiceImpl<TradePushLog, Long> im
         tradePushLog.setCreated(new Date());
         tradePushLog.setModified(new Date());
         getDao().insert(tradePushLog);
+
+
+        RegisterBill rb=this.registerBillService.get(tradeDetail.getBillId());
+        Long marketId=(rb==null?null:rb.getMarketId());
+        BigDecimal changedWeight=pushAwayWeight.abs();
+        if(tradePushLog.getLogType().equals(PushTypeEnum.DOWN.getCode())) {
+            // 下架
+            this.productRpcService.deductRegDetail(tradeDetail.getTradeDetailId(),marketId,changedWeight, Optional.empty());
+        }else if(tradePushLog.getLogType().equals(PushTypeEnum.UP.getCode())){
+            // 上架
+            this.productRpcService.increaseRegDetail(tradeDetail.getTradeDetailId(),marketId,changedWeight, Optional.empty());
+        }
     }
 }
