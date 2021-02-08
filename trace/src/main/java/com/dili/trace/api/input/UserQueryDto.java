@@ -14,6 +14,11 @@ public class UserQueryDto extends UserInfo {
     @Like
     private String name;
 
+    @Column(name = "`id`")
+    @Operator(Operator.IN)
+    private List<Long> userInfoIdList;
+
+
     @Column(name = "`tally_area_nos`")
     @Like
     private String tallyAreaNos;
@@ -154,5 +159,13 @@ public class UserQueryDto extends UserInfo {
 
     public void setLikeTallyAreaNos(String likeTallyAreaNos) {
         this.likeTallyAreaNos = likeTallyAreaNos;
+    }
+
+    public List<Long> getUserInfoIdList() {
+        return userInfoIdList;
+    }
+
+    public void setUserInfoIdList(List<Long> userInfoIdList) {
+        this.userInfoIdList = userInfoIdList;
     }
 }
