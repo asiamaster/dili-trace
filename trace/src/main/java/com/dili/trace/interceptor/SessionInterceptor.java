@@ -1,4 +1,4 @@
-package com.dili.common.interceptor;
+package com.dili.trace.interceptor;
 
 import com.dili.common.annotation.AppAccess;
 import com.dili.common.annotation.Role;
@@ -8,11 +8,9 @@ import com.dili.common.exception.TraceBizException;
 import com.dili.ss.domain.BaseOutput;
 import com.dili.ss.redis.service.RedisUtil;
 import com.dili.ss.util.DateUtils;
-import com.dili.trace.domain.UserInfo;
 import com.dili.trace.rpc.service.CustomerRpcService;
 import com.dili.trace.service.SyncUserInfoService;
 import com.dili.trace.service.UapRpcService;
-import com.dili.trace.service.UserInfoService;
 import com.dili.uap.sdk.domain.UserTicket;
 import com.dili.uap.sdk.redis.UserRedis;
 import com.dili.uap.sdk.redis.UserUrlRedis;

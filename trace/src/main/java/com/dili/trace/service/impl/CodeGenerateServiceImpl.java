@@ -8,7 +8,7 @@ import java.util.Date;
 import com.dili.common.exception.TraceBizException;
 import com.dili.ss.redis.service.RedisDistributedLock;
 import com.dili.trace.enums.BillTypeEnum;
-import com.dili.sg.trace.glossary.CodeGenerateEnum;
+import com.dili.trace.enums.CodeGenerateEnum;
 import com.dili.trace.service.BillService;
 import com.dili.ss.base.BaseServiceImpl;
 import com.dili.trace.dao.CodeGenerateMapper;

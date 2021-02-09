@@ -1,4 +1,4 @@
-package com.dili.sg.trace.glossary;
+package com.dili.trace.enums;
 
 /**
  * <B>Description</B>

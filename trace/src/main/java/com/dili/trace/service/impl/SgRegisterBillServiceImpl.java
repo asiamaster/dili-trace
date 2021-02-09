@@ -7,7 +7,7 @@ import com.dili.common.entity.SessionData;
 import com.dili.common.exception.TraceBizException;
 import com.dili.commons.glossary.YesOrNoEnum;
 import com.dili.customer.sdk.domain.dto.CustomerExtendDto;
-import com.dili.sg.trace.glossary.SalesTypeEnum;
+import com.dili.trace.enums.SalesTypeEnum;
 import com.dili.ss.domain.BaseOutput;
 import com.dili.ss.domain.EasyuiPageOutput;
 import com.dili.ss.dto.DTOUtils;

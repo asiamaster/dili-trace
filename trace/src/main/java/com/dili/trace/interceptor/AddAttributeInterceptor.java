@@ -1,4 +1,4 @@
-package com.dili.common.interceptor;
+package com.dili.trace.interceptor;
 
 import com.dili.common.config.BuildConfiguration;
 import com.dili.trace.service.GlobalVarService;
@@ -9,7 +9,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 
-import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.List;
@@ -40,13 +39,13 @@ public class AddAttributeInterceptor extends HandlerInterceptorAdapter {
 
         List<String> activeProfiles = StreamEx.of(this.environment.getActiveProfiles()).nonNull().toList();
         if (activeProfiles.contains("dev") || activeProfiles.contains("test")) {
-            this.buildConfiguration.setVersion(String.valueOf(System.currentTimeMillis()));
+            this.buildConfiguration.setDate(String.valueOf(System.currentTimeMillis()));
         } else {
-            if ("${pom.version}".equalsIgnoreCase(this.buildConfiguration.getVersion())) {
-                this.buildConfiguration.setVersion(String.valueOf(System.currentTimeMillis()));
+            if ("${pom.date}".equalsIgnoreCase(this.buildConfiguration.getDate())) {
+                this.buildConfiguration.setDate(String.valueOf(System.currentTimeMillis()));
             }
         }
-        return this.buildConfiguration.getVersion();
+        return this.buildConfiguration.getDate();
     }
 
 }
