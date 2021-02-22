@@ -166,7 +166,7 @@ public class UpStreamController {
         upStreams.forEach(o -> {
             UpStreamDto usd = new UpStreamDto();
             BeanUtils.copyProperties(o, usd);
-            List<String> nameList = userMap.get(o.getId());
+            List<String> nameList = userMap.getOrDefault(o.getId(),Lists.newArrayList());
             usd.setUserNames(nameList.isEmpty()? "" : StringUtils.strip(String.join(",",nameList), "[]"));
             upStreamDtos.add(usd);
         });
