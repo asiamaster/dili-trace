@@ -9,6 +9,7 @@
 })(function (require, exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
+    exports.TruckEnterRecordGrid = void 0;
     class TruckEnterRecordGrid extends ListPage {
         constructor(grid, queryform, toolbar) {
             super(grid, queryform, queryform.find('#query'), "/truckEnterRecord/listPage.action");

@@ -8,7 +8,7 @@ import com.dili.common.util.MD5Util;
 import com.dili.customer.sdk.domain.Customer;
 import com.dili.customer.sdk.domain.TallyingArea;
 import com.dili.customer.sdk.domain.dto.CustomerExtendDto;
-import com.dili.customer.sdk.domain.dto.CustomerQueryInput;
+import com.dili.customer.sdk.domain.query.CustomerQueryInput;
 import com.dili.customer.sdk.rpc.CustomerRpc;
 import com.dili.customer.sdk.rpc.TallyingAreaRpc;
 import com.dili.ss.domain.BaseOutput;

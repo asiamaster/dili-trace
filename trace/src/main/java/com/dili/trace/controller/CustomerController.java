@@ -1,7 +1,7 @@
 package com.dili.trace.controller;
 
 import com.dili.common.entity.LoginSessionContext;
-import com.dili.customer.sdk.domain.dto.CustomerQueryInput;
+import com.dili.customer.sdk.domain.query.CustomerQueryInput;
 import com.dili.ss.domain.BaseOutput;
 import com.dili.trace.rpc.service.CustomerRpcService;
 import com.dili.trace.service.UapRpcService;

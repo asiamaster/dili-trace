@@ -1,7 +1,7 @@
 package com.dili.trace.api.client;
 
 import com.alibaba.fastjson.JSON;
-import com.dili.customer.sdk.domain.dto.CustomerQueryInput;
+import com.dili.customer.sdk.domain.query.CustomerQueryInput;
 import com.dili.ss.domain.BaseOutput;
 import com.dili.trace.AutoWiredBaseTest;
 import com.dili.trace.api.output.UserOutput;
