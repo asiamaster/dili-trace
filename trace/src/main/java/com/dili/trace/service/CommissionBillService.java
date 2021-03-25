@@ -16,6 +16,7 @@ import com.dili.trace.glossary.RegisterBilCreationSourceEnum;
 import com.dili.trace.glossary.RegisterSourceEnum;
 import com.dili.trace.glossary.SampleSourceEnum;
 import com.dili.trace.rpc.service.UidRestfulRpcService;
+import com.dili.trace.util.RegUtils;
 import one.util.streamex.StreamEx;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -253,10 +254,24 @@ public class CommissionBillService extends BaseServiceImpl<RegisterBill, Long> {
         if (StringUtils.isAllBlank(bill.getName(), bill.getCorporateName())) {
             throw new TraceBizException("业户名称和企业名称不能同时为空");
         }
+        if(StringUtils.isNotBlank(bill.getName())){
+            if(!RegUtils.isValidInput(bill.getName())){
+                throw new TraceBizException("业户名称不能有特殊字符");
+            }
+        }
+        if(StringUtils.isNotBlank(bill.getCorporateName())){
+            if(!RegUtils.isValidInput(bill.getCorporateName())){
+                throw new TraceBizException("企业名称不能有特殊字符");
+            }
+        }
+        if(StringUtils.trimToEmpty(bill.getProductAliasName()).length()>40){
+            throw new TraceBizException("商品别名不能超过40字符");
+        }
         bill.setRegisterSource(RegisterSourceEnum.OTHERS.getCode());
         if (!RegisterBilCreationSourceEnum.fromCode(bill.getCreationSource()).isPresent()) {
             throw new TraceBizException("登记单来源类型错误");
         }
+
         bill.setVerifyStatus(BillVerifyStatusEnum.WAIT_AUDIT.getCode());
         createCommissionBill(bill);
         DetectRequest detectRequest=this.detectRequestService.createDefault(bill.getBillId(),Optional.empty());

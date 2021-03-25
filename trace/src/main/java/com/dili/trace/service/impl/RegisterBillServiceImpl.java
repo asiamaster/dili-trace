@@ -321,6 +321,9 @@ public class RegisterBillServiceImpl extends BaseServiceImpl<RegisterBill, Long>
         if (!TruckTypeEnum.fromCode(registerBill.getTruckType()).isPresent()) {
             throw new TraceBizException("装车类型错误");
         }
+        if(StringUtils.trimToEmpty(registerBill.getProductAliasName()).length()>40){
+            throw new TraceBizException("商品别名不能超过40字符");
+        }
 //        if (registerBill.getUpStreamId() == null) {
 //            throw new TraceBizException("上游企业不能为空");
 //        }

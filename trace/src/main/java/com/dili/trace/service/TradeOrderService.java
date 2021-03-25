@@ -85,7 +85,8 @@ public class TradeOrderService extends BaseServiceImpl<TradeOrder, Long> {
                 });
                 tradeDto.getBuyer().setBuyerId(null);
                 tradeDto.getBuyer().setBuyerType(BuyerTypeEnum.DOWNSTREAM_BUYER);
-                tradeDto.getBuyer().setBuyerName(upStream.getName() + "-" + upStream.getId());
+//                tradeDto.getBuyer().setBuyerName(upStream.getName() + "-" + upStream.getId());
+                tradeDto.getBuyer().setBuyerName(upStream.getName());
             } else {
                 if (StringUtils.isBlank(tradeDto.getBuyer().getBuyerName())) {
                     throw new TraceBizException("分销客户信息不完整");
