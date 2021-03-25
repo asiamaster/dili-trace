@@ -258,10 +258,16 @@ public class CommissionBillService extends BaseServiceImpl<RegisterBill, Long> {
             if(!RegUtils.isValidInput(bill.getName())){
                 throw new TraceBizException("业户名称不能有特殊字符");
             }
+            if(StringUtils.trimToEmpty(bill.getName()).length()>40){
+                throw new TraceBizException("业户名称不能超过40字符");
+            }
         }
         if(StringUtils.isNotBlank(bill.getCorporateName())){
             if(!RegUtils.isValidInput(bill.getCorporateName())){
                 throw new TraceBizException("企业名称不能有特殊字符");
+            }
+            if(StringUtils.trimToEmpty(bill.getProductAliasName()).length()>40){
+                throw new TraceBizException("企业名称不能超过40字符");
             }
         }
         if(StringUtils.trimToEmpty(bill.getProductAliasName()).length()>40){
