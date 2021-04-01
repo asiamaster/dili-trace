@@ -1101,11 +1101,10 @@ public class NewRegisterBillController {
      * @return
      */
     private UserInfoDto maskUserInfoDto(UserInfoDto dto) {
-
         if (dto == null) {
             return dto;
         }
-        return dto.mask(!SessionContext.hasAccess("post", "registerBill/create.html#user"));
+        return dto.mask(!this.uapRpcService.hasAccess("registerBill/create.html#user"));
     }
 
     /**
@@ -1118,13 +1117,13 @@ public class NewRegisterBillController {
         if (dto == null) {
             return dto;
         }
-        if (SessionContext.hasAccess("post", "registerBill/create.html#user")) {
+//        if (SessionContext.hasAccess("post", "registerBill/create.html#user")) {
             return dto;
-        } else {
-            dto.setIdCardNo(MaskUserInfo.maskIdNo(dto.getIdCardNo()));
-            dto.setAddr(MaskUserInfo.maskAddr(dto.getAddr()));
-            return dto;
-        }
+//        } else {
+//            dto.setIdCardNo(MaskUserInfo.maskIdNo(dto.getIdCardNo()));
+//            dto.setAddr(MaskUserInfo.maskAddr(dto.getAddr()));
+//            return dto;
+//        }
 
     }
 

@@ -6,6 +6,8 @@ import com.dili.trace.dto.OperatorUser;
 import com.dili.trace.rpc.service.FirmRpcService;
 import com.dili.uap.sdk.domain.Firm;
 import com.dili.uap.sdk.domain.UserTicket;
+import com.dili.uap.sdk.glossary.SystemType;
+import com.dili.uap.sdk.service.redis.UserUrlRedis;
 import com.dili.uap.sdk.session.SessionContext;
 import one.util.streamex.StreamEx;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,9 +27,12 @@ import java.util.Optional;
 public class UapRpcService {
     @Autowired
     FirmRpcService firmRpcService;
+    @Autowired
+    UserUrlRedis userUrlRedis;
 
     /**
      * 当前登录用户名和id
+     *
      * @return
      */
     public Optional<OperatorUser> getCurrentOperator() {
@@ -69,6 +74,14 @@ public class UapRpcService {
             return StreamEx.of(this.firmRpcService.getFirmById(u.getFirmId())).toList();
         }).findFirst();
 
+    }
+
+    public boolean hasAccess(String url) {
+
+        UserTicket ut = this.getCurrentUserTicket().orElseThrow(() -> {
+            return new TraceBizException("您还未登录");
+        });
+        return this.userUrlRedis.checkUserMenuUrlRight(ut.getId(), SystemType.WEB.getCode(), url);
     }
 
 }

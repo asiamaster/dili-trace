@@ -11,14 +11,20 @@ import com.dili.ss.util.DateUtils;
 import com.dili.trace.rpc.service.CustomerRpcService;
 import com.dili.trace.service.SyncUserInfoService;
 import com.dili.trace.service.UapRpcService;
+import com.dili.uap.sdk.config.ManageConfig;
 import com.dili.uap.sdk.domain.UserTicket;
+import com.dili.uap.sdk.service.AuthService;
 import com.dili.uap.sdk.service.redis.UserRedis;
 import com.dili.uap.sdk.service.redis.UserUrlRedis;
+import com.dili.uap.sdk.session.PermissionContext;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.context.request.RequestAttributes;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 
@@ -46,6 +52,8 @@ public class SessionInterceptor extends HandlerInterceptorAdapter {
     SyncUserInfoService syncUserInfoService;
     @Resource
     RedisUtil redisUtil;
+    @Autowired
+    AuthService authService;
     private ObjectMapper mapper = new ObjectMapper();
 
     /**
@@ -56,6 +64,7 @@ public class SessionInterceptor extends HandlerInterceptorAdapter {
      * 用户过期时间-分钟
      */
     private Integer userEffectMin = 10;
+
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)
@@ -126,27 +135,21 @@ public class SessionInterceptor extends HandlerInterceptorAdapter {
 
     private Optional<SessionData> loginAsManager(HttpServletRequest req) {
 //        System.out.println(req.getHeaderNames());
-        String refreshToken = req.getHeader("UAP_Token");
-        if (StringUtils.isBlank(refreshToken)) {
-            return Optional.empty();
-        }
+        HttpServletResponse resp = this.getHttpServletResponse();
+        PermissionContext permissionContext = new PermissionContext(req, resp, null, new ManageConfig(), "");
+        String accessToken = permissionContext.getAccessToken();
+        String refreshToken = permissionContext.getRefreshToken();
 
-        UserTicket ut = this.userRedis.applyAccessToken(refreshToken).getUserTicket();
+        UserTicket ut = authService.getUserTicket(accessToken, refreshToken);
         if (ut == null) {
             return Optional.empty();
         }
-//        String url = "app_auth";
-//        if (!this.userUrlRedis.checkUserMenuUrlRight(ut.getId(), url)) {
-//            return Optional.empty();
-//        }
         SessionData sessionData = SessionData.fromUserTicket(ut);
-        //asyncRpcUser(Optional.ofNullable(sessionData));
         return Optional.ofNullable(sessionData);
     }
 
     private Optional<SessionData> loginAsClient(HttpServletRequest req) {
         Optional<SessionData> data = this.customerRpcService.getCurrentCustomer();
-        //asyncRpcUser(data);
         this.sync(data);
         return data;
     }
@@ -163,37 +166,6 @@ public class SessionInterceptor extends HandlerInterceptorAdapter {
         }
     }
 
-    /**
-     * 同步用户信息
-     *
-     * @param customer
-     */
-    public void asyncRpcUser(Optional<SessionData> customer) {
-        if (null == customer) {
-            return;
-        }
-        try {
-            //取用户id
-            SessionData sessionData = customer.get();
-            if (null == sessionData) {
-                return;
-            }
-            Long userId = sessionData.getUserId();
-            if (null == userId) {
-                return;
-            }
-            String key_user = syncUserTimeKey + userId;
-            //没有对应用户key，则同步该用户信息并写入到redis，key:user_id,val:过期时间
-            if (!redisUtil.exists(key_user)) {
-                syncUserInfoAdd(userId, key_user);
-            } else {
-                syncUserInfoUpdate(userId, key_user);
-            }
-        } catch (Exception e) {
-            logger.error("===>>同步用户失败");
-            logger.error(e.getMessage());
-        }
-    }
 
     /**
      * 新增用戶对应redis同步时间
@@ -202,51 +174,11 @@ public class SessionInterceptor extends HandlerInterceptorAdapter {
      * @param key_user
      */
     private void syncUserInfoAdd(Long userId, String key_user) {
-        doSyncUserRpc(userId);
         Date newMinutes = DateUtils.addMinutes(DateUtils.getCurrentDate(), userEffectMin);
         redisUtil.set(key_user, newMinutes);
     }
 
-    /**
-     * 更新用戶对应redis同步时间
-     *
-     * @param userId
-     * @param key_user
-     */
-    private void syncUserInfoUpdate(Long userId, String key_user) {
-        //redis中同步过期时间
-        Date syncUserTime = (Date) redisUtil.get(key_user);
-        //当前时间
-        Date currentDate = DateUtils.getCurrentDate();
-        //redis中没有过期时间,重新设置
-        if (null == syncUserTime) {
-            syncUserInfoAdd(userId, key_user);
-        } else {
-            //当前时间在同步过期时间之后，则调用同步方法同步用户
-            if (currentDate.after(syncUserTime)) {
-                doSyncUserRpc(userId);
-                //秒转分
-                Date newSyncDate = DateUtils.addMinutes(syncUserTime, userEffectMin);
-                //同步过期时间+10分钟仍然在当前时间之前，则取当前时间+10分钟作新的同步过期时间
-                if (currentDate.after(newSyncDate)) {
-                    newSyncDate = DateUtils.addMinutes(DateUtils.getCurrentDate(), userEffectMin);
-                }
-                redisUtil.set(key_user, newSyncDate);
-            }
-        }
 
-    }
-
-    /**
-     * 同步用户
-     */
-    public void doSyncUserRpc(Long userId) {
-//        try {
-//            syncRpcService.syncRpcUserByUserId(userId);
-//        } catch (Exception e) {
-//            logger.error(e.getMessage());
-//        }
-    }
 
     private void sync(Optional<SessionData> sessionData) {
         sessionData.ifPresent(sd -> {
@@ -261,4 +193,23 @@ public class SessionInterceptor extends HandlerInterceptorAdapter {
         return handler.getBeanType().getAnnotation(annotationType);
     }
 
+    /**
+     * 查询当前登录用户信息
+     *
+     * @return
+     */
+    public HttpServletResponse getHttpServletResponse() {
+        try {
+            //两个方法在没有使用JSF的项目中是没有区别的
+            RequestAttributes requestAttributes = RequestContextHolder.currentRequestAttributes();
+            //RequestContextHolder.getRequestAttributes();
+            //从session里面获取对应的值
+            HttpServletRequest request = ((ServletRequestAttributes) requestAttributes).getRequest();
+            HttpServletResponse response = ((ServletRequestAttributes) requestAttributes).getResponse();
+            return response;
+        } catch (Exception e) {
+            throw new TraceBizException("当前运行环境不是web请求环境");
+        }
+
+    }
 }

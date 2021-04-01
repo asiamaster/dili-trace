@@ -111,7 +111,7 @@ public class TradeInfoController {
      * @return
      */
     private UserInfo maskUser(UserInfo user) {
-        if (SessionContext.hasAccess("post", "registerBill/create.html#user")) {
+        if (this.uapRpcService.hasAccess("registerBill/create.html#user")) {
             return user;
         } else {
             user.setCardNo(MaskUserInfo.maskIdNo(user.getCardNo()));
