@@ -71,25 +71,4 @@ public class UapRpcService {
 
     }
 
-    /**
-     * 是否有访问权限
-     *
-     * @param method
-     * @param url
-     * @return
-     */
-    public boolean hasAccess(String method, String url) {
-        return SessionContext.hasAccess(method, url);
-    }
-
-    /**
-     * 是否有访问权限
-     *
-     * @param access
-     * @return
-     */
-    public boolean hasAccess(AppAccess access) {
-        return SessionContext.hasAccess(access.method(), access.url());
-    }
-
 }

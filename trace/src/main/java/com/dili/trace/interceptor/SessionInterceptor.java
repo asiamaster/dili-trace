@@ -12,8 +12,8 @@ import com.dili.trace.rpc.service.CustomerRpcService;
 import com.dili.trace.service.SyncUserInfoService;
 import com.dili.trace.service.UapRpcService;
 import com.dili.uap.sdk.domain.UserTicket;
-import com.dili.uap.sdk.redis.UserRedis;
-import com.dili.uap.sdk.redis.UserUrlRedis;
+import com.dili.uap.sdk.service.redis.UserRedis;
+import com.dili.uap.sdk.service.redis.UserUrlRedis;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -126,12 +126,12 @@ public class SessionInterceptor extends HandlerInterceptorAdapter {
 
     private Optional<SessionData> loginAsManager(HttpServletRequest req) {
 //        System.out.println(req.getHeaderNames());
-        String userToken = req.getHeader("UAP_Token");
-        if (StringUtils.isBlank(userToken)) {
+        String refreshToken = req.getHeader("UAP_Token");
+        if (StringUtils.isBlank(refreshToken)) {
             return Optional.empty();
         }
 
-        UserTicket ut = this.userRedis.getTokenUser(userToken);
+        UserTicket ut = this.userRedis.applyAccessToken(refreshToken).getUserTicket();
         if (ut == null) {
             return Optional.empty();
         }

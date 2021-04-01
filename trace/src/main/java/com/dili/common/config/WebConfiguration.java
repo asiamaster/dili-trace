@@ -3,7 +3,7 @@ package com.dili.common.config;
 import com.dili.common.entity.LoginSessionContext;
 import com.dili.trace.interceptor.AddAttributeInterceptor;
 import com.dili.trace.interceptor.SessionInterceptor;
-import com.dili.uap.sdk.session.SessionFilter;
+import com.dili.uap.sdk.filter.SessionFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
