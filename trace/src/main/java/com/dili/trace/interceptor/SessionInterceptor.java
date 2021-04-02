@@ -140,6 +140,9 @@ public class SessionInterceptor extends HandlerInterceptorAdapter {
 //        PermissionContext permissionContext = new PermissionContext(req, resp, null, new ManageConfig(), "");
         String accessToken = req.getHeader("UAP_accessToken");
         String refreshToken = req.getHeader("UAP_refreshToken");
+        if(StringUtils.isBlank(accessToken)&&StringUtils.isBlank(refreshToken)){
+            return Optional.empty();
+        }
 
         UserTicket ut = authService.getUserTicket(accessToken, refreshToken);
         if (ut == null) {
