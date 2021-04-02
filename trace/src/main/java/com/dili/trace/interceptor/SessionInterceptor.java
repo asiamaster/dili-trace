@@ -136,10 +136,10 @@ public class SessionInterceptor extends HandlerInterceptorAdapter {
 
     private Optional<SessionData> loginAsManager(HttpServletRequest req) {
 //        System.out.println(req.getHeaderNames());
-        HttpServletResponse resp = this.getHttpServletResponse();
-        PermissionContext permissionContext = new PermissionContext(req, resp, null, new ManageConfig(), "");
-        String accessToken = permissionContext.getAccessToken();
-        String refreshToken = permissionContext.getRefreshToken();
+//        HttpServletResponse resp = this.getHttpServletResponse();
+//        PermissionContext permissionContext = new PermissionContext(req, resp, null, new ManageConfig(), "");
+        String accessToken = req.getHeader("UAP_accessToken");
+        String refreshToken = req.getHeader("UAP_refreshToken");
 
         UserTicket ut = authService.getUserTicket(accessToken, refreshToken);
         if (ut == null) {
