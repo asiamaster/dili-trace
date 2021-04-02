@@ -100,6 +100,7 @@ public class SessionInterceptor extends HandlerInterceptorAdapter {
         } catch (TraceBizException e) {
             return this.writeError(response, e.getMessage());
         } catch (Exception e) {
+            logger.error(e.getMessage(),e);
             return this.writeError(response, "服务端出错");
         }
 
