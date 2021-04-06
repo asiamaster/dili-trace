@@ -276,7 +276,7 @@ public class CommissionBillController {
     public @ResponseBody
     BaseOutput autoCheck(@PathVariable Long id) {
         try {
-            this.registerBillService.autoCheckRegisterBill(id);
+            this.registerBillService.autoCheckRegisterBill(id,this.uapRpcService.getCurrentOperator().get());
         } catch (TraceBizException e) {
             return BaseOutput.failure(e.getMessage());
         }
@@ -293,7 +293,7 @@ public class CommissionBillController {
     public @ResponseBody
     BaseOutput samplingCheck(@PathVariable Long id) {
         try {
-            this.registerBillService.samplingCheckRegisterBill(id);
+            this.registerBillService.samplingCheckRegisterBill(id,this.uapRpcService.getCurrentOperator().get());
         } catch (TraceBizException e) {
             return BaseOutput.failure(e.getMessage());
         }

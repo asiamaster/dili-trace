@@ -138,7 +138,7 @@ public class NewRegisterBillController {
     @RequestMapping(value = "/findHighLightBill.action", method = {RequestMethod.GET, RequestMethod.POST})
     public @ResponseBody
     Object findHighLightBill(RegisterBillDto dto) throws Exception {
-        RegisterBill registerBill = registerBillService.findHighLightBill(dto);
+        RegisterBill registerBill = registerBillService.findHighLightBill(dto,this.uapRpcService.getCurrentOperator().get());
         return BaseOutput.success().setData(registerBill);
     }
 
@@ -380,7 +380,7 @@ public class NewRegisterBillController {
             if (billVerifyStatusEnum == null) {
                 return BaseOutput.failure("审核状态错误");
             }
-            registerBillService.auditRegisterBill(id, billVerifyStatusEnum);
+            registerBillService.auditRegisterBill(id, billVerifyStatusEnum,this.uapRpcService.getCurrentOperator().get());
             if (BillVerifyStatusEnum.PASSED == billVerifyStatusEnum) {
                 Long marketId = this.uapRpcService.getCurrentFirm().get().getId();
                 processService.afterBillPassed(id, marketId, this.uapRpcService.getCurrentOperator());
@@ -406,7 +406,7 @@ public class NewRegisterBillController {
         if (CollectionUtils.isEmpty(idList)) {
             return BaseOutput.failure("参数错误");
         }
-        return this.registerBillService.doBatchAutoCheck(idList);
+        return this.registerBillService.doBatchAutoCheck(idList,this.uapRpcService.getCurrentOperator().get());
     }
 
     /**
@@ -423,7 +423,7 @@ public class NewRegisterBillController {
         if (CollectionUtils.isEmpty(idList)) {
             return BaseOutput.failure("参数错误");
         }
-        return this.registerBillService.doBatchUndo(idList);
+        return this.registerBillService.doBatchUndo(idList,this.uapRpcService.getCurrentOperator().get());
     }
 
     /**
@@ -441,7 +441,7 @@ public class NewRegisterBillController {
         if (CollectionUtils.isEmpty(idList)) {
             return BaseOutput.failure("参数错误");
         }
-        return this.registerBillService.doBatchSamplingCheck(idList);
+        return this.registerBillService.doBatchSamplingCheck(idList,this.uapRpcService.getCurrentOperator().get());
     }
 
     /**
@@ -465,7 +465,7 @@ public class NewRegisterBillController {
         }
         batchAuditDto.setVerifyStatus(BillVerifyStatusEnum.PASSED.getCode());
         batchAuditDto.setRegisterBillIdList(idList);
-        return this.registerBillService.doBatchAudit(batchAuditDto);
+        return this.registerBillService.doBatchAudit(batchAuditDto,this.uapRpcService.getCurrentOperator().get());
     }
 
     /**
@@ -478,7 +478,7 @@ public class NewRegisterBillController {
     public @ResponseBody
     BaseOutput doUndo(@RequestParam(name = "id", required = true) Long id) {
         try {
-            registerBillService.undoRegisterBill(id);
+            registerBillService.undoRegisterBill(id,this.uapRpcService.getCurrentOperator().get());
         } catch (TraceBizException e) {
             return BaseOutput.failure(e.getMessage());
         }
@@ -577,7 +577,7 @@ public class NewRegisterBillController {
     public @ResponseBody
     BaseOutput doAutoCheck(@RequestParam(name = "id", required = true) Long id) {
         try {
-            registerBillService.autoCheckRegisterBill(id);
+            registerBillService.autoCheckRegisterBill(id,this.uapRpcService.getCurrentOperator().get());
         } catch (TraceBizException e) {
             return BaseOutput.failure(e.getMessage());
         }
@@ -594,7 +594,7 @@ public class NewRegisterBillController {
     public @ResponseBody
     BaseOutput doSamplingCheck(@RequestParam(name = "id", required = true) Long id) {
         try {
-            registerBillService.samplingCheckRegisterBill(id);
+            registerBillService.samplingCheckRegisterBill(id,this.uapRpcService.getCurrentOperator().get());
         } catch (TraceBizException e) {
             return BaseOutput.failure(e.getMessage());
         }
@@ -611,7 +611,7 @@ public class NewRegisterBillController {
     public @ResponseBody
     BaseOutput doReviewCheck(@RequestParam(name = "id", required = true) Long id) {
         try {
-            registerBillService.reviewCheckRegisterBill(id);
+            registerBillService.reviewCheckRegisterBill(id,this.uapRpcService.getCurrentOperator().get());
         } catch (TraceBizException e) {
             return BaseOutput.failure(e.getMessage());
         }

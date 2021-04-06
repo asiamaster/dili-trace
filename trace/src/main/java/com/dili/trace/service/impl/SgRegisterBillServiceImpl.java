@@ -3,7 +3,6 @@ package com.dili.trace.service.impl;
 import cn.hutool.core.bean.BeanUtil;
 import com.alibaba.fastjson.JSON;
 import com.dili.trace.events.RegisterBillMessageEvent;
-import com.dili.common.entity.SessionData;
 import com.dili.common.exception.TraceBizException;
 import com.dili.commons.glossary.YesOrNoEnum;
 import com.dili.customer.sdk.domain.dto.CustomerExtendDto;
@@ -24,8 +23,6 @@ import com.dili.trace.enums.*;
 import com.dili.trace.glossary.*;
 import com.dili.trace.rpc.service.CustomerRpcService;
 import com.dili.trace.service.*;
-import com.dili.uap.sdk.domain.UserTicket;
-import com.dili.uap.sdk.session.SessionContext;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
 import com.google.common.collect.Lists;
@@ -82,7 +79,7 @@ public class SgRegisterBillServiceImpl implements SgRegisterBillService {
 
     @Transactional
     @Override
-    public Long createRegisterBill(RegisterBill inputBill) {
+    public Long createRegisterBill(RegisterBill inputBill,OperatorUser operatorUser) {
 //        BaseOutput recheck = checkBill(registerBill);
 //        if (!recheck.isSuccess()) {
 //            throw new TraceBizException(recheck.getMessage());
@@ -116,9 +113,8 @@ public class SgRegisterBillServiceImpl implements SgRegisterBillService {
             // registerBill.setSampleSource(SampleSourceEnum.SAMPLE_CHECK.getCode().intValue());
         }
         if (StringUtils.isBlank(inputBill.getOperatorName())) {
-            UserTicket userTicket = getOptUser();
-            inputBill.setOperatorName(userTicket.getRealName());
-            inputBill.setOperatorId(userTicket.getId());
+            inputBill.setOperatorName(operatorUser.getName());
+            inputBill.setOperatorId(operatorUser.getId());
         }
 
         inputBill.setIdCardNo(StringUtils.trimToEmpty(inputBill.getIdCardNo()).toUpperCase());
@@ -281,18 +277,17 @@ public class SgRegisterBillServiceImpl implements SgRegisterBillService {
 //	}
     @Transactional
     @Override
-    public int auditRegisterBill(Long id, BillVerifyStatusEnum verifyStatusEnum) {
+    public int auditRegisterBill(Long id, BillVerifyStatusEnum verifyStatusEnum,OperatorUser operatorUser) {
         RegisterBill registerBill = this.billService.getAvaiableBill(id).orElseThrow(()->{
             return new TraceBizException("数据不存在或已删除");
         });
-        return auditRegisterBill(verifyStatusEnum, registerBill);
+        return auditRegisterBill(verifyStatusEnum, registerBill,operatorUser);
     }
 
-    private int auditRegisterBill(BillVerifyStatusEnum verifyStatusEnum, RegisterBill registerBill) {
+    private int auditRegisterBill(BillVerifyStatusEnum verifyStatusEnum, RegisterBill registerBill,OperatorUser operatorUser) {
         if (BillVerifyStatusEnum.WAIT_AUDIT.equalsToCode(registerBill.getVerifyStatus())) {
-            UserTicket userTicket = getOptUser();
-            registerBill.setOperatorName(userTicket.getRealName());
-            registerBill.setOperatorId(userTicket.getId());
+            registerBill.setOperatorName(operatorUser.getName());
+            registerBill.setOperatorId(operatorUser.getId());
             if (BillVerifyStatusEnum.PASSED == verifyStatusEnum) {
                 // 理货区
                 if (RegisterSourceEnum.TALLY_AREA.getCode().equals(registerBill.getRegisterSource())
@@ -320,13 +315,12 @@ public class SgRegisterBillServiceImpl implements SgRegisterBillService {
 
     @Transactional
     @Override
-    public int undoRegisterBill(Long id) {
+    public int undoRegisterBill(Long id,OperatorUser operatorUser) {
         return billService.getAvaiableBill(id).map(item -> {
 
             // 待审核、已退回 可以撤销
             if (BillVerifyStatusEnum.RETURNED.equalsToCode(item.getVerifyStatus()) ||
                     BillVerifyStatusEnum.WAIT_AUDIT.equalsToCode(item.getVerifyStatus())) {
-                UserTicket userTicket = getOptUser();
 
                 RegisterBill bill = new RegisterBill();
                 bill.setId(item.getBillId());
@@ -341,25 +335,23 @@ public class SgRegisterBillServiceImpl implements SgRegisterBillService {
 
     @Transactional
     @Override
-    public int autoCheckRegisterBill(Long id) {
+    public int autoCheckRegisterBill(Long id, OperatorUser operatorUser) {
         RegisterBill registerBillItem = this.billService.getAvaiableBill(id).orElseThrow(()->{
             return new TraceBizException("数据不存在或已删除");
         });
-        UserTicket userTicket = getOptUser();
-        return autoCheckRegisterBill(registerBillItem, userTicket);
+        return autoCheckRegisterBill(registerBillItem, operatorUser);
     }
 
     @Transactional
     @Override
-    public int autoCheckRegisterBillFromApp(Long id, SessionData sessionData) {
+    public int autoCheckRegisterBillFromApp(Long id , OperatorUser operatorUser) {
         RegisterBill registerBillItem = this.billService.getAvaiableBill(id).orElseThrow(()->{
             return new TraceBizException("数据不存在或已删除");
         });
-        UserTicket userTicket = getOptUserFromApp(sessionData);
-        return autoCheckRegisterBill(registerBillItem, userTicket);
+        return autoCheckRegisterBill(registerBillItem, operatorUser);
     }
 
-    private int autoCheckRegisterBill(RegisterBill registerBillItem, UserTicket userTicket) {
+    private int autoCheckRegisterBill(RegisterBill registerBillItem, OperatorUser operatorUser) {
         if(BillVerifyStatusEnum.NO_PASSED.equalsToCode(registerBillItem.getVerifyStatus())||BillVerifyStatusEnum.DELETED.equalsToCode(registerBillItem.getVerifyStatus())){
             throw new TraceBizException("当前登记单不能进行接单");
         }
@@ -367,8 +359,8 @@ public class SgRegisterBillServiceImpl implements SgRegisterBillService {
             RegisterBill updatableBill=new RegisterBill();
             updatableBill.setId(registerBillItem.getId());
 
-            updatableBill.setOperatorName(userTicket.getRealName());
-            updatableBill.setOperatorId(userTicket.getId());
+            updatableBill.setOperatorName(operatorUser.getName());
+            updatableBill.setOperatorId(operatorUser.getId());
 //            registerBill.setSampleSource(SampleSourceEnum.AUTO_CHECK.getCode().intValue());
             updatableBill.setDetectStatus(DetectStatusEnum.WAIT_DETECT.getCode());
 
@@ -397,7 +389,7 @@ public class SgRegisterBillServiceImpl implements SgRegisterBillService {
     }
 
     @Override
-    public BaseOutput doBatchAutoCheck(List<Long> idList) {
+    public BaseOutput doBatchAutoCheck(List<Long> idList, OperatorUser operatorUser) {
         BatchResultDto<String> dto = new BatchResultDto<>();
         for (Long id : idList) {
             RegisterBill registerBillItem = this.billService.getAvaiableBill(id).orElse(null);
@@ -405,8 +397,7 @@ public class SgRegisterBillServiceImpl implements SgRegisterBillService {
                 continue;
             }
             try {
-                UserTicket userTicket = getOptUser();
-                this.autoCheckRegisterBill(registerBillItem, userTicket);
+                this.autoCheckRegisterBill(registerBillItem, operatorUser);
                 dto.getSuccessList().add(registerBillItem.getCode());
             } catch (Exception e) {
                 dto.getFailureList().add(registerBillItem.getCode());
@@ -419,11 +410,11 @@ public class SgRegisterBillServiceImpl implements SgRegisterBillService {
 
     @Transactional
     @Override
-    public BaseOutput doBatchUndo(List<Long> idList) {
+    public BaseOutput doBatchUndo(List<Long> idList,OperatorUser operatorUser) {
 
         StreamEx.of(idList).forEach(registerBillId -> {
             try {
-                this.undoRegisterBill(registerBillId);
+                this.undoRegisterBill(registerBillId,operatorUser);
             } catch (TraceBizException e) {
                 logger.warn(e.getMessage());
             }
@@ -433,7 +424,7 @@ public class SgRegisterBillServiceImpl implements SgRegisterBillService {
     }
 
     @Override
-    public BaseOutput doBatchSamplingCheck(List<Long> idList) {
+    public BaseOutput doBatchSamplingCheck(List<Long> idList,OperatorUser operatorUser) {
         BatchResultDto<String> dto = new BatchResultDto<>();
         for (Long id : idList) {
             RegisterBill registerBill = this.billService.getAvaiableBill(id).orElse(null);
@@ -441,8 +432,7 @@ public class SgRegisterBillServiceImpl implements SgRegisterBillService {
                 continue;
             }
             try {
-                UserTicket userTicket = getOptUser();
-                this.samplingCheckRegisterBill(registerBill, userTicket);
+                this.samplingCheckRegisterBill(registerBill, operatorUser);
                 dto.getSuccessList().add(registerBill.getCode());
             } catch (Exception e) {
                 dto.getFailureList().add(registerBill.getCode());
@@ -454,7 +444,7 @@ public class SgRegisterBillServiceImpl implements SgRegisterBillService {
 
     @Transactional
     @Override
-    public BaseOutput doBatchAudit(BatchAuditDto batchAuditDto) {
+    public BaseOutput doBatchAudit(BatchAuditDto batchAuditDto, OperatorUser operatorUser) {
         BillVerifyStatusEnum billVerifyStatusEnum = BillVerifyStatusEnum.fromCode(batchAuditDto.getVerifyStatus()).orElse(null);
         if (billVerifyStatusEnum == null) {
             return BaseOutput.failure("审核状态错误");
@@ -490,9 +480,8 @@ public class SgRegisterBillServiceImpl implements SgRegisterBillService {
 
 
             if (BillVerifyStatusEnum.WAIT_AUDIT.equalsToCode(registerBill.getVerifyStatus())) {
-                UserTicket userTicket = getOptUser();
-                registerBill.setOperatorName(userTicket.getRealName());
-                registerBill.setOperatorId(userTicket.getId());
+                registerBill.setOperatorName(operatorUser.getName());
+                registerBill.setOperatorId(operatorUser.getId());
 //                registerBill.setState(RegisterBillStateEnum.ALREADY_AUDIT.getCode());
                 registerBill.setVerifyStatus(BillVerifyStatusEnum.PASSED.getCode());
                 registerBill.setDetectStatus(DetectStatusEnum.NONE.getCode());
@@ -506,7 +495,7 @@ public class SgRegisterBillServiceImpl implements SgRegisterBillService {
         // 其他登记单
         CollectionUtils.emptyIfNull(partitionedMap.get(Boolean.FALSE)).forEach(registerBill -> {
             try {
-                this.auditRegisterBill(billVerifyStatusEnum, registerBill);
+                this.auditRegisterBill(billVerifyStatusEnum, registerBill,operatorUser);
                 dto.getSuccessList().add(registerBill.getCode());
             } catch (Exception e) {
                 dto.getFailureList().add(registerBill.getCode());
@@ -519,33 +508,31 @@ public class SgRegisterBillServiceImpl implements SgRegisterBillService {
 
     @Transactional
     @Override
-    public int samplingCheckRegisterBill(Long id) {
+    public int samplingCheckRegisterBill(Long id,OperatorUser operatorUser) {
         RegisterBill registerBill = this.billService.getAvaiableBill(id).orElseThrow(()->{
             return new TraceBizException("数据不存在或已删除");
         });
-        UserTicket userTicket = getOptUser();
-        return samplingCheckRegisterBill(registerBill, userTicket);
+        return samplingCheckRegisterBill(registerBill, operatorUser);
     }
 
     @Transactional
     @Override
-    public int samplingCheckRegisterBillFromApp(Long id, SessionData sessionData) {
+    public int samplingCheckRegisterBillFromApp(Long id, OperatorUser operatorUser) {
         RegisterBill registerBill = this.billService.getAvaiableBill(id).orElseThrow(()->{
             return new TraceBizException("数据不存在或已删除");
         });
-        UserTicket userTicket = getOptUserFromApp(sessionData);
-        return samplingCheckRegisterBill(registerBill, userTicket);
+        return samplingCheckRegisterBill(registerBill, operatorUser);
     }
 
-    private int samplingCheckRegisterBill(RegisterBill registerBillItem, UserTicket userTicket) {
+    private int samplingCheckRegisterBill(RegisterBill registerBillItem,OperatorUser operatorUser) {
         if(BillVerifyStatusEnum.NO_PASSED.equalsToCode(registerBillItem.getVerifyStatus())||BillVerifyStatusEnum.DELETED.equalsToCode(registerBillItem.getVerifyStatus())){
             throw new TraceBizException("当前登记单不能进行接单");
         }
         if (DetectStatusEnum.WAIT_SAMPLE.equalsToCode(registerBillItem.getDetectStatus())) {
             RegisterBill updatableBill=new RegisterBill();
             updatableBill.setId(registerBillItem.getId());
-            updatableBill.setOperatorName(userTicket.getRealName());
-            updatableBill.setOperatorId(userTicket.getId());
+            updatableBill.setOperatorName(operatorUser.getName());
+            updatableBill.setOperatorId(operatorUser.getId());
 //            registerBill.setSampleSource(SampleSourceEnum.SAMPLE_CHECK.getCode().intValue());
             updatableBill.setDetectStatus(DetectStatusEnum.WAIT_DETECT.getCode());
 
@@ -575,26 +562,24 @@ public class SgRegisterBillServiceImpl implements SgRegisterBillService {
 
     @Transactional
     @Override
-    public int spotCheckRegisterBill(Long id) {
+    public int spotCheckRegisterBill(Long id,OperatorUser operatorUser) {
         RegisterBill registerBill = this.billService.getAvaiableBill(id).orElseThrow(()->{
             return new TraceBizException("数据不存在或已删除");
         });
-        UserTicket userTicket = getOptUser();
-        return spotCheckRegisterBill(registerBill, userTicket);
+        return spotCheckRegisterBill(registerBill, operatorUser);
     }
 
     @Transactional
     @Override
-    public int spotCheckRegisterBillFromApp(Long id, SessionData sessionData) {
+    public int spotCheckRegisterBillFromApp(Long id ,OperatorUser operatorUser) {
         RegisterBill registerBillItem = this.billService.getAvaiableBill(id).orElseThrow(()->{
             return new TraceBizException("数据不存在或已删除");
         });
 
-        UserTicket userTicket = getOptUserFromApp(sessionData);
-        return spotCheckRegisterBill(registerBillItem, userTicket);
+        return spotCheckRegisterBill(registerBillItem, operatorUser);
     }
 
-    private int spotCheckRegisterBill(RegisterBill registerBillItem, UserTicket userTicket) {
+    private int spotCheckRegisterBill(RegisterBill registerBillItem, OperatorUser operatorUser) {
         if(BillVerifyStatusEnum.NO_PASSED.equalsToCode(registerBillItem.getVerifyStatus())||BillVerifyStatusEnum.DELETED.equalsToCode(registerBillItem.getVerifyStatus())){
             throw new TraceBizException("当前登记单不能进行接单");
         }
@@ -602,8 +587,8 @@ public class SgRegisterBillServiceImpl implements SgRegisterBillService {
             RegisterBill updatableBill=new RegisterBill();
             updatableBill.setId(registerBillItem.getId());
 
-            updatableBill.setOperatorName(userTicket.getRealName());
-            updatableBill.setOperatorId(userTicket.getId());
+            updatableBill.setOperatorName(operatorUser.getName());
+            updatableBill.setOperatorId(operatorUser.getId());
             updatableBill.setDetectStatus(DetectStatusEnum.WAIT_DETECT.getCode());
 
             this.spotCheckDetectRequest(registerBillItem.getDetectRequestId());
@@ -622,7 +607,7 @@ public class SgRegisterBillServiceImpl implements SgRegisterBillService {
 
     @Transactional
     @Override
-    public int reviewCheckRegisterBill(Long id) {
+    public int reviewCheckRegisterBill(Long id,OperatorUser operatorUser) {
         RegisterBill registerBill = this.billService.getAvaiableBill(id).orElseThrow(()->{
             return new TraceBizException("数据不存在或已删除");
         });
@@ -647,12 +632,11 @@ public class SgRegisterBillServiceImpl implements SgRegisterBillService {
         };
 
         boolean updateState = Optional.of(detectRequest).stream().anyMatch(pred);
-        UserTicket userTicket = getOptUser();
         if (updateState) {
             registerBill.setId(registerBill.getId());
 
-            registerBill.setOperatorName(userTicket.getRealName());
-            registerBill.setOperatorId(userTicket.getId());
+            registerBill.setOperatorName(operatorUser.getName());
+            registerBill.setOperatorId(operatorUser.getId());
 
 
             try{
@@ -683,17 +667,6 @@ public class SgRegisterBillServiceImpl implements SgRegisterBillService {
         updatableBill.setModified(new Date());
         return this.billService.updateSelective(updatableBill);
 //        return this.billService.update(updatableBill);
-    }
-
-    UserTicket getOptUser() {
-        return SessionContext.getSessionContext().getUserTicket();
-    }
-
-    UserTicket getOptUserFromApp(SessionData sessionData) {
-        UserTicket userTicket = DTOUtils.newInstance(UserTicket.class);
-        userTicket.setId(sessionData.getUserId());
-        userTicket.setUserName(sessionData.getUserName());
-        return userTicket;
     }
 
     @Override
@@ -1080,10 +1053,9 @@ public class SgRegisterBillServiceImpl implements SgRegisterBillService {
     }
 
     @Override
-    public RegisterBill findHighLightBill(RegisterBillDto input) throws Exception {
+    public RegisterBill findHighLightBill(RegisterBillDto input,OperatorUser operatorUser) throws Exception {
         RegisterBillDto dto = new RegisterBillDto();
-        UserTicket userTicket = getOptUser();
-        dto.setOperatorId(userTicket.getId());
+        dto.setOperatorId(operatorUser.getId());
 //        dto.setState(RegisterBillStateEnum.WAIT_AUDIT.getCode());
         dto.setVerifyStatus(BillVerifyStatusEnum.WAIT_AUDIT.getCode());
         dto.setRows(1);
@@ -1249,7 +1221,7 @@ public class SgRegisterBillServiceImpl implements SgRegisterBillService {
     @Override
     public int createRegisterBillList(List<RegisterBill> registerBillList, OperatorUser operatorUser) {
         return StreamEx.ofNullable(registerBillList).flatCollection(Function.identity()).nonNull().map(rb -> {
-            Long registerBillId = this.createRegisterBill(rb);
+            Long registerBillId = this.createRegisterBill(rb,operatorUser);
             // 寿光管理端，新增完报备单的同时新增检测请求
             DetectRequest item = this.detectRequestService.createByBillId(registerBillId, DetectTypeEnum.NEW, new IdNameDto(operatorUser.getId(), operatorUser.getName()), Optional.empty());
 
