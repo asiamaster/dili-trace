@@ -82,8 +82,8 @@ public class SessionInterceptor extends HandlerInterceptorAdapter {
             if (access == null) {
                 return this.write401(response, "没有权限访问");
             }
-            WebContent.put("req", request);
-            WebContent.put("resp", response);
+            WebContent.put(request);
+            WebContent.put(response);
             Optional<SessionData> currentSessionData = Optional.empty();
             if (access.role() == Role.ANY) {
                 currentSessionData = this.loginAsAny(request);
