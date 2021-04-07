@@ -17,11 +17,13 @@ import com.dili.uap.sdk.service.AuthService;
 import com.dili.uap.sdk.service.redis.UserRedis;
 import com.dili.uap.sdk.service.redis.UserUrlRedis;
 import com.dili.uap.sdk.session.PermissionContext;
+import com.dili.uap.sdk.util.WebContent;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.lang.Nullable;
 import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
@@ -57,14 +59,15 @@ public class SessionInterceptor extends HandlerInterceptorAdapter {
     private ObjectMapper mapper = new ObjectMapper();
 
     /**
-     * 同步时间
-     */
-    private String syncUserTimeKey = "syncUserTime_";
-    /**
      * 用户过期时间-分钟
      */
     private Integer userEffectMin = 10;
 
+    @Override
+    public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler,
+                                @Nullable Exception ex) throws Exception {
+        WebContent.resetLocal();
+    }
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)
@@ -79,6 +82,8 @@ public class SessionInterceptor extends HandlerInterceptorAdapter {
             if (access == null) {
                 return this.write401(response, "没有权限访问");
             }
+            WebContent.put("req", request);
+            WebContent.put("resp", response);
             Optional<SessionData> currentSessionData = Optional.empty();
             if (access.role() == Role.ANY) {
                 currentSessionData = this.loginAsAny(request);
@@ -100,7 +105,7 @@ public class SessionInterceptor extends HandlerInterceptorAdapter {
         } catch (TraceBizException e) {
             return this.writeError(response, e.getMessage());
         } catch (Exception e) {
-            logger.error(e.getMessage(),e);
+            logger.error(e.getMessage(), e);
             return this.writeError(response, "服务端出错");
         }
 
@@ -135,12 +140,10 @@ public class SessionInterceptor extends HandlerInterceptorAdapter {
     }
 
     private Optional<SessionData> loginAsManager(HttpServletRequest req) {
-//        System.out.println(req.getHeaderNames());
-//        HttpServletResponse resp = this.getHttpServletResponse();
-//        PermissionContext permissionContext = new PermissionContext(req, resp, null, new ManageConfig(), "");
+
         String accessToken = req.getHeader("UAP_accessToken");
         String refreshToken = req.getHeader("UAP_refreshToken");
-        if(StringUtils.isBlank(accessToken)&&StringUtils.isBlank(refreshToken)){
+        if (StringUtils.isBlank(accessToken) && StringUtils.isBlank(refreshToken)) {
             return Optional.empty();
         }
 
@@ -162,7 +165,7 @@ public class SessionInterceptor extends HandlerInterceptorAdapter {
         String accessToken = req.getHeader("UAP_accessToken");
         String refreshToken = req.getHeader("UAP_refreshToken");
         String userId = req.getHeader("userId");
-        if (StringUtils.isNotBlank(accessToken)||StringUtils.isNotBlank(refreshToken)) {
+        if (StringUtils.isNotBlank(accessToken) || StringUtils.isNotBlank(refreshToken)) {
             return this.loginAsManager(req);
         } else if (StringUtils.isNotBlank(userId)) {
             return this.loginAsClient(req);
@@ -170,19 +173,6 @@ public class SessionInterceptor extends HandlerInterceptorAdapter {
             return Optional.empty();
         }
     }
-
-
-    /**
-     * 新增用戶对应redis同步时间
-     *
-     * @param userId
-     * @param key_user
-     */
-    private void syncUserInfoAdd(Long userId, String key_user) {
-        Date newMinutes = DateUtils.addMinutes(DateUtils.getCurrentDate(), userEffectMin);
-        redisUtil.set(key_user, newMinutes);
-    }
-
 
 
     private void sync(Optional<SessionData> sessionData) {
@@ -198,23 +188,4 @@ public class SessionInterceptor extends HandlerInterceptorAdapter {
         return handler.getBeanType().getAnnotation(annotationType);
     }
 
-    /**
-     * 查询当前登录用户信息
-     *
-     * @return
-     */
-    public HttpServletResponse getHttpServletResponse() {
-        try {
-            //两个方法在没有使用JSF的项目中是没有区别的
-            RequestAttributes requestAttributes = RequestContextHolder.currentRequestAttributes();
-            //RequestContextHolder.getRequestAttributes();
-            //从session里面获取对应的值
-            HttpServletRequest request = ((ServletRequestAttributes) requestAttributes).getRequest();
-            HttpServletResponse response = ((ServletRequestAttributes) requestAttributes).getResponse();
-            return response;
-        } catch (Exception e) {
-            throw new TraceBizException("当前运行环境不是web请求环境");
-        }
-
-    }
 }
