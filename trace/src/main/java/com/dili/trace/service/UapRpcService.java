@@ -2,6 +2,7 @@ package com.dili.trace.service;
 
 import com.dili.common.annotation.AppAccess;
 import com.dili.common.exception.TraceBizException;
+import com.dili.ss.util.ReflectionUtils;
 import com.dili.trace.dto.OperatorUser;
 import com.dili.trace.rpc.service.FirmRpcService;
 import com.dili.uap.sdk.domain.Firm;
@@ -10,6 +11,8 @@ import com.dili.uap.sdk.glossary.SystemType;
 import com.dili.uap.sdk.service.redis.UserUrlRedis;
 import com.dili.uap.sdk.session.SessionContext;
 import one.util.streamex.StreamEx;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.context.request.RequestAttributes;
@@ -25,6 +28,7 @@ import java.util.Optional;
  */
 @Service
 public class UapRpcService {
+    private static final Logger logger = LoggerFactory.getLogger(UapRpcService.class);
     @Autowired
     FirmRpcService firmRpcService;
     @Autowired
@@ -60,8 +64,18 @@ public class UapRpcService {
         } catch (Exception e) {
             throw new TraceBizException("当前运行环境不是web请求环境");
         }
-        UserTicket userTicket = SessionContext.getSessionContext().getUserTicket();
-        return Optional.ofNullable(userTicket);
+        try {
+            UserTicket userTicket = SessionContext.getSessionContext().getUserTicket();
+            return Optional.ofNullable(userTicket);
+        } catch (Exception e) {
+            logger.error(e.getMessage(), e);
+            Object pc = ReflectionUtils.getFieldValue(SessionContext.getSessionContext(), "pc");
+            Object authService = ReflectionUtils.getFieldValue(SessionContext.getSessionContext(), "authService");
+            logger.info("pc={}",pc);
+            logger.info("authService={}",authService);
+            return Optional.empty();
+        }
+
     }
 
     /**
@@ -76,6 +90,12 @@ public class UapRpcService {
 
     }
 
+    /**
+     * SB
+     *
+     * @param url
+     * @return
+     */
     public boolean hasAccess(String url) {
 
         UserTicket ut = this.getCurrentUserTicket().orElseThrow(() -> {

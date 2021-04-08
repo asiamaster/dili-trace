@@ -8,6 +8,7 @@ import com.dili.assets.sdk.dto.CusCategoryDTO;
 import com.dili.assets.sdk.dto.CusCategoryQuery;
 import com.dili.common.entity.LoginSessionContext;
 import com.dili.trace.rpc.service.CityRpcService;
+import com.dili.trace.service.UapRpcService;
 import com.dili.trace.util.MarketUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -32,11 +33,10 @@ public class TollInfoController {
 
     @Autowired
     CityRpcService cityService;
-
     @Autowired
     AssetsRpcService categoryService;
     @Autowired
-    LoginSessionContext loginSessionContext;
+    UapRpcService uapRpcService;
 
     /**
      * 根据名字查询品类信息
@@ -48,7 +48,7 @@ public class TollInfoController {
     @RequestMapping("/category")
     @ResponseBody
     public Map<String, ?> listByName(String name, boolean allFlag) {
-        Long marketId = MarketUtil.returnMarket();
+        Long marketId = this.uapRpcService.getCurrentFirm().get().getId();
         CusCategoryQuery cusCategoryQuery = new CusCategoryQuery();
         cusCategoryQuery.setKeyword(name);
         List<CusCategoryDTO> categorys = this.categoryService.listCusCategory(cusCategoryQuery, marketId);
