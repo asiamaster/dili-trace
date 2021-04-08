@@ -9,6 +9,7 @@ import com.dili.uap.sdk.domain.Firm;
 import com.dili.uap.sdk.domain.UserTicket;
 import com.dili.uap.sdk.glossary.SystemType;
 import com.dili.uap.sdk.service.redis.UserUrlRedis;
+import com.dili.uap.sdk.session.PermissionContext;
 import com.dili.uap.sdk.session.SessionContext;
 import one.util.streamex.StreamEx;
 import org.slf4j.Logger;
@@ -69,10 +70,17 @@ public class UapRpcService {
             return Optional.ofNullable(userTicket);
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
-            Object pc = ReflectionUtils.getFieldValue(SessionContext.getSessionContext(), "pc");
+            PermissionContext pc = (PermissionContext)ReflectionUtils.getFieldValue(SessionContext.getSessionContext(), "pc");
             Object authService = ReflectionUtils.getFieldValue(SessionContext.getSessionContext(), "authService");
             logger.info("pc={}",pc);
             logger.info("authService={}",authService);
+            if(pc!=null){
+                Object req =    ReflectionUtils.getFieldValue(pc,"req");
+                Object resp =    ReflectionUtils.getFieldValue(pc,"resp");
+                logger.info("req={}",req);
+                logger.info("resp={}",resp);
+
+            }
             return Optional.empty();
         }
 
