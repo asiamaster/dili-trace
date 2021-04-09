@@ -51,7 +51,7 @@ public class UserRpcService {
 
             UserQuery user = DTOUtils.newDTO(UserQuery.class);
             user.setDepartmentId(department.getId());
-            user.setUserName(likeUserName);
+            user.setKeyword(likeUserName);
             BaseOutput<List<User>> result = userRpc.listByExample(user);
             if (result.isSuccess()) {
                 return result.getData();
