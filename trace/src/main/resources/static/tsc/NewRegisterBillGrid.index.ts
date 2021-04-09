@@ -692,7 +692,7 @@ class NewRegisterBillGrid extends ListPage {
         // @ts-ignore
         var productName = $('#productCombobox').combotree('getText');
         var data = [];
-        var url =  '/toll/category?name=' + productName;
+        var url =  '/toll/category.action?name=' + productName;
         $.ajax({
             url: url,
             success: function (resp) {

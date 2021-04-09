@@ -45,7 +45,7 @@ public class TollInfoController {
      * @param allFlag
      * @return
      */
-    @RequestMapping("/category")
+    @RequestMapping("/category.action")
     @ResponseBody
     public Map<String, ?> listByName(String name, boolean allFlag) {
         Long marketId = this.uapRpcService.getCurrentFirm().get().getId();
@@ -75,7 +75,7 @@ public class TollInfoController {
      * @param name
      * @return
      */
-    @RequestMapping(value = "/city", method = RequestMethod.GET)
+    @RequestMapping(value = "/city.action", method = RequestMethod.GET)
     @ResponseBody
     public Map<String, ?> queryCity(String name) {
         List<Map<String, Object>> list = Lists.newArrayList();

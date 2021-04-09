@@ -219,8 +219,8 @@
         $('.upload-div input[type="file"]').each(function(){
             initFileUpload($(this));
         })
-        initAutoComplete('#originName','${contextPath}/toll/city');
-        initAutoComplete('#productName','${contextPath}/toll/category');
+        initAutoComplete('#originName','${contextPath}/toll/city.action');
+        initAutoComplete('#productName','${contextPath}/toll/category.action');
         // initAutoComplete('#originName','/toll/city');
     });
 

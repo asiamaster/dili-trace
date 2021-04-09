@@ -247,7 +247,7 @@ class CommissionBillGrid extends ListPage {
             return;
         }
         let selected_id = row[0].id;
-        let url = this.toUrl('/commissionBill/view/' + selected_id + '/true');
+        let url = this.toUrl('/commissionBill/view.html?id=' + selected_id);
         //@ts-ignore
         var dia = bs4pop.dialog({
             title: '查看委托单',

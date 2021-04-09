@@ -262,7 +262,7 @@
      function queryProductSearchDlg(){
     	   var likeProductName=$('#productIdList').combotree('getText');
     		$.ajax({
-    			url:'${contextPath!}/toll/category?name='+likeProductName,
+    			url:'${contextPath!}/toll/category.action?name='+likeProductName,
     			async:false,
     			success:function(resp){
     				productInfoList=resp.suggestions.map(function(v,i){v['parentId']='';return v});

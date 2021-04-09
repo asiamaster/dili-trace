@@ -16,19 +16,19 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @Configuration
 public class WebConfiguration implements WebMvcConfigurer {
-    @Autowired
-    private SessionFilter sessionFilter;
-
-    @Bean
-    public FilterRegistrationBean sessionFilterRegistration() {
-        FilterRegistrationBean registration = new FilterRegistrationBean();
-        registration.setFilter(sessionFilter);
-
-        registration.addUrlPatterns("*.html", "*.action");
-        registration.setName("sessionFilter");
-        registration.setOrder(1);
-        return registration;
-    }
+//    @Autowired
+//    private SessionFilter sessionFilter;
+//
+//    @Bean
+//    public FilterRegistrationBean sessionFilterRegistration() {
+//        FilterRegistrationBean registration = new FilterRegistrationBean();
+//        registration.setFilter(sessionFilter);
+//
+//        registration.addUrlPatterns("*.html", "*.action");
+//        registration.setName("sessionFilter");
+//        registration.setOrder(1);
+//        return registration;
+//    }
 
 //    @Override
 //    public void addResourceHandlers(ResourceHandlerRegistry registry) {

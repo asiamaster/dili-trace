@@ -247,21 +247,17 @@ public class CommissionBillController {
      * @param modelMap
      * @return
      */
-    @RequestMapping(value = "/view/{id}/{displayWeight}", method = RequestMethod.GET)
-    public String view(ModelMap modelMap, @PathVariable Long id,
-                       @PathVariable(required = false) Boolean displayWeight) {
+    @RequestMapping(value = "/view.html", method = RequestMethod.GET)
+    public String view(ModelMap modelMap, Long id) {
         RegisterBill bill = this.billService.get(id);
         if (bill == null) {
             return "";
         }
         List<DetectRecord> detectRecordList = this.detectRecordService.findTop2AndLatest(bill.getCode());
         modelMap.put("detectRecordList", detectRecordList);
-        if (displayWeight == null) {
-            displayWeight = false;
-        }
 
         modelMap.put("item", bill);
-        modelMap.put("displayWeight", displayWeight);
+        modelMap.put("displayWeight", false);
         return "commissionBill/view";
     }
 
@@ -272,9 +268,9 @@ public class CommissionBillController {
      * @param id
      * @return
      */
-    @RequestMapping(value = "/autoCheck/{id}", method = RequestMethod.GET)
+    @RequestMapping(value = "/autoCheck.action", method = RequestMethod.GET)
     public @ResponseBody
-    BaseOutput autoCheck(@PathVariable Long id) {
+    BaseOutput autoCheck(Long id) {
         try {
             this.registerBillService.autoCheckRegisterBill(id,this.uapRpcService.getCurrentOperator().get());
         } catch (TraceBizException e) {
@@ -289,9 +285,9 @@ public class CommissionBillController {
      * @param id
      * @return
      */
-    @RequestMapping(value = "/samplingCheck/{id}", method = RequestMethod.GET)
+    @RequestMapping(value = "/samplingCheck.action", method = RequestMethod.GET)
     public @ResponseBody
-    BaseOutput samplingCheck(@PathVariable Long id) {
+    BaseOutput samplingCheck(Long id) {
         try {
             this.registerBillService.samplingCheckRegisterBill(id,this.uapRpcService.getCurrentOperator().get());
         } catch (TraceBizException e) {

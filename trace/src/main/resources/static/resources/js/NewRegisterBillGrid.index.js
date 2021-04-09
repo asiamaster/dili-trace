@@ -545,7 +545,7 @@ class NewRegisterBillGrid extends ListPage {
     static queryProduct(param, success, error) {
         var productName = $('#productCombobox').combotree('getText');
         var data = [];
-        var url = '/toll/category?name=' + productName;
+        var url = '/toll/category.action?name=' + productName;
         $.ajax({
             url: url,
             success: function (resp) {

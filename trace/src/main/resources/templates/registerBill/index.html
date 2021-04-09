@@ -240,7 +240,7 @@
   	   var productName=$('#productCombobox').combotree('getText');
   	   var data=[];
   		$.ajax({
-  			url:'${contextPath!}/toll/category?name='+productName,
+  			url:'${contextPath!}/toll/category.action?name='+productName,
   			success:function(resp){
   				data=resp.suggestions.map(function(v,i){v['parentId']='';return v});
   	  			success(data);

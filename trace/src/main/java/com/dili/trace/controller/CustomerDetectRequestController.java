@@ -181,7 +181,7 @@ public class CustomerDetectRequestController {
      * @param name
      * @return
      */
-    @RequestMapping("/detector")
+    @RequestMapping("/detector.action")
     @ResponseBody
     public Map<String, ?> listByName(String name) {
         Long marketId = MarketUtil.returnMarket();

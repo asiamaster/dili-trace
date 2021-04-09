@@ -13,8 +13,8 @@ var currentUser={"depId":"${user.departmentId!}"
         $('#goodsTable tbody').append(template('goodsItem', {index: ++goodsItemCount}));
         initFileUpload('#detectReportUrlFile');
         initFileUpload1('#originCertifiyUrl_'+goodsItemCount);
-        initAutoComplete('#productName_'+goodsItemCount,'/toll/category');
-        initAutoComplete('#originName_'+goodsItemCount,'/toll/city');
+        initAutoComplete('#productName_'+goodsItemCount,'/toll/category.action');
+        initAutoComplete('#originName_'+goodsItemCount,'/toll/city.action');
         
         if(typeof(initWithLocalStorage)=='undefined'||initWithLocalStorage==true){
 	        if(!location.hash){
@@ -58,8 +58,8 @@ var currentUser={"depId":"${user.departmentId!}"
     $('.main-container').on('click', '#addGoodsItem', function () {
         $('#goodsTable tbody').append(template('goodsItem', {index: ++goodsItemCount}));
         initFileUpload1('#originCertifiyUrl_'+goodsItemCount);
-        initAutoComplete('#productName_'+goodsItemCount,'/toll/category');
-        initAutoComplete('#originName_'+goodsItemCount,'/toll/city');
+        initAutoComplete('#productName_'+goodsItemCount,'/toll/category.action');
+        initAutoComplete('#originName_'+goodsItemCount,'/toll/city.action');
     });
 
 

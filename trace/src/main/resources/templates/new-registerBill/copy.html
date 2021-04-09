@@ -268,8 +268,8 @@
        var productNameEl=tempEl.find('input[name*="productName"]');
        var originNameEl=tempEl.find('input[name*="originName"]');
        var originCertifiyUrlEl=tempEl.find('input[id*="originCertifiyUrl"]');
-       initAutoComplete(productNameEl,'/toll/category');
-       initAutoComplete(originNameEl,'/toll/city')
+       initAutoComplete(productNameEl,'/toll/category.action');
+       initAutoComplete(originNameEl,'/toll/city.action')
 
        initFileUpload(originCertifiyUrlEl,function(){});
    }

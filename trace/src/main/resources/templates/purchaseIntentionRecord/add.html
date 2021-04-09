@@ -68,7 +68,7 @@
 <script>
     $(function(){
         let productNameEl=$('input[name="productName"]');
-        initAutoComplete(productNameEl,'/toll/category');
+        initAutoComplete(productNameEl,'/toll/category.action');
         initUserInfo();
         $("#addBuyer-btn").on("click",function(){
             goAddBuyer();
