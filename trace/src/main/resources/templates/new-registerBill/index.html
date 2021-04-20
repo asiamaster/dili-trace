@@ -44,7 +44,7 @@
             <div class="form-group col">
                 <label for="detectResultSelect">检测结果</label>
                 <select id="detectResultSelect" name="detectResultSelect" class="form-control" data-value-type="skip">
-                    <option value='{"detectType":"","detectResult":"}'>-- 请选择 --</option>
+                    <option value='{"detectType":"","detectResult":""}'>-- 请选择 --</option>
                     <option value='{"detectType":"${@com.dili.trace.enums.DetectTypeEnum.INITIAL_CHECK.getCode()}","detectResult":"${@com.dili.trace.enums.DetectResultEnum.PASSED.getCode()}"}'>初检合格</option>
                     <option  value='{"detectType":"${@com.dili.trace.enums.DetectTypeEnum.INITIAL_CHECK.getCode()}","detectResult":"${@com.dili.trace.enums.DetectResultEnum.FAILED.getCode()}"}'>初检不合格</option>
                     <option  value='{"detectType":"${@com.dili.trace.enums.DetectTypeEnum.RECHECK.getCode()}","detectResult":"${@com.dili.trace.enums.DetectResultEnum.PASSED.getCode()}"}'>复检合格</option>
