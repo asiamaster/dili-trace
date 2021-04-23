@@ -6,6 +6,9 @@ import com.dili.trace.domain.UserHistory;
 import com.dili.trace.dto.UserHistoryListDto;
 import com.dili.trace.dto.UserHistoryStaticsDto;
 
+/**
+ * 用户历史数据
+ */
 public interface UserHistoryService extends BaseService<UserHistory, Long> {
 
 

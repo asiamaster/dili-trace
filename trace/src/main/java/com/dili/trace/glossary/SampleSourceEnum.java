@@ -52,14 +52,6 @@ public enum SampleSourceEnum {
         this.name = name;
     }
 
-    public static SampleSourceEnum getEnabledState(Integer code) {
-        for (SampleSourceEnum anEnum : SampleSourceEnum.values()) {
-            if (anEnum.getCode().equals(code)) {
-                return anEnum;
-            }
-        }
-        return null;
-    }
 
     public static Optional<SampleSourceEnum> fromCode(Integer code) {
         for (SampleSourceEnum anEnum : SampleSourceEnum.values()) {

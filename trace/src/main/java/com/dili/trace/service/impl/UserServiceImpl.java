@@ -1,7 +1,6 @@
 package com.dili.trace.service.impl;
 
 import com.alibaba.fastjson.JSON;
-import com.beust.jcommander.internal.Lists;
 import com.dili.common.config.DefaultConfiguration;
 import com.dili.common.exception.TraceBizException;
 import com.dili.commons.glossary.YesOrNoEnum;
@@ -23,6 +22,7 @@ import com.dili.trace.glossary.EnabledStateEnum;
 import com.dili.trace.rpc.service.CustomerRpcService;
 import com.dili.trace.rpc.service.TallyingAreaRpcService;
 import com.dili.trace.service.*;
+import com.google.common.collect.Lists;
 import one.util.streamex.StreamEx;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;

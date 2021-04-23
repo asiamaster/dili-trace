@@ -2,7 +2,7 @@ package com.dili.trace.service;
 
 import com.dili.assets.sdk.dto.CusCategoryQuery;
 import com.dili.trace.async.AsyncService;
-import com.dili.trace.domain.hangguo.HangGuoCategory;
+import com.dili.trace.domain.Category;
 import com.google.common.collect.Lists;
 import one.util.streamex.StreamEx;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,7 +28,7 @@ public class SyncCategoryService {
         if (categoryId == null || marketId == null) {
             return;
         }
-        HangGuoCategory category = this.categoryService.saveCategory(categoryId, marketId);
+        Category category = this.categoryService.saveCategory(categoryId, marketId);
         this.asyncService.syncCategoryInfo(category, cusCategoryDTO -> {
             this.categoryService.updateCategory(category.getId(), cusCategoryDTO);
         });

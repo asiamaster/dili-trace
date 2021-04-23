@@ -75,25 +75,6 @@ public class QualityTraceTradeBillApi {
 //            return BaseOutput.failure("参数错误");
 //        }
 //
-//        QualityTraceTradeBill query= DTOUtils.newDTO(QualityTraceTradeBill.class);
-//        query.setBillId(input.getBillId());
-//        Long id=StreamEx.ofNullable(this.qualityTraceTradeBillService.listByExample(query)).nonNull()
-//                .flatCollection(Function.identity()).nonNull()
-//                .findFirst().map(QualityTraceTradeBill::getRegisterBillCode)
-//                .map(code->{
-//                    return this.billService.findByCode(code);
-//                }).map(RegisterBill::getId).orElse(null);
-//        if(id==null){
-//            return BaseOutput.failure("没有查到匹配的登记单");
-//        }
-//        try {
-//            String base64Img=this.qrCodeService.getBase64QrCode("http://www.baidu.com",200,200);
-//            return BaseOutput.success().setData(base64Img);
-//        } catch (Exception e) {
-//            logger.error(e.getMessage(), e);
-//            return BaseOutput.failure(e.getMessage());
-//        }
-//
-//    }
+
 
 }

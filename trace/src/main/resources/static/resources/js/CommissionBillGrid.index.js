@@ -16,10 +16,10 @@ class CommissionBillGrid extends ListPage {
         });
         let categoryController = new CategoryController();
         let cityController = new CityController();
-        this.initAutoComplete($("[name='productName']"), function (query, done) {
+        this.initTraceAutoComplete($("[name='productName']"), function (query, done) {
             categoryController.lookupCategories(query, done);
         });
-        this.initAutoComplete($("[name='originName']"), function (query, done) {
+        this.initTraceAutoComplete($("[name='originName']"), function (query, done) {
             cityController.lookupCities(query, done);
         });
         let cthis = this;

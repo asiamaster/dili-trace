@@ -124,9 +124,6 @@ select count(1) as ct,order_id from quality_trace_trade_bill group by order_id h
       <if test="saleUnit != null">
         sale_unit = #{saleUnit,jdbcType=INTEGER},
       </if>
-      <if test="orderVersion != null">
-        order_version = #{orderVersion,jdbcType=INTEGER},
-      </if>
     </set>
     where id = #{id,jdbcType=BIGINT}
   </update>

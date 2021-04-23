@@ -3,6 +3,7 @@ package com.dili.trace.domain;
 import com.alibaba.fastjson.annotation.JSONField;
 import com.dili.commons.glossary.YesOrNoEnum;
 import com.dili.ss.domain.BaseDomain;
+import com.dili.trace.api.output.ProductStockExtendDataDto;
 import com.dili.trace.enums.*;
 import com.dili.trace.glossary.RegisterSourceEnum;
 import com.dili.trace.glossary.TFEnum;
@@ -12,6 +13,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import javax.persistence.*;
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
 
@@ -186,12 +188,6 @@ public class RegisterBill extends BaseDomain {
     @Column(name = "`latest_pd_result`")
     private String latestPdResult;
 
-    /**
-     * 版本
-     */
-    @ApiModelProperty(value = "版本")
-    @Column(name = "`version`")
-    private Integer version;
 
     /**
      * 创建时间
@@ -499,6 +495,29 @@ public class RegisterBill extends BaseDomain {
     @Column(name = "`return_reason`")
     private String returnReason;
 
+
+    /**
+     * 到场时间
+     */
+    @Column(name = "`arrival_datetime`")
+    @JSONField(format = "yyyy-MM-dd HH:mm")
+    private Date arrivalDatetime;
+
+
+    /**
+     * 到货摊位
+     */
+    @Transient
+    private List<String> arrivalTallynos;
+
+    public Date getArrivalDatetime() {
+        return arrivalDatetime;
+    }
+
+    public void setArrivalDatetime(Date arrivalDatetime) {
+        this.arrivalDatetime = arrivalDatetime;
+    }
+
     public String getReturnReason() {
         return returnReason;
     }
@@ -585,6 +604,9 @@ public class RegisterBill extends BaseDomain {
 
     @Transient
     private List<TradePushLog> tradePushLogs;
+
+    @Transient
+    private ProductStockExtendDataDto productStockExtendDataDto;
 
     @Transient
     private BigDecimal headWeight;
@@ -703,6 +725,12 @@ public class RegisterBill extends BaseDomain {
     @ApiModelProperty(value = "检测请求ID")
     @Column(name = "`detect_request_id`")
     private Long detectRequestId;
+
+    /**
+     * 称重单ID
+     */
+    @Column(name = "`weighting_bill_id`")
+    private Long weightingBillId;
 
     @Transient
     private DetectRequest detectRequest;
@@ -1023,13 +1051,7 @@ public class RegisterBill extends BaseDomain {
         this.latestPdResult = latestPdResult;
     }
 
-    public Integer getVersion() {
-        return version;
-    }
 
-    public void setVersion(Integer version) {
-        this.version = version;
-    }
 
     @JSONField(format = "yyyy-MM-dd HH:mm:ss")
     public Date getCreated() {
@@ -1544,5 +1566,29 @@ public class RegisterBill extends BaseDomain {
     @Transient
     public String getCheckInStatusName(){
         return CheckinStatusEnum.ALLOWED.equalsToCode(this.getCheckinStatus())?"是":"否";
+    }
+
+    public List<String> getArrivalTallynos() {
+        return arrivalTallynos;
+    }
+
+    public void setArrivalTallynos(List<String> arrivalTallynos) {
+        this.arrivalTallynos = arrivalTallynos;
+    }
+
+    public Long getWeightingBillId() {
+        return weightingBillId;
+    }
+
+    public void setWeightingBillId(Long weightingBillId) {
+        this.weightingBillId = weightingBillId;
+    }
+
+    public ProductStockExtendDataDto getProductStockExtendDataDto() {
+        return productStockExtendDataDto;
+    }
+
+    public void setProductStockExtendDataDto(ProductStockExtendDataDto productStockExtendDataDto) {
+        this.productStockExtendDataDto = productStockExtendDataDto;
     }
 }

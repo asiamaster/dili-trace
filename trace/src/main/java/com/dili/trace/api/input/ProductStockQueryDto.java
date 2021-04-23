@@ -1,6 +1,7 @@
 package com.dili.trace.api.input;
 
 import javax.persistence.Column;
+import javax.persistence.Transient;
 
 import com.dili.ss.domain.annotation.Like;
 import com.dili.ss.domain.annotation.Operator;
@@ -41,6 +42,18 @@ public class ProductStockQueryDto extends ProductStock {
     @Operator(Operator.GREAT_EQUAL_THAN)
     private Integer minTradeDetailNum;
 
+
+    @Transient
+    private Long productStockId;
+
+    @Override
+    public Long getProductStockId() {
+        return productStockId;
+    }
+
+    public void setProductStockId(Long productStockId) {
+        this.productStockId = productStockId;
+    }
 
     /**
      * @return String return the createdStart

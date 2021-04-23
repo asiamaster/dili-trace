@@ -10,7 +10,7 @@ class UsualAddressEdit extends WebConfig {
         this.pw=window.parent.window;
 
         let cityController: CityController = new CityController();
-        super.initAutoComplete(this.dataForm.find('#addressInput'),
+        super.initTraceAutoComplete(this.dataForm.find('#addressInput'),
             function (query, done) {
                 cityController.lookupCities(query, done)
             }, function (sug) {

@@ -1,0 +1,56 @@
+<#bs4Body>
+<#vueElm />
+<div id="app">
+    <ele-form
+            v-bind="formConfig"
+            v-model="formData"
+            ref="myForm"
+            :request-fn="handleRequest"
+    >
+        <template v-slot:weight="{ desc, data, field, formData }">
+            <el-input placeholder="请输入内容" v-model="formData.weight" class="input-with-select">
+                <el-select v-model="formData.weightUnit" slot="append">
+                    <el-option
+                            v-for="item in unitOptions"
+                            :key="item.value"
+                            :label="item.label"
+                            :value="item.value">
+                    </el-option>
+                </el-select>
+            </el-input>
+        </template>
+        <template v-slot:pieceweight="{ desc, data, field, formData }">
+            <el-input placeholder="请输入内容" v-model="formData.pieceweight" class="input-with-select"
+                      @input="changePieceWeight">
+                <el-select v-model="formData.pieceweightUnit" slot="append">
+                    <el-option
+                            v-for="item in unitOptions"
+                            :key="item.value"
+                            :label="item.label"
+                            :value="item.value">
+                    </el-option>
+                </el-select>
+            </el-input>
+        </template>
+    </ele-form>
+</div>
+<script src="${contextPath}/resources/design/extends/vue-ele-form-image-uploader/dist/vue-ele-form-image-uploader.umd.min.js"></script>
+<style>
+    .el-input-group__append .el-select .el-input {
+        width: 130px;
+    }
+
+    .input-with-select .el-input-group__prepend {
+        background-color: #fff;
+    }
+</style>
+
+<script type="text/javascript">
+    function init(vm){
+
+    }
+</script>
+
+<#registerBill_createJs />
+
+</#bs4Body>

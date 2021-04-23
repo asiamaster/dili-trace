@@ -43,42 +43,62 @@ class WebConfig{
             idField.val(suggestion.id);
         }
         $(self).val(suggestion.value.trim());
-        $(self).data('oldvalue',suggestion.value);
+        $(self).data('input-text',$(self).val());
         //@ts-ignore
         var v=$(self).valid();
-
     }
-    public initAutoComplete(selector,lookupFun:Function,onSelect:Function=this.onselectFun){
+
+    public initTraceAutoComplete(selector,lookupFun:Function,onSelect:Function=this.onselectFun){
         $(selector).keydown(function (e){
             if(e.keyCode == 13){
                 // $(selector).data('keycode',e.keyCode);
                 // console.info('keydown')
             }
         });
-        $(selector).data('oldvalue','');
+        $(selector).data('input-text','');
         $(selector).on('change',function () {
-            var oldvalue=$(selector).data('oldvalue');
+            var selectText=$(selector).data('select-text');
+            var inputValue=$(selector).data('input-value');
             var val=$(this).val();
-            if(oldvalue!=val){
+            if(selectText!=val){
                 $(this).siblings('input').val('');
             }
+            $(this).data('input-value', $(this).val());
         });
-
-        //@ts-ignore
+        $(selector).on('focus',function () {
+            var selectText=$(selector).data('select-text');
+            var inputValue=$(selector).data('input-value');
+            if(_.isUndefined(inputValue)){
+                $(this).val('')
+            }else{
+                $(this).val(inputValue)
+            }
+        });
         // 联想输入
+        //@ts-ignore
         $(selector).devbridgeAutocomplete({
-            noCache: 1,
+            noCache: false,
             //serviceUrl: url,  // 数据地址
             lookup: lookupFun,
             dataType: 'json',
             onSearchComplete: function (query, suggestions) {
             },
+            deferRequestBy:200,
+            triggerSelectOnValidInput:false,
             showNoSuggestionNotice: true,
             noSuggestionNotice: "不存在，请重输！",
             autoSelectFirst:true,
-            autoFocus: true,
+            autoFocus: false,
             onSelect: onSelect
         });
+    }
+    public serializeJSON(form:JQuery,serializeOpts:object=null):JSON{
+        var opts={useIntKeysAsArrayIndex: true};
+        if(serializeOpts!=null){
+            _.extend(opts,serializeOpts)
+        }
+        let data = (form as any).serializeJSON(opts);
+        return data;
     }
 
 }

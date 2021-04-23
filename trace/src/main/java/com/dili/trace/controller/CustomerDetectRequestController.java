@@ -51,6 +51,7 @@ public class CustomerDetectRequestController {
 
     @Autowired
     UserRpcService userRpcService;
+
     @Autowired
     UapRpcService uapRpcService;
 
@@ -308,7 +309,7 @@ public class CustomerDetectRequestController {
                 modelMap.put("separateSalesRecords", records);
             }
         } else {
-            QualityTraceTradeBill condition = DTOUtils.newDTO(QualityTraceTradeBill.class);
+            QualityTraceTradeBill condition = new QualityTraceTradeBill();
             condition.setRegisterBillCode(item.getCode());
             modelMap.put("qualityTraceTradeBills", qualityTraceTradeBillService.listByExample(condition));
         }
@@ -448,7 +449,7 @@ public class CustomerDetectRequestController {
         if (dto == null) {
             return dto;
         }
-        if (this.uapRpcService.hasAccess("registerBill/create.html#user")) {
+        if (this.uapRpcService.hasAccess( "registerBill/create.html#user")) {
             return dto;
         } else {
             dto.setIdCardNo(MaskUserInfo.maskIdNo(dto.getIdCardNo()));

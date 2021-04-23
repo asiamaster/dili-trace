@@ -2,15 +2,25 @@ package com.dili.trace.api;
 
 import java.util.List;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import com.dili.common.annotation.AppAccess;
 import com.dili.common.annotation.Role;
+import com.dili.common.entity.LoginSessionContext;
+import com.dili.common.entity.SessionData;
+import com.dili.commons.glossary.YesOrNoEnum;
 import com.dili.ss.domain.BaseOutput;
+import com.dili.trace.domain.RegisterBill;
 import com.dili.trace.dto.KeyTextPair;
 import com.dili.trace.enums.*;
 
 import com.dili.trace.glossary.UpStreamTypeEnum;
+import com.dili.trace.service.EnumService;
+import com.dili.trace.service.FieldConfigDetailService;
+import de.cronn.reflection.util.PropertyUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
@@ -24,6 +34,12 @@ import one.util.streamex.StreamEx;
 @RequestMapping(value = "/api/enums")
 @AppAccess(role = Role.ANY)
 public class EnumsApi {
+    @Autowired
+    FieldConfigDetailService fieldConfigDetailService;
+    @Autowired
+    LoginSessionContext loginSessionContext;
+    @Autowired
+    EnumService enumService;
 
     /**
      * 上游类型枚举查询
@@ -104,12 +120,16 @@ public class EnumsApi {
     @RequestMapping(value = "/listImageCertType.api", method = RequestMethod.POST)
     public BaseOutput<List<KeyTextPair>> listImageCertType() {
         try {
-            List<KeyTextPair> list = StreamEx.of(ImageCertTypeEnum.values()).map(e -> {
+            SessionData sessionData = loginSessionContext.getSessionData();
+            List<KeyTextPair> list = StreamEx.of(this.enumService.listImageCertType(sessionData.getMarketId(), FieldConfigModuleTypeEnum.REGISTER)).map(e -> {
+
                 KeyTextPair p = new KeyTextPair();
                 p.setKey(e.getCode());
                 p.setText(e.getName());
                 return p;
+
             }).toList();
+
             return BaseOutput.success().setData(list);
         } catch (Exception e) {
             return BaseOutput.failure(e.getMessage());
@@ -195,11 +215,14 @@ public class EnumsApi {
     @RequestMapping(value = "/listTruckType.api", method = RequestMethod.POST)
     public BaseOutput<List<KeyTextPair>> listTruckType() {
         try {
-            List<KeyTextPair> list = StreamEx.of(TruckTypeEnum.values()).map(e -> {
+            SessionData sessionData = loginSessionContext.getSessionData();
+            List<KeyTextPair> list = StreamEx.of(this.enumService.listTruckType(sessionData.getMarketId(), FieldConfigModuleTypeEnum.REGISTER)).map(e -> {
+
                 KeyTextPair p = new KeyTextPair();
                 p.setKey(e.getCode());
                 p.setText(e.getName());
                 return p;
+
             }).toList();
 
             return BaseOutput.success().setData(list);
@@ -207,6 +230,7 @@ public class EnumsApi {
             return BaseOutput.failure(e.getMessage());
         }
     }
+
     /**
      * 重量单位型枚举查询
      */
@@ -224,4 +248,26 @@ public class EnumsApi {
             return BaseOutput.failure(e.getMessage());
         }
     }
+    /**
+     * 计重类型查询
+     */
+    @RequestMapping(value = "/listMeasureType.api", method = RequestMethod.POST)
+    public BaseOutput<List<KeyTextPair>> listMeasureType() {
+        try {
+            SessionData sessionData = loginSessionContext.getSessionData();
+            List<KeyTextPair> list = StreamEx.of(this.enumService.listMeasureType(sessionData.getMarketId(), FieldConfigModuleTypeEnum.REGISTER)).map(e -> {
+
+                KeyTextPair p = new KeyTextPair();
+                p.setKey(e.getCode());
+                p.setText(e.getName());
+                return p;
+
+            }).toList();
+
+            return BaseOutput.success().setData(list);
+        } catch (Exception e) {
+            return BaseOutput.failure(e.getMessage());
+        }
+    }
+
 }

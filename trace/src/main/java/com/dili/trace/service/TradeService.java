@@ -85,6 +85,7 @@ public class TradeService {
             updatableTD.setId(tradeDetailItem.getId());
             updatableTD.setCheckinRecordId(checkinOutRecord.getId());
             updatableTD.setCheckinStatus(checkinOutRecord.getStatus());
+            updatableTD.setSaleStatus(SaleStatusEnum.FOR_SALE.getCode());
 
             this.tradeDetailService.updateSelective(updatableTD);
 

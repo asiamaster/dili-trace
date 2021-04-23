@@ -379,7 +379,11 @@ public class UpStreamService extends BaseServiceImpl<UpStream, Long> {
 			return new ArrayList<>();
 		}
 		Example example = new Example(UpStream.class);
-		example.and().andIn("id", upStreamIdList).andLike("name", "%" + keyword + "%");
+		example.and().andIn("id", upStreamIdList);
+		if(StringUtils.isNotBlank(keyword)){
+			example.and().andLike("name", "%" + keyword.trim() + "%");
+		}
+
 		return this.getActualDao().selectByExample(example);
 
 	}

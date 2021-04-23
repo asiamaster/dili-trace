@@ -30,13 +30,6 @@ public interface RegisterBillMapper extends MyMapper<RegisterBill> {
      */
     public List<VerifyStatusCountOutputDto> countByVerifyStatus(RegisterBill query);
 
-    /**
-     * 根据报备单数量更新用户状态到黑码
-     * 
-     * @param user
-     * @return
-     */
-    public List<Long> selectUserIdWithouBill(UserQueryDto user);
 
     /**
      * 通过ID悲观锁定数据

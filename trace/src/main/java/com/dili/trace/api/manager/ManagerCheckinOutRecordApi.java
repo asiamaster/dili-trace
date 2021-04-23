@@ -21,10 +21,7 @@ import com.dili.trace.dto.RegisterBillDto;
 import com.dili.trace.enums.BillVerifyStatusEnum;
 import com.dili.trace.enums.CheckinStatusEnum;
 import com.dili.trace.glossary.TFEnum;
-import com.dili.trace.service.CheckinOutRecordService;
-import com.dili.trace.service.RegisterBillService;
-import com.dili.trace.service.SeparateSalesRecordService;
-import com.dili.trace.service.UpStreamService;
+import com.dili.trace.service.*;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -54,6 +51,8 @@ public class ManagerCheckinOutRecordApi {
 	RegisterBillService registerBillService;
 	@Autowired
 	CheckinOutRecordService checkinOutRecordService;
+	@Autowired
+	ProcessService processService;
 	@Autowired
 	SeparateSalesRecordService separateSalesRecordService;
 	@Autowired
@@ -87,8 +86,8 @@ public class ManagerCheckinOutRecordApi {
 				}
 			});
 
-			List<CheckinOutRecord> checkinRecordList = this.checkinOutRecordService
-					.doCheckin(Optional.ofNullable(operatorUser), billIdList, CheckinStatusEnum.ALLOWED);
+			List<CheckinOutRecord> checkinRecordList = this.processService
+					.doCheckIn(Optional.ofNullable(operatorUser), billIdList, CheckinStatusEnum.ALLOWED);
 			return BaseOutput.success();
 		} catch (TraceBizException e) {
 			return BaseOutput.failure(e.getMessage());

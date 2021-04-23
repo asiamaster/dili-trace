@@ -46,6 +46,9 @@ public class SeparateSalesRecordController {
     @ApiImplicitParams({
 		@ApiImplicitParam(name="SeparateSalesRecord", paramType="form", value = "SeparateSalesRecord的form信息", required = false, dataType = "string")
 	})
+    /**
+     * 查询 数据
+     */
     @RequestMapping(value="/list.action", method = {RequestMethod.GET, RequestMethod.POST})
     public @ResponseBody List<SeparateSalesRecord> list(SeparateSalesRecord separateSalesRecord) {
         return separateSalesRecordService.list(separateSalesRecord);

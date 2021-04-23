@@ -1,279 +1,313 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.dili.trace.dao.UserMapper">
-  <resultMap id="BaseResultMap" type="com.dili.trace.domain.UserInfo">
-    <!--
-      WARNING - @mbg.generated
-    -->
-    <id column="id" jdbcType="BIGINT" property="id" />
-    <result column="name" jdbcType="VARCHAR" property="name" />
-    <result column="phone" jdbcType="VARCHAR" property="phone" />
-    <result column="card_no" jdbcType="VARCHAR" property="cardNo" />
-    <result column="addr" jdbcType="VARCHAR" property="addr" />
-    <result column="tally_area_nos" jdbcType="VARCHAR" property="tallyAreaNos" />
-    <result column="business_license_url" jdbcType="VARCHAR" property="businessLicenseUrl" />
-    <result column="sales_city_id" jdbcType="BIGINT" property="salesCityId" />
-    <result column="sales_city_name" jdbcType="VARCHAR" property="salesCityName" />
-    <result column="state" jdbcType="BIT" property="state" />
-    <result column="validate_state" jdbcType="BIT" property="validateState" />
-    <result column="vocation_type" jdbcType="BIT" property="vocationType" />
-    <result column="qr_status" jdbcType="BIT" property="qrStatus" />
-    <result column="source" jdbcType="BIT" property="source" />
-    <result column="market_id" jdbcType="BIGINT" property="marketId" />
-    <result column="market_name" jdbcType="VARCHAR" property="marketName" />
-    <result column="business_category_ids" jdbcType="VARCHAR" property="businessCategoryIds" />
-    <result column="business_categories" jdbcType="VARCHAR" property="businessCategories" />
-    <result column="created" jdbcType="TIMESTAMP" property="created" />
-    <result column="modified" jdbcType="TIMESTAMP" property="modified" />
-    <result column="third_party_code" jdbcType="VARCHAR" property="thirdPartyCode" />
-  </resultMap>
-  <sql id="Base_Column_List">
-    <!--
-      WARNING - @mbg.generated
-    -->
-    id, user_name, phone, card_no, addr, card_no_url, tally_area_nos, business_license_url,market_id,market_name,qr_status,source,
-    sales_city_id, sales_city_name, state, pwd, created, modified,name,validate_state,vocation_type,business_category_ids,business_categories,
-    third_party_code
-  </sql>
-  <select id="selectBy" parameterType="java.lang.Long" resultMap="BaseResultMap">
-    <!--
-      WARNING - @mbg.generated
-    -->
-    select
-    <include refid="Base_Column_List" />
-    from user
-    where id = #{id,jdbcType=BIGINT}
-  </select>
-  <update id="updateBy" parameterType="com.dili.trace.domain.UserInfo">
-    <!--
-      WARNING - @mbg.generated
-    -->
-    update user
-    <set>
-      <if test="userName != null">
-        user_name = #{userName,jdbcType=VARCHAR},
-      </if>
-      <if test="phone != null">
-        phone = #{phone,jdbcType=VARCHAR},
-      </if>
-      <if test="cardNo != null">
-        card_no = #{cardNo,jdbcType=VARCHAR},
-      </if>
-      <if test="addr != null">
-        addr = #{addr,jdbcType=VARCHAR},
-      </if>
-      <if test="cardNoUrl != null">
-        card_no_url = #{cardNoUrl,jdbcType=VARCHAR},
-      </if>
-      <if test="tallyAreaNo != null">
-        tally_area_no = #{tallyAreaNo,jdbcType=VARCHAR},
-      </if>
-      <if test="businessLicenseUrl != null">
-        business_license_url = #{businessLicenseUrl,jdbcType=VARCHAR},
-      </if>
-      <if test="salesCityId != null">
-        sales_city_id = #{salesCityId,jdbcType=BIGINT},
-      </if>
-      <if test="salesCityName != null">
-        sales_city_name = #{salesCityName,jdbcType=VARCHAR},
-      </if>
-      <if test="state != null">
-        state = #{state,jdbcType=BIT},
-      </if>
-      <if test="pwd != null">
-        pwd = #{pwd,jdbcType=VARCHAR},
-      </if>
-      <if test="created != null">
-        created = #{created,jdbcType=TIMESTAMP},
-      </if>
-      <if test="modified != null">
-        modified = #{modified,jdbcType=TIMESTAMP},
-      </if>
-    </set>
-    where id = #{id,jdbcType=BIGINT}
-  </update>
+    <resultMap id="BaseResultMap" type="com.dili.trace.domain.UserInfo">
+        <!--
+          WARNING - @mbg.generated
+        -->
+        <id column="id" jdbcType="BIGINT" property="id"/>
+        <result column="name" jdbcType="VARCHAR" property="name"/>
+        <result column="phone" jdbcType="VARCHAR" property="phone"/>
+        <result column="card_no" jdbcType="VARCHAR" property="cardNo"/>
+        <result column="addr" jdbcType="VARCHAR" property="addr"/>
+        <result column="tally_area_nos" jdbcType="VARCHAR" property="tallyAreaNos"/>
+        <result column="business_license_url" jdbcType="VARCHAR" property="businessLicenseUrl"/>
+        <result column="sales_city_id" jdbcType="BIGINT" property="salesCityId"/>
+        <result column="sales_city_name" jdbcType="VARCHAR" property="salesCityName"/>
+        <result column="state" jdbcType="BIT" property="state"/>
+        <result column="validate_state" jdbcType="BIT" property="validateState"/>
+        <result column="vocation_type" jdbcType="BIT" property="vocationType"/>
+        <result column="qr_status" jdbcType="BIT" property="qrStatus"/>
+        <result column="source" jdbcType="BIT" property="source"/>
+        <result column="market_id" jdbcType="BIGINT" property="marketId"/>
+        <result column="market_name" jdbcType="VARCHAR" property="marketName"/>
+        <result column="business_category_ids" jdbcType="VARCHAR" property="businessCategoryIds"/>
+        <result column="business_categories" jdbcType="VARCHAR" property="businessCategories"/>
+        <result column="created" jdbcType="TIMESTAMP" property="created"/>
+        <result column="modified" jdbcType="TIMESTAMP" property="modified"/>
+        <result column="third_party_code" jdbcType="VARCHAR" property="thirdPartyCode"/>
+    </resultMap>
+    <sql id="Base_Column_List">
+        <!--
+          WARNING - @mbg.generated
+        -->
+        id, user_name, phone, card_no, addr, card_no_url, tally_area_nos,
+        business_license_url,market_id,market_name,qr_status,source,
+        sales_city_id, sales_city_name, state, pwd, created,
+        modified,name,validate_state,vocation_type,business_category_ids,business_categories,
+        third_party_code
+    </sql>
+    <select id="selectBy" parameterType="java.lang.Long" resultMap="BaseResultMap">
+        <!--
+          WARNING - @mbg.generated
+        -->
+        select
+        <include refid="Base_Column_List"/>
+        from user
+        where id = #{id,jdbcType=BIGINT}
+    </select>
+    <update id="updateBy" parameterType="com.dili.trace.domain.UserInfo">
+        <!--
+          WARNING - @mbg.generated
+        -->
+        update user
+        <set>
+            <if test="userName != null">
+                user_name = #{userName,jdbcType=VARCHAR},
+            </if>
+            <if test="phone != null">
+                phone = #{phone,jdbcType=VARCHAR},
+            </if>
+            <if test="cardNo != null">
+                card_no = #{cardNo,jdbcType=VARCHAR},
+            </if>
+            <if test="addr != null">
+                addr = #{addr,jdbcType=VARCHAR},
+            </if>
+            <if test="cardNoUrl != null">
+                card_no_url = #{cardNoUrl,jdbcType=VARCHAR},
+            </if>
+            <if test="tallyAreaNo != null">
+                tally_area_no = #{tallyAreaNo,jdbcType=VARCHAR},
+            </if>
+            <if test="businessLicenseUrl != null">
+                business_license_url = #{businessLicenseUrl,jdbcType=VARCHAR},
+            </if>
+            <if test="salesCityId != null">
+                sales_city_id = #{salesCityId,jdbcType=BIGINT},
+            </if>
+            <if test="salesCityName != null">
+                sales_city_name = #{salesCityName,jdbcType=VARCHAR},
+            </if>
+            <if test="state != null">
+                state = #{state,jdbcType=BIT},
+            </if>
+            <if test="pwd != null">
+                pwd = #{pwd,jdbcType=VARCHAR},
+            </if>
+            <if test="created != null">
+                created = #{created,jdbcType=TIMESTAMP},
+            </if>
+            <if test="modified != null">
+                modified = #{modified,jdbcType=TIMESTAMP},
+            </if>
+        </set>
+        where id = #{id,jdbcType=BIGINT}
+    </update>
 
-  <select id="countGroupByValidateState" parameterType="com.dili.trace.domain.UserInfo" resultType="com.dili.trace.api.output.UserOutput">
-    SELECT validate_state validateState,COUNT(1) numbers
-    from `user` u
-    where  yn = 1
-    <if test="marketId != null">
-      and market_id = #{marketId}
-    </if>
-    GROUP BY validate_state
-  </select>
-
-  <select id="listUserByQuery" parameterType="com.dili.trace.api.input.UserInput" resultType="com.dili.trace.api.output.UserOutput">
-    SELECT id,name,tally_area_nos,phone,validate_state
-    from `user` u
-    where yn=1
-    <if test="validateState != null">
-      and validate_state = #{validateState}
-    </if>
-    <if test="marketId != null">
-      and market_id = #{marketId}
-    </if>
-    <if test="keyword != null">
-      and (name LIKE CONCAT('%',#{keyword},'%')  or tally_area_nos LIKE CONCAT('%',#{keyword},'%'))
-    </if>
-
-  </select>
-  <select id="groupByQrStatus"  resultType="com.dili.trace.api.output.UserOutput">
-    select qr_status,count(1) cnt from `user`
-    where yn=1
-    <if test="marketId != null">
-      AND market_id = #{marketId}
-    </if>
-    <if test="qrStatusList!=null and qrStatusList.size()>0">
-      and qr_status
-      <foreach collection="qrStatusList" open=" IN (" close=")" item="qrStatus"  separator=",">
-        #{qrStatus}
-      </foreach>
-    </if>
-
-    group by qr_status
-  </select>
-
-  <select id="listUserByStoreName" resultType="com.dili.trace.api.output.UserOutput">
-
-    select * from user_store where 1=1
-    <if test="queryCondition!=null and queryCondition!=''">
-      AND (user_name #{queryCondition} or store_name like #{queryCondition})
-    </if>
-    <if test="marketId != null">
-      AND u.market_id = #{marketId}
-    </if>
-  </select>
-
-  <select id="getUserByUserId" resultType="com.dili.trace.api.output.UserOutput">
-    select u.id, if(s.store_name = '' or s.store_name is null, u.name, s.store_name) as name,
-    u.tally_area_nos, u.market_name, u.business_license_url from user u left join user_store s
-    on (u.id=s.user_id) where u.id = #{id}
-  </select>
-
-  <update id="updateUserIsPushFlag">
-    update user
-    <set>
-        <if test="isPush != null">
-          is_push = #{isPush},
-        </if>
-    </set>
-      where 1=1
-      <if test="idList!=null and idList.size()>0">
-        and id
-        <foreach collection="idList" open=" IN (" close=")" item="oid"  separator=",">
-          #{oid}
-        </foreach>
-      </if>
-  </update>
-
-  <update id="updateUserActiveByBill">
-    update user u,register_bill b
-    <set>
-      u.is_active=1
-    </set>
-    where u.is_delete=0
-    AND u.yn=1
-    AND u.is_active=-1
-    AND u.id=b.user_id
-    AND b.is_deleted=0
-    <![CDATA[AND ( b.created > #{limitTime} OR b.modified > #{limitTime})]]>
-  </update>
-
-  <update id="updateUserActiveByBuyer">
-    update user u,trade_detail t
-    <set>
-      u.is_active=1
-    </set>
-    where u.is_delete=0
-    AND u.yn=1
-    AND u.is_active=-1
-    AND u.id=t.buyer_id
-    <![CDATA[AND ( t.created > #{limitTime} OR t.modified > #{limitTime})]]>
-  </update>
-
-  <update id="updateUserActiveBySeller">
-    update user u,trade_detail t
-    <set>
-      u.is_active=1
-    </set>
-    where u.is_delete=0
-    AND u.yn=1
-    AND u.is_active=-1
-    AND u.id=t.seller_id
-    <![CDATA[AND ( t.created > #{limitTime} OR t.modified > #{limitTime})]]>
-  </update>
-
-  <select id="getActiveUserListByBill" resultType="com.dili.trace.domain.UserInfo" >
-    SELECT u.id,u.name,u.is_delete,u.is_active
-    FROM
-    user u
-    LEFT JOIN register_bill b ON u.id = b.user_id
-    AND b.is_deleted = 0
-    <![CDATA[AND  (b.created > #{limitTime} OR b.modified > #{limitTime})]]>
-    WHERE u.is_delete = 0
-    AND u.yn = 1
-    AND u.is_active = 1
-    AND b.id IS NULL
-  </select>
-
-  <select id="getActiveUserListByBuyer" resultType="com.dili.trace.domain.UserInfo" >
-    SELECT u.id,u.name,u.is_delete,u.is_active
-    FROM
-    user u
-    LEFT JOIN trade_detail t ON u.id = t.buyer_id
-    <![CDATA[ AND  (t.created > #{limitTime} OR t.modified > #{limitTime} ) ]]>
-    WHERE u.is_delete = 0
-    AND u.yn = 1
-    AND u.is_active = 1
-    AND t.id IS NULL
-  </select>
-
-  <select id="getActiveUserListBySeller" resultType="com.dili.trace.domain.UserInfo" >
-    SELECT u.id,u.name,u.is_delete,u.is_active
-    FROM
-    user u
-    LEFT JOIN trade_detail t ON u.id = t.seller_id
-    <![CDATA[ AND  ( t.created > #{limitTime} OR t.modified > #{limitTime} ) ]]>
-    WHERE u.is_delete = 0
-    AND u.yn = 1
-    AND u.is_active = 1
-    AND t.id IS NULL
-  </select>
-
-  <update id="updateUserUnActiveFlag">
-    update user
-    <set>
-      is_active = -1,
-    </set>
-    where 1=1
-      and id
-      <foreach collection="idList" open=" IN (" close=")" item="oid"  separator=",">
-        #{oid}
-      </foreach>
-  </update>
-
-  <select id="getUserByCredentialUrl" parameterType="com.dili.trace.domain.UserInfo" resultType="com.dili.trace.domain.UserInfo">
-    SELECT
-      u.`id`,
-      u.`third_party_code`
-    FROM
-      `user` u JOIN `user_ext` e ON u.id = e.user_id
-    WHERE u.`yn` = 1
+    <select id="countGroupByValidateState" parameterType="com.dili.trace.domain.UserInfo"
+            resultType="com.dili.trace.api.output.UserOutput">
+        SELECT validate_state validateState,COUNT(1) numbers
+        from `user` u
+        where yn = 1
         <if test="marketId != null">
-          and market_id = #{marketId}
+            and market_id = #{marketId}
         </if>
-          AND e.credential_url IS NULL
-          AND e.supplier_type IS NOT NULL
-  </select>
+        GROUP BY validate_state
+    </select>
 
-  <select id="getUserListByUserIds" resultType="com.dili.trace.domain.UserInfo">
-    select u.id,u.name,
-    u.tally_area_nos, u.market_name, u.market_id from user u
-    where u.id
-    <foreach collection="idList" open=" IN (" close=")" item="oid" separator=",">
-      #{oid}
-    </foreach>
-  </select>
+    <select id="listUserByQuery" parameterType="com.dili.trace.api.input.UserInput"
+            resultType="com.dili.trace.api.output.UserOutput">
+        SELECT id,name,tally_area_nos,phone,validate_state
+        from `user` u
+        where yn=1
+        <if test="validateState != null">
+            and validate_state = #{validateState}
+        </if>
+        <if test="marketId != null">
+            and market_id = #{marketId}
+        </if>
+        <if test="keyword != null">
+            and (name LIKE CONCAT('%',#{keyword},'%') or tally_area_nos LIKE CONCAT('%',#{keyword},'%'))
+        </if>
+
+    </select>
+    <select id="groupByQrStatus" resultType="com.dili.trace.api.output.UserOutput">
+        select qr_status,count(1) cnt from `user`
+        where yn=1
+        <if test="marketId != null">
+            AND market_id = #{marketId}
+        </if>
+        <if test="qrStatusList!=null and qrStatusList.size()>0">
+            and qr_status
+            <foreach collection="qrStatusList" open=" IN (" close=")" item="qrStatus" separator=",">
+                #{qrStatus}
+            </foreach>
+        </if>
+
+        group by qr_status
+    </select>
+
+    <select id="listUserByStoreName" resultType="com.dili.trace.api.output.UserOutput">
+
+        select * from user_store where 1=1
+        <if test="queryCondition!=null and queryCondition!=''">
+            AND (user_name #{queryCondition} or store_name like #{queryCondition})
+        </if>
+        <if test="marketId != null">
+            AND u.market_id = #{marketId}
+        </if>
+    </select>
+
+    <select id="getUserByUserId" resultType="com.dili.trace.api.output.UserOutput">
+        select u.id,
+               if(s.store_name = '' or s.store_name is null, u.name, s.store_name) as name,
+               u.tally_area_nos,
+               u.market_name,
+               u.business_license_url
+        from user u
+                 left join user_store s
+                           on (u.id = s.user_id)
+        where u.id = #{id}
+    </select>
+
+    <update id="updateUserIsPushFlag">
+        update user
+        <set>
+            <if test="isPush != null">
+                is_push = #{isPush},
+            </if>
+        </set>
+        where 1=1
+        <if test="idList!=null and idList.size()>0">
+            and id
+            <foreach collection="idList" open=" IN (" close=")" item="oid" separator=",">
+                #{oid}
+            </foreach>
+        </if>
+    </update>
+
+    <update id="updateUserActiveByBill">
+        update user u,register_bill b
+        <set>
+            u.is_active=1
+        </set>
+        where u.is_delete=0
+        AND u.yn=1
+        AND u.is_active=-1
+        AND u.id=b.user_id
+        AND b.is_deleted=0
+        <![CDATA[AND ( b.created > #{limitTime} OR b.modified > #{limitTime})]]>
+    </update>
+
+    <update id="updateUserActiveByBuyer">
+        update user u,trade_detail t
+        <set>
+            u.is_active=1
+        </set>
+        where u.is_delete=0
+        AND u.yn=1
+        AND u.is_active=-1
+        AND u.id=t.buyer_id
+        <![CDATA[AND ( t.created > #{limitTime} OR t.modified > #{limitTime})]]>
+    </update>
+
+    <update id="updateUserActiveBySeller">
+        update user u,trade_detail t
+        <set>
+            u.is_active=1
+        </set>
+        where u.is_delete=0
+        AND u.yn=1
+        AND u.is_active=-1
+        AND u.id=t.seller_id
+        <![CDATA[AND ( t.created > #{limitTime} OR t.modified > #{limitTime})]]>
+    </update>
+
+    <select id="getActiveUserListByBill" resultType="com.dili.trace.domain.UserInfo">
+        SELECT u.id, u.name, u.is_delete, u.is_active
+        FROM user u
+                 LEFT JOIN register_bill b ON u.id = b.user_id
+            AND b.is_deleted = 0
+    <![CDATA[AND (b.created > #{limitTime} OR b.modified > #{limitTime})]]>
+        WHERE u.is_delete = 0
+          AND u.yn = 1
+          AND u.is_active = 1
+          AND b.id IS NULL
+    </select>
+
+    <select id="getActiveUserListByBuyer" resultType="com.dili.trace.domain.UserInfo">
+        SELECT u.id, u.name, u.is_delete, u.is_active
+        FROM user u
+                 LEFT JOIN trade_detail t ON u.id = t.buyer_id
+    <![CDATA[ AND (t.created > #{limitTime} OR t.modified > #{limitTime}) ]]>
+    WHERE u.is_delete = 0
+          AND u.yn = 1
+          AND u.is_active = 1
+          AND t.id IS NULL
+    </select>
+
+    <select id="getActiveUserListBySeller" resultType="com.dili.trace.domain.UserInfo">
+        SELECT u.id, u.name, u.is_delete, u.is_active
+        FROM user u
+                 LEFT JOIN trade_detail t ON u.id = t.seller_id
+    <![CDATA[ AND (t.created > #{limitTime} OR t.modified > #{limitTime}) ]]>
+    WHERE u.is_delete = 0
+          AND u.yn = 1
+          AND u.is_active = 1
+          AND t.id IS NULL
+    </select>
+
+    <update id="updateUserUnActiveFlag">
+        update user
+        <set>
+            is_active = -1,
+        </set>
+        where 1=1
+        and id
+        <foreach collection="idList" open=" IN (" close=")" item="oid" separator=",">
+            #{oid}
+        </foreach>
+    </update>
+
+    <select id="getUserByCredentialUrl" parameterType="com.dili.trace.domain.UserInfo"
+            resultType="com.dili.trace.domain.UserInfo">
+        SELECT
+        u.`id`,
+        u.`third_party_code`
+        FROM
+        `user` u JOIN `user_ext` e ON u.id = e.user_id
+        WHERE u.`yn` = 1
+        <if test="marketId != null">
+            and market_id = #{marketId}
+        </if>
+        AND e.credential_url IS NULL
+        AND e.supplier_type IS NOT NULL
+    </select>
+
+    <select id="getUserListByUserIds" resultType="com.dili.trace.domain.UserInfo">
+        select u.id,u.name,
+        u.tally_area_nos, u.market_name, u.market_id from user u
+        where u.id
+        <foreach collection="idList" open=" IN (" close=")" item="oid" separator=",">
+            #{oid}
+        </foreach>
+    </select>
+    <insert id="insertIgnoreUserInfo" parameterType="com.dili.trace.domain.UserInfo">
+        INSERT
+        ignore into `user`
+      (user_id,market_id,pre_qr_status,qr_status,last_sync_success)
+      values(
+        #{userId},
+        #{marketId},
+        #{preQrStatus},
+        #{qrStatus},
+        #{lastSyncSuccess}
+        );
+    </insert>
+
+    <select id="selectUserInfoByQrHistory" parameterType="com.dili.trace.dto.query.UserQrHistoryQueryDto"
+            resultType="com.dili.trace.domain.UserInfo">
+        select *
+        from `user` u
+        where u.id in (
+            select user_info_id
+            from user_qr_history uq
+            where uq.is_valid = #{isValid}
+            <![CDATA[AND uq.created >= #{createdStart} ]]>
+          )
+
+
+    </select>
 
 </mapper>

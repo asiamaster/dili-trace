@@ -110,10 +110,10 @@ public class UserInfo extends BaseDomain {
     /**
      * 密码
      */
-    @ApiModelProperty(value = "密码")
-    @Column(name = "`password`")
-    @JSONField(serialize = false)
-    private String password;
+//    @ApiModelProperty(value = "密码")
+//    @Column(name = "`password`")
+//    @JSONField(serialize = false)
+//    private String password;
 
     /**
      * 删除状态1:正常 0：删除
@@ -128,8 +128,8 @@ public class UserInfo extends BaseDomain {
      *
      * @return
      */
-    @Column(name = "`version`")
-    private Integer version;
+//    @Column(name = "`version`")
+//    private Integer version;
 
     /**
      * 创建时间
@@ -326,7 +326,33 @@ public class UserInfo extends BaseDomain {
      */
     @Column(name = "`last_sync_success`")
     private Integer lastSyncSuccess;
+    /**
+     * 最后的二维码变更内容
+     */
+    @Column(name = "`qr_content`")
+    private String qrContent;
 
+    /**
+     * 最后的二维码变更历史ID
+     */
+    @Column(name = "`qr_history_id`")
+    private Long qrHistoryId;
+
+    public String getQrContent() {
+        return qrContent;
+    }
+
+    public void setQrContent(String qrContent) {
+        this.qrContent = qrContent;
+    }
+
+    public Long getQrHistoryId() {
+        return qrHistoryId;
+    }
+
+    public void setQrHistoryId(Long qrHistoryId) {
+        this.qrHistoryId = qrHistoryId;
+    }
 
     /**
      * 经营户扩展信息
@@ -444,13 +470,13 @@ public class UserInfo extends BaseDomain {
         this.state = state;
     }
 
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
+//    public String getPassword() {
+//        return password;
+//    }
+//
+//    public void setPassword(String password) {
+//        this.password = password;
+//    }
 
     public Integer getYn() {
         return yn;
@@ -460,13 +486,13 @@ public class UserInfo extends BaseDomain {
         this.yn = yn;
     }
 
-    public Integer getVersion() {
-        return version;
-    }
-
-    public void setVersion(Integer version) {
-        this.version = version;
-    }
+//    public Integer getVersion() {
+//        return version;
+//    }
+//
+//    public void setVersion(Integer version) {
+//        this.version = version;
+//    }
 
     public Date getCreated() {
         return created;

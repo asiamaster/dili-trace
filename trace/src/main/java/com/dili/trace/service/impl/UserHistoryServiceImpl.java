@@ -130,17 +130,17 @@ public class UserHistoryServiceImpl extends BaseServiceImpl<UserHistory, Long> i
 	}
 
 	private UserHistory buildUserHistory(UserInfo user, List<UserPlate> userPlateList, List<UserTallyArea> tallyAreaList) {
-		UserHistory history = DTOUtils.newDTO(UserHistory.class);
+		UserHistory history = new UserHistory();
 		history.setUserId(user.getId());
 		history.setAddr(user.getAddr());
-		history.setBusinessLicenseUrl(user.getBusinessLicenseUrl());
+//		history.setBusinessLicenseUrl(user.getBusinessLicenseUrl());
 		history.setCardNo(user.getCardNo());
-		history.setCardNoBackUrl(user.getCardNoBackUrl());
-		history.setCardNoFrontUrl(user.getCardNoFrontUrl());
+//		history.setCardNoBackUrl(user.getCardNoBackUrl());
+//		history.setCardNoFrontUrl(user.getCardNoFrontUrl());
 		history.setCreated(user.getCreated());
 		history.setModified(new Date());
 		history.setName(user.getName());
-		history.setPassword(user.getPassword());
+//		history.setPassword(user.getPassword());
 		history.setPhone(user.getPhone());
 		history.setPlateAmount(userPlateList.size());
 		history.setSalesCityId(user.getSalesCityId());
@@ -151,7 +151,7 @@ public class UserHistoryServiceImpl extends BaseServiceImpl<UserHistory, Long> i
 		String userPlates = userPlateList.stream().map(UserPlate::getPlate).filter(StringUtils::isNotBlank)
 				.collect(Collectors.joining(","));
 		history.setUserPlates(userPlates);
-		history.setVersion(user.getVersion());
+//		history.setVersion(user.getVersion());
 		history.setYn(user.getYn());
 		return history;
 	}

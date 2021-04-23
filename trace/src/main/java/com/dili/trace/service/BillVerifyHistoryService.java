@@ -16,17 +16,20 @@ public class BillVerifyHistoryService extends TraceBaseService<BillVerifyHistory
     /**
      * 创建审核历史记录
      *
-     * @param previousVerifyStatusEnum
+     * @param previousVerifyStatus
      * @param billId
      * @param verifyOperatorUser
      * @return
      */
-    public BillVerifyHistory createVerifyHistory(BillVerifyStatusEnum previousVerifyStatusEnum, Long billId, Optional<OperatorUser> verifyOperatorUser) {
+    public BillVerifyHistory createVerifyHistory(Optional<BillVerifyStatusEnum> previousVerifyStatus, Long billId, Optional<OperatorUser> verifyOperatorUser) {
         BillVerifyHistory verifyHistory = new BillVerifyHistory();
         verifyHistory.setBillId(billId);
         verifyHistory.setCreated(new Date());
         verifyHistory.setModified(new Date());
-        verifyHistory.setPreviousVerifyStatus(previousVerifyStatusEnum.getCode());
+        previousVerifyStatus.ifPresent(pvs->{
+            verifyHistory.setPreviousVerifyStatus(pvs.getCode());
+        });
+
         verifyHistory.setVerifyDateTime(new Date());
         verifyOperatorUser.ifPresent(opt -> {
 

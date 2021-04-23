@@ -2,10 +2,7 @@ package com.dili.trace.rpc.api;
 
 import com.dili.ss.domain.BaseOutput;
 import com.dili.ss.retrofitful.annotation.VOBody;
-import com.dili.trace.rpc.dto.RegCreateDto;
-import com.dili.trace.rpc.dto.RegCreateResultDto;
-import com.dili.trace.rpc.dto.StockReduceRequestDto;
-import com.dili.trace.rpc.dto.StockReductResultDto;
+import com.dili.trace.rpc.dto.*;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -48,4 +45,12 @@ public interface ProductRpc {
      */
     @PostMapping(value="/api/register/create",consumes = MediaType.APPLICATION_JSON_VALUE)
     public BaseOutput<RegCreateResultDto> create(@VOBody RegCreateDto obj);
+
+    /**
+     * 锁定 or 释放库存
+     * @param lockReleaseRequestDto
+     * @return
+     */
+    @PostMapping(value = "/api/stock/frozenOrUnfrozen")
+    BaseOutput<?> lockOrRelease(LockReleaseRequestDto lockReleaseRequestDto);
 }

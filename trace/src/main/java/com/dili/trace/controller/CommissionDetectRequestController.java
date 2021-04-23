@@ -3,6 +3,7 @@ package com.dili.trace.controller;
 import com.dili.common.exception.TraceBizException;
 import com.dili.commons.glossary.YesOrNoEnum;
 import com.dili.customer.sdk.domain.dto.CustomerExtendDto;
+import com.dili.trace.dto.ret.FieldConfigDetailRetDto;
 import com.dili.trace.enums.SalesTypeEnum;
 import com.dili.ss.domain.BaseOutput;
 import com.dili.ss.domain.EasyuiPageOutput;
@@ -19,6 +20,7 @@ import com.dili.trace.glossary.UsualAddressTypeEnum;
 import com.dili.trace.service.*;
 import com.dili.trace.util.MarketUtil;
 import com.dili.trace.util.MaskUserInfo;
+import com.dili.uap.sdk.domain.Firm;
 import com.dili.uap.sdk.domain.User;
 import com.dili.uap.sdk.session.SessionContext;
 import com.google.common.collect.Lists;
@@ -74,6 +76,8 @@ public class CommissionDetectRequestController {
     CommissionBillService commissionBillService;
     @Autowired
     UsualAddressService usualAddressService;
+    @Autowired
+    FieldConfigDetailService fieldConfigDetailService;
 
     /**
      * 跳转到DetectRequest页面
@@ -166,7 +170,7 @@ public class CommissionDetectRequestController {
                 modelMap.put("separateSalesRecords", records);
             }
         } else {
-            QualityTraceTradeBill condition = DTOUtils.newDTO(QualityTraceTradeBill.class);
+            QualityTraceTradeBill condition = new QualityTraceTradeBill();
             condition.setRegisterBillCode(item.getCode());
             modelMap.put("qualityTraceTradeBills", qualityTraceTradeBillService.listByExample(condition));
         }
@@ -203,7 +207,7 @@ public class CommissionDetectRequestController {
         if (Objects.isNull(dto)) {
             return dto;
         }
-        if (this.uapRpcService.hasAccess("registerBill/create.html#user")) {
+        if (this.uapRpcService.hasAccess( "registerBill/create.html#user")) {
             return dto;
         } else {
             dto.setIdCardNo(MaskUserInfo.maskIdNo(dto.getIdCardNo()));
@@ -221,6 +225,13 @@ public class CommissionDetectRequestController {
     @RequestMapping(value = "/create.html")
     public String create(ModelMap modelMap) {
         modelMap.put("citys", this.queryCitys());
+        Firm currentFirm = this.uapRpcService.getCurrentFirm().orElse(DTOUtils.newDTO(Firm.class));
+        modelMap.put("currentFirm", currentFirm);
+        FieldConfigModuleTypeEnum moduleType=FieldConfigModuleTypeEnum.DETECT_REQUEST;
+        Map<String, FieldConfigDetailRetDto>filedNameRetMap=   StreamEx.of(  this.fieldConfigDetailService.findByMarketIdAndModuleType(currentFirm.getId(),moduleType))
+                .toMap(item->item.getDefaultFieldDetail().getFieldName(),Function.identity());
+        modelMap.put("filedNameRetMap", filedNameRetMap);
+
         return "commissionDetectRequest/create";
     }
 
@@ -252,10 +263,11 @@ public class CommissionDetectRequestController {
                     CustomerExtendDto customer = new CustomerExtendDto();
                     RegisterBill rb = rbInputDto.build(customer, this.uapRpcService.getCurrentFirm().orElse(null).getId());
                     rb.setIdCardNo(input.getIdCardNo());
-                    rb.setName(input.getName());
-                    rb.setCorporateName(input.getCorporateName());
+                    rb.setName(rbInputDto.getName());
+                    rb.setCorporateName(rbInputDto.getCorporateName());
+                    rb.setPlate(rbInputDto.getPlate());
                     rb.setPhone(input.getPhone());
-                    rb.setPlate(input.getPlate());
+
                     rb.setAddr(input.getAddr());
                     rb.setUserId(input.getUserId());
                     List<ImageCert> imageList = StreamEx.ofNullable(input.getGlobalImageCertList()).flatCollection(Function.identity()).nonNull().toList();

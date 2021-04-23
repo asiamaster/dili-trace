@@ -29,7 +29,7 @@ public class TradeCustomerApi {
     private static final Logger LOGGER = LoggerFactory.getLogger(TradeCustomerApi.class);
     @Autowired
     private CustomerRpcService customerService;
-    @Resource
+    @Autowired
     private UserService userService;
     @Autowired
     private LoginSessionContext loginSessionContext;

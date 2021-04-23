@@ -51,48 +51,7 @@ public class TallyAreaNoService extends BaseServiceImpl<TallyAreaNo, Long> {//im
     @Autowired
     RUserTallyAreaService ruserTallyAreaService;
 
-    // @Override
-    // public void run(String... args) throws Exception {
-    //     User uq = DTOUtils.newDTO(User.class);
-    //     uq.setPage(1);
-    //     uq.setRows(200);
-    //     while (true) {
-    //         List<User> userList = StreamEx.of(this.userService.listPageByExample(uq).getDatas()).map(userItem -> {
-    //             String parsedTallyAreaNos = StringUtils
-    //                     .trimToNull(this.parseAndConvertTallyAreaNos(userItem.getTallyAreaNos()));
-    //             if (!Objects.equals(parsedTallyAreaNos, StringUtils.trimToNull(userItem.getTallyAreaNos()))) {
-    //                 User u = DTOUtils.newDTO(User.class);
-    //                 u.setId(userItem.getId());
-    //                 u.setTallyAreaNos(parsedTallyAreaNos);
-    //                 this.userService.updateSelective(u);
-    //                 return this.userService.get(u.getId());
-    //             }
-    //             return userItem;
-    //         }).toList();
-    //         if (userList.isEmpty()) {
-    //             return;
-    //         }
-    //         try {
-    //             List<RUserTallyArea> list = StreamEx.of(userList).nonNull().mapToEntry(u -> u, u -> u.getTallyAreaNos())
-    //                     .filterValues(StringUtils::isNotBlank).mapValues(String::trim)
-    //                     .mapValues(ChineseStringUtil::cToe).mapValues(ChineseStringUtil::full2Half)
-    //                     .mapValues(tallyAreaNos -> StreamEx.of(tallyAreaNos.split(",")).filter(StringUtils::isNotBlank)
-    //                             .toList())
-    //                     .flatMapKeyValue((u, t) -> {
-    //                         return StreamEx.of(t).map(tallyAreaNo -> {
-    //                             TallyAreaNo tallyAreaItem = this.parseAndSave(tallyAreaNo);
-    //                             RUserTallyArea ruserTallyArea = this.ruserTallyAreaService
-    //                                     .saveOrUpdate(tallyAreaItem.getId(), u.getId());
-    //                             return ruserTallyArea;
-    //                         });
-    //                     }).toList();
-    //             logger.info("list.size={}", list.size());
-    //         } catch (Exception e) {
-    //             logger.error(e.getMessage(), e);
-    //         }
-    //         uq.setPage(uq.getPage() + 1);
-    //     }
-    // }
+
     /**
      * 理货区号转换
      *

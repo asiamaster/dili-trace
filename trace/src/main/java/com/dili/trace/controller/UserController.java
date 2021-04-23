@@ -81,11 +81,11 @@ public class UserController {
     TallyingAreaRpcService tallyingAreaRpcService;
     @Autowired
     TallyingAreaRpc tallyingAreaRpc;
-    @Resource
+    @Autowired
     CustomerRpc customerRpc;
-    @Resource
+    @Autowired
     UserRpc userRpc;
-    @Resource
+    @Autowired
     MarketService marketService;
 
     /**

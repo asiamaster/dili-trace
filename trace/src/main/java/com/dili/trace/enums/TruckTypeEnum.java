@@ -45,4 +45,9 @@ public enum TruckTypeEnum {
 	public String getName() {
 		return name;
 	}
+
+	//获取字符串类型编码  用于页面判断
+	public String getStringCode() {
+		return String.valueOf(this.code);
+	}
 }

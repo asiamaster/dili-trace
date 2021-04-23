@@ -14,7 +14,7 @@ import io.swagger.annotations.ApiModelProperty;
 
 /**
  * 由MyBatis Generator工具自动生成
- * 
+ * <p>
  * This file was generated on 2019-07-26 09:20:35.
  */
 @Table(name = "`user_qr_history`")
@@ -30,14 +30,9 @@ public class UserQrHistory extends BaseDomain {
     /**
      * 业户主键
      */
-    @Column(name = "`user_id`")
-    private Long userId;
+    @Column(name = "`user_info_id`")
+    private Long userInfoId;
 
-    /**
-     * 二维码条目参数值（业户名称）
-     */
-    @Column(name = "`user_name`")
-    private String userName;
 
     /**
      * 二维码条目类型 {@link com.dili.trace.glossary.QrItemTypeEnum}
@@ -66,18 +61,24 @@ public class UserQrHistory extends BaseDomain {
     private Date modified;
 
     /**
-     * 报备单ID
+     * qr事件ID
      */
-    @ApiModelProperty(value = "报备单ID")
-    @Column(name = "`bill_id`")
-    private Long billId;
+    @ApiModelProperty(value = "qr事件ID")
+    @Column(name = "`qr_history_event_id`")
+    private Long qrHistoryEventId;
+
+    /**
+     * qr事件类型
+     */
+    @Column(name = "`qr_history_event_type`")
+    private Integer qrHistoryEventType;
 
     /**
      * 交易单ID
      */
-    @ApiModelProperty(value = "交易单ID")
-    @Column(name = "`trade_request_id`")
-    private Long tradeRequestId;
+//    @ApiModelProperty(value = "交易单ID")
+//    @Column(name = "`trade_request_id`")
+//    private Long tradeRequestId;
 
     /**
      * 查验状态
@@ -86,6 +87,9 @@ public class UserQrHistory extends BaseDomain {
     @Column(name = "`verify_status`")
     private Integer verifyStatus;
 
+
+
+
     /**
      * 是否有效
      */
@@ -93,13 +97,13 @@ public class UserQrHistory extends BaseDomain {
     @Column(name = "`is_valid`")
     private Integer isValid;
 
-    public Long getTradeRequestId() {
-        return tradeRequestId;
-    }
-
-    public void setTradeRequestId(Long tradeRequestId) {
-        this.tradeRequestId = tradeRequestId;
-    }
+//    public Long getTradeRequestId() {
+//        return tradeRequestId;
+//    }
+//
+//    public void setTradeRequestId(Long tradeRequestId) {
+//        this.tradeRequestId = tradeRequestId;
+//    }
 
     /**
      * @return Long return the id
@@ -113,20 +117,6 @@ public class UserQrHistory extends BaseDomain {
      */
     public void setId(Long id) {
         this.id = id;
-    }
-
-    /**
-     * @return Long return the userId
-     */
-    public Long getUserId() {
-        return userId;
-    }
-
-    /**
-     * @param userId the userId to set
-     */
-    public void setUserId(Long userId) {
-        this.userId = userId;
     }
 
     /**
@@ -157,19 +147,7 @@ public class UserQrHistory extends BaseDomain {
         this.modified = modified;
     }
 
-    /**
-     * @return String return the userName
-     */
-    public String getUserName() {
-        return userName;
-    }
 
-    /**
-     * @param userName the userName to set
-     */
-    public void setUserName(String userName) {
-        this.userName = userName;
-    }
 
     /**
      * @return Integer return the qrStatus
@@ -203,16 +181,16 @@ public class UserQrHistory extends BaseDomain {
     /**
      * @return Long return the billId
      */
-    public Long getBillId() {
-        return billId;
-    }
-
-    /**
-     * @param billId the billId to set
-     */
-    public void setBillId(Long billId) {
-        this.billId = billId;
-    }
+//    public Long getBillId() {
+//        return billId;
+//    }
+//
+//    /**
+//     * @param billId the billId to set
+//     */
+//    public void setBillId(Long billId) {
+//        this.billId = billId;
+//    }
 
     /**
      * @return Integer return the verifyStatus
@@ -242,4 +220,27 @@ public class UserQrHistory extends BaseDomain {
         this.isValid = isValid;
     }
 
+    public Long getQrHistoryEventId() {
+        return qrHistoryEventId;
+    }
+
+    public void setQrHistoryEventId(Long qrHistoryEventId) {
+        this.qrHistoryEventId = qrHistoryEventId;
+    }
+
+    public Integer getQrHistoryEventType() {
+        return qrHistoryEventType;
+    }
+
+    public void setQrHistoryEventType(Integer qrHistoryEventType) {
+        this.qrHistoryEventType = qrHistoryEventType;
+    }
+
+    public Long getUserInfoId() {
+        return userInfoId;
+    }
+
+    public void setUserInfoId(Long userInfoId) {
+        this.userInfoId = userInfoId;
+    }
 }

@@ -18,7 +18,7 @@ import io.swagger.annotations.ApiModelProperty;
 
 /**
  * 由MyBatis Generator工具自动生成
- * 
+ * <p>
  * This file was generated on 2019-07-26 09:20:34.
  */
 @SuppressWarnings("serial")
@@ -31,7 +31,7 @@ public class ProductStock extends BaseDomain {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "`id`")
-    @JSONField(serialize =false)
+    @JSONField(serialize = false)
     private Long id;
 
     /**
@@ -47,6 +47,13 @@ public class ProductStock extends BaseDomain {
     @ApiModelProperty(value = "用户iD")
     @Column(name = "`user_id`")
     private Long userId;
+
+    /**
+     * 市场ID
+     */
+    @ApiModelProperty(value = "市场ID")
+    @Column(name = "`market_id`")
+    private Long marketId;
 
     /**
      * 保存类型 {@link com.dili.trace.enums.PreserveTypeEnum}
@@ -144,7 +151,7 @@ public class ProductStock extends BaseDomain {
     }
 
     @Transient
-    public Long getProductStockId(){
+    public Long getProductStockId() {
         return this.id;
     }
 
@@ -360,4 +367,11 @@ public class ProductStock extends BaseDomain {
         this.tradeDetailNum = tradeDetailNum;
     }
 
+    public Long getMarketId() {
+        return marketId;
+    }
+
+    public void setMarketId(Long marketId) {
+        this.marketId = marketId;
+    }
 }

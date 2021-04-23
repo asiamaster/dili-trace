@@ -1,5 +1,6 @@
 package com.dili.trace.domain;
 
+import com.dili.ss.domain.BaseDomain;
 import com.dili.ss.dto.IBaseDomain;
 import com.dili.ss.metadata.FieldEditor;
 import com.dili.ss.metadata.annotation.EditMode;
@@ -15,171 +16,199 @@ import javax.persistence.Id;
 
 /**
  * 由MyBatis Generator工具自动生成
- * 
+ * <p>
  * This file was generated on 2019-07-26 09:20:35.
  */
 @Table(name = "`user_history`")
-public interface UserHistory extends IBaseDomain {
+public class UserHistory extends BaseDomain {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "`id`")
-    @FieldDef(label="id")
-    @EditMode(editor = FieldEditor.Number, required = true)
-    Long getId();
+    private Long id;
 
-    void setId(Long id);
-    
     @ApiModelProperty(value = "用户ID")
     @Column(name = "`user_id`")
-    @FieldDef(label="user_id")
-    @EditMode(editor = FieldEditor.Number, required = true)
-    Long getUserId();
+    private Long userId;
 
-    void setUserId(Long userId);
 
     @ApiModelProperty(value = "名称")
     @Column(name = "`name`")
-    @FieldDef(label="name", maxLength = 30)
-    @EditMode(editor = FieldEditor.Text, required = false)
-    String getName();
+    private String name;
 
-    void setName(String name);
 
     @ApiModelProperty(value = "手机号（帐号）")
     @Column(name = "`phone`")
-    @FieldDef(label="phone", maxLength = 15)
-    @EditMode(editor = FieldEditor.Text, required = false)
-    String getPhone();
-
-    void setPhone(String phone);
+    private String phone;
 
     @ApiModelProperty(value = "理货区号")
     @Column(name = "`tally_area_nos`")
-    @FieldDef(label="tallyAreaNos", maxLength = 50)
-    @EditMode(editor = FieldEditor.Text, required = false)
-    String getTallyAreaNos();
+    private String tallyAreaNos;
 
-    void setTallyAreaNos(String tallyAreaNos);
 
     @ApiModelProperty(value = "身份证号")
     @Column(name = "`card_no`")
-    @FieldDef(label="cardNo", maxLength = 20)
-    @EditMode(editor = FieldEditor.Text, required = false)
-    String getCardNo();
+    private String cardNo;
 
-    void setCardNo(String cardNo);
 
     @ApiModelProperty(value = "地址")
     @Column(name = "`addr`")
-    @FieldDef(label="addr", maxLength = 50)
-    @EditMode(editor = FieldEditor.Text, required = false)
-    String getAddr();
-
-    void setAddr(String addr);
-
-    @ApiModelProperty(value = "身份证照正面URL")
-    @Column(name = "`card_no_front_url`")
-    @FieldDef(label="cardNoFrontUrl", maxLength = 50)
-    @EditMode(editor = FieldEditor.Text, required = false)
-    String getCardNoFrontUrl();
-
-    void setCardNoFrontUrl(String cardNoFrontUrl);
-
-    @ApiModelProperty(value = "身份证照反面URL")
-    @Column(name = "`card_no_back_url`")
-    @FieldDef(label="cardNoBackUrl", maxLength = 50)
-    @EditMode(editor = FieldEditor.Text, required = false)
-    String getCardNoBackUrl();
-
-    void setCardNoBackUrl(String cardNoBackUrl);
-
-    @ApiModelProperty(value = "营业执照URL")
-    @Column(name = "`business_license_url`")
-    @FieldDef(label="businessLicenseUrl", maxLength = 50)
-    @EditMode(editor = FieldEditor.Text, required = false)
-    String getBusinessLicenseUrl();
-
-    void setBusinessLicenseUrl(String businessLicenseUrl);
+    private String addr;
 
     @ApiModelProperty(value = "销售城市ID")
     @Column(name = "`sales_city_id`")
-    @FieldDef(label="salesCityId")
-    @EditMode(editor = FieldEditor.Number, required = false)
-    Long getSalesCityId();
+    private Long salesCityId;
 
-    void setSalesCityId(Long salesCityId);
 
     @ApiModelProperty(value = "销售城市名称")
     @Column(name = "`sales_city_name`")
-    @FieldDef(label="salesCityName", maxLength = 20)
-    @EditMode(editor = FieldEditor.Text, required = false)
-    String getSalesCityName();
+    private String salesCityName;
 
-    void setSalesCityName(String salesCityName);
 
     @ApiModelProperty(value = "状态")
     @Column(name = "`state`")
-    @FieldDef(label="1:启用 2：禁用")
-    @EditMode(editor = FieldEditor.Number, required = false)
-    Integer getState();
+    private Integer state;
 
-    void setState(Integer state);
-
-    @ApiModelProperty(value = "密码")
-    @Column(name = "`password`")
-    @FieldDef(label="password", maxLength = 50)
-    @EditMode(editor = FieldEditor.Text, required = false)
-    String getPassword();
-
-    void setPassword(String password);
 
     @Column(name = "`yn`")
-    @FieldDef(label="1:正常 -1：删除")
-    @EditMode(editor = FieldEditor.Number, required = false)
-    Integer getYn();
-
-    void setYn(Integer yn);
-
-    @Column(name = "`version`")
-    @FieldDef(label="version")
-    @EditMode(editor = FieldEditor.Number)
-    Integer getVersion();
-
-    void setVersion(Integer version);
+    private Integer yn;
 
     @ApiModelProperty(value = "创建时间")
     @Column(name = "`created`")
-    @FieldDef(label="created")
-    @EditMode(editor = FieldEditor.Datetime, required = true)
-    Date getCreated();
+    private Date created;
 
-    void setCreated(Date created);
 
     @ApiModelProperty(value = "修改时间")
     @Column(name = "`modified`")
-    @FieldDef(label="modified")
-    @EditMode(editor = FieldEditor.Datetime, required = true)
-    Date getModified();
-
-    void setModified(Date modified);
+    private Date modified;
 
 
     @ApiModelProperty(value = "车牌号")
     @Column(name = "`user_plates`")
-    @FieldDef(label="user_plates", maxLength = 50)
-    @EditMode(editor = FieldEditor.Text, required = false)
-    String getUserPlates();
+    private String userPlates;
 
-    void setUserPlates(String userPlates);
-    
     @ApiModelProperty(value = "车牌数量")
     @Column(name = "`plate_amount`")
-    @FieldDef(label="plate_amount", maxLength = 50)
-    @EditMode(editor = FieldEditor.Number, required = false)
-    Integer getPlateAmount();
+    private Integer plateAmount;
 
-    void setPlateAmount(Integer plateAmount);
-    
-    
+    @Override
+    public Long getId() {
+        return id;
+    }
 
+    @Override
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public Long getUserId() {
+        return userId;
+    }
+
+    public void setUserId(Long userId) {
+        this.userId = userId;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getPhone() {
+        return phone;
+    }
+
+    public void setPhone(String phone) {
+        this.phone = phone;
+    }
+
+    public String getTallyAreaNos() {
+        return tallyAreaNos;
+    }
+
+    public void setTallyAreaNos(String tallyAreaNos) {
+        this.tallyAreaNos = tallyAreaNos;
+    }
+
+    public String getCardNo() {
+        return cardNo;
+    }
+
+    public void setCardNo(String cardNo) {
+        this.cardNo = cardNo;
+    }
+
+    public String getAddr() {
+        return addr;
+    }
+
+    public void setAddr(String addr) {
+        this.addr = addr;
+    }
+
+    public Long getSalesCityId() {
+        return salesCityId;
+    }
+
+    public void setSalesCityId(Long salesCityId) {
+        this.salesCityId = salesCityId;
+    }
+
+    public String getSalesCityName() {
+        return salesCityName;
+    }
+
+    public void setSalesCityName(String salesCityName) {
+        this.salesCityName = salesCityName;
+    }
+
+    public Integer getState() {
+        return state;
+    }
+
+    public void setState(Integer state) {
+        this.state = state;
+    }
+
+    public Integer getYn() {
+        return yn;
+    }
+
+    public void setYn(Integer yn) {
+        this.yn = yn;
+    }
+
+    public Date getCreated() {
+        return created;
+    }
+
+    public void setCreated(Date created) {
+        this.created = created;
+    }
+
+    public Date getModified() {
+        return modified;
+    }
+
+    public void setModified(Date modified) {
+        this.modified = modified;
+    }
+
+    public String getUserPlates() {
+        return userPlates;
+    }
+
+    public void setUserPlates(String userPlates) {
+        this.userPlates = userPlates;
+    }
+
+    public Integer getPlateAmount() {
+        return plateAmount;
+    }
+
+    public void setPlateAmount(Integer plateAmount) {
+        this.plateAmount = plateAmount;
+    }
 }

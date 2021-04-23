@@ -48,7 +48,7 @@ public class DetectRequestService extends TraceBaseService<DetectRequest, Long> 
 
     @Autowired
     BillService billService;
-    @Resource
+    @Autowired
     DetectRequestMapper detectRequestMapper;
     @Autowired
     UpStreamService upStreamService;

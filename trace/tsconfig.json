@@ -19,7 +19,7 @@
     "removeComments": true,
     "sourceMap": false,
     "strictNullChecks": false,
-    "moduleResolution": "classic",
+    "moduleResolution": "node",
     "target": "ES2020",
     "outDir":"./src/main/resources/static/resources/js",
     "lib": ["DOM","ES6"],

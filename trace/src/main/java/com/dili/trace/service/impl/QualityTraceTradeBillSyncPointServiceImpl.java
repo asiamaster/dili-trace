@@ -52,7 +52,7 @@ public class QualityTraceTradeBillSyncPointServiceImpl extends BaseServiceImpl<Q
 					continue;
 				}
 			}
-			QualityTraceTradeBillSyncPoint point = DTOUtils.newDTO(QualityTraceTradeBillSyncPoint.class);
+			QualityTraceTradeBillSyncPoint point = new QualityTraceTradeBillSyncPoint();
 			point.setId(item.getId());
 			point.setBillId(bill.getBillId());
 			point.setOrderId(bill.getOrderId());
@@ -66,10 +66,10 @@ public class QualityTraceTradeBillSyncPointServiceImpl extends BaseServiceImpl<Q
 
 	@Override
 	public void run(String... args) throws Exception {
-		QualityTraceTradeBillSyncPointDto example = DTOUtils.newDTO(QualityTraceTradeBillSyncPointDto.class);
+		QualityTraceTradeBillSyncPointDto example = new QualityTraceTradeBillSyncPointDto();
 		int count = 	this.listByExample(example).size();
 		if (count == 0) {
-			QualityTraceTradeBillSyncPoint item = DTOUtils.newDTO(QualityTraceTradeBillSyncPoint.class);
+			QualityTraceTradeBillSyncPoint item = new QualityTraceTradeBillSyncPoint();
 //			item.setOrderVersion(OrderVersionEnum.VERSION.getCode());
 			this.insertSelective(item);
 

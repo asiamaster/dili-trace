@@ -1,20 +1,28 @@
 package com.dili.trace.service;
 
 import cn.hutool.db.sql.SqlFormatter;
+import com.dili.customer.sdk.domain.CustomerMarket;
 import com.dili.customer.sdk.domain.dto.CustomerExtendDto;
+import com.dili.customer.sdk.enums.CustomerEnum;
 import com.dili.customer.sdk.rpc.CustomerRpc;
 import com.dili.ss.domain.BaseOutput;
 import com.dili.trace.AutoWiredBaseTest;
+import com.dili.trace.api.input.CreateRegisterBillInputDto;
 import com.dili.trace.api.input.ProductStockInput;
-import com.dili.trace.domain.TradeOrder;
+import com.dili.trace.api.input.TradeDetailQueryDto;
+import com.dili.trace.api.input.TradeRequestHandleDto;
+import com.dili.trace.domain.*;
+import com.dili.trace.dto.CreateListBillParam;
 import com.dili.trace.dto.TradeDto;
-import com.dili.trace.enums.BuyerTypeEnum;
-import com.dili.trace.enums.TradeOrderTypeEnum;
+import com.dili.trace.enums.*;
 import com.dili.trace.rpc.service.CustomerRpcService;
+import one.util.streamex.StreamEx;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.mock.mockito.SpyBean;
@@ -27,14 +35,21 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 @EnableDiscoveryClient
 public class TradeOrderServiceTest extends AutoWiredBaseTest {
     @Autowired
     TradeOrderService tradeOrderService;
+    @Autowired
+    TradeRequestService tradeRequestService;
+    @Autowired
+    ProductStockService productStockService;
     //对真实的bean进行一次spy之后再注入。
     //相当于 @Autowired之后进行Spy然后再替换这个Service (@Autowired+@Spy)
-    @SpyBean
-    CustomerRpcService customerRpcService;
+//    @SpyBean
+//    CustomerRpcService customerRpcService;
     //用mock的bean来代码本次testcase相关的所有依赖的bean(@Autowired+@Mocked)
     @MockBean
     CustomerRpc customerRpc;
@@ -68,29 +83,65 @@ public class TradeOrderServiceTest extends AutoWiredBaseTest {
 
     @Test
     public void createBuy_test1() {
+        Long marketId = 8L;
+        Long userId = 1L;
+        Mockito.doAnswer(invocation -> {
+            CustomerExtendDto dto = new CustomerExtendDto();
+            Long uid = (Long) invocation.getArguments()[0];
+            Long marketid = (Long) invocation.getArguments()[1];
+            dto.setName("user-" + uid);
+            dto.setId(uid);
+            dto.setCustomerMarket(new CustomerMarket());
+            dto.getCustomerMarket().setMarketId(marketid);
+            dto.getCustomerMarket().setApprovalStatus(CustomerEnum.ApprovalStatus.PASSED.getCode());
+            return Optional.ofNullable(dto);
+        }).when(customerRpcService).findCustomerById(Mockito.anyLong(), Mockito.anyLong());
 
+        CustomerExtendDto userDto = this.customerRpcService.findCustomerById(userId, marketId).orElse(null);
+        this.deleteAllDatas(userDto);
+        BigDecimal weight = BigDecimal.valueOf(110);
+        Long billId = super.baseCreateRegisterBill(marketId, userId, weight);
+        super.doVerifyBeforeCheckIn(billId);
+        super.doOneCheckin(billId);
+
+        RegisterBill registerBill = this.registerBillService.get(billId);
+
+        ProductStock q = new ProductStock();
+        q.setUserId(registerBill.getUserId());
+        q.setProductId(registerBill.getProductId());
+        q.setMarketId(registerBill.getMarketId());
+        ProductStock productStock = StreamEx.of(this.productStockService.listByExample(q)).findFirst().orElse(null);
 
         TradeDto tradeDto = new TradeDto();
-        tradeDto.setMarketId(8L);
+        tradeDto.setMarketId(marketId);
         tradeDto.setTradeOrderType(TradeOrderTypeEnum.SELL);
 
-        tradeDto.getBuyer().setBuyerId(589L);
+        tradeDto.getBuyer().setBuyerId(100L);
         tradeDto.getBuyer().setBuyerName("错位时空");
         tradeDto.getBuyer().setBuyerType(BuyerTypeEnum.NORMAL_BUYER);
 
+
         List<ProductStockInput> batchStockInputList = new ArrayList<>();
         ProductStockInput input = new ProductStockInput();
-        input.setProductStockId(157L);
+        input.setProductStockId(productStock.getProductStockId());
         input.setTradeWeight(BigDecimal.valueOf(2));
         batchStockInputList.add(input);
 
-        ProductStockInput input2 = new ProductStockInput();
-        input2.setProductStockId(158L);
-        input2.setTradeWeight(BigDecimal.valueOf(2));
-        batchStockInputList.add(input2);
 
         TradeOrder tradeOrder = this.tradeOrderService.createBuyTrade(tradeDto, batchStockInputList);
         Assertions.assertNotNull(tradeOrder);
+
+
+        TradeRequest trq = new TradeRequest();
+        trq.setTradeOrderId(tradeOrder.getId());
+        StreamEx.of(this.tradeRequestService.listByExample(trq)).forEach(tr -> {
+            TradeRequestHandleDto handleDto = new TradeRequestHandleDto();
+            handleDto.setTradeRequestId(tr.getId());
+            handleDto.setHandleStatus(TradeOrderStatusEnum.FINISHED.getCode());
+            this.tradeOrderService.handleBuyerRequest(handleDto);
+
+        });
+
     }
 
     @Test
@@ -158,17 +209,69 @@ public class TradeOrderServiceTest extends AutoWiredBaseTest {
         Assertions.assertNotNull(tradeOrder);
     }
 
+    private void deleteAllDatas(CustomerExtendDto userDto) {
+        RegisterBill del = new RegisterBill();
+        del.setMarketId(userDto.getCustomerMarket().getMarketId());
+        del.setUserId(userDto.getId());
+        List<Long> billIdList = StreamEx.of(this.registerBillService.listByExample(del)).map(RegisterBill::getId).toList();
+        this.registerBillService.deleteByExample(del);
+
+        StreamEx.of(billIdList).forEach(billId->{
+            TradeDetail td=new TradeDetail();
+            td.setBillId(billId);
+            this.tradeDetailService.deleteByExample(td);
+        });
+        ProductStock productStock=new ProductStock();
+        productStock.setUserId(userDto.getId());
+        productStock.setMarketId(userDto.getCustomerMarket().getMarketId());
+        this.productStockService.deleteByExample(productStock);
+
+    }
+
     @Transactional
     @Test
 //    @Commit
     public void createSellTrade() {
 
+        Long marketId = 8L;
+        Long userId = 1L;
+        Mockito.doAnswer(invocation -> {
+            CustomerExtendDto dto = new CustomerExtendDto();
+            Long uid = (Long) invocation.getArguments()[0];
+            Long marketid = (Long) invocation.getArguments()[1];
+            dto.setName("user-" + uid);
+            dto.setId(uid);
+            dto.setCustomerMarket(new CustomerMarket());
+            dto.getCustomerMarket().setMarketId(marketid);
+            dto.getCustomerMarket().setApprovalStatus(CustomerEnum.ApprovalStatus.PASSED.getCode());
+            return Optional.ofNullable(dto);
+        }).when(customerRpcService).findCustomerById(Mockito.anyLong(), Mockito.anyLong());
+
+        CustomerExtendDto userDto = this.customerRpcService.findCustomerById(userId, marketId).orElse(null);
+        this.deleteAllDatas(userDto);
+        BigDecimal weight = BigDecimal.valueOf(110);
+
+        Long billId = super.baseCreateRegisterBill(marketId, userId, weight);
+        RegisterBill registerBill = this.registerBillService.get(billId);
+
+        super.doVerifyBeforeCheckIn(billId);
+        super.doOneCheckin(billId);
+
+
+        ProductStock q = new ProductStock();
+        q.setUserId(userDto.getId());
+        q.setMarketId(userDto.getCustomerMarket().getMarketId());
+        q.setProductId(registerBill.getProductId());
+
+        ProductStock productStock = StreamEx.of(this.productStockService.listByExample(q)).findFirst().orElse(null);
+
+
         TradeDto tradeDto = new TradeDto();
-        tradeDto.setMarketId(8L);
+        tradeDto.setMarketId(userDto.getCustomerMarket().getMarketId());
         tradeDto.setTradeOrderType(TradeOrderTypeEnum.SELL);
 
-        tradeDto.getSeller().setSellerId(31L);
-        tradeDto.getSeller().setSellerName("zhangsan");
+        tradeDto.getSeller().setSellerId(userDto.getId());
+        tradeDto.getSeller().setSellerName(userDto.getName());
 
         tradeDto.getBuyer().setBuyerType(BuyerTypeEnum.NORMAL_BUYER);
         tradeDto.getBuyer().setBuyerId(2L);
@@ -177,8 +280,8 @@ public class TradeOrderServiceTest extends AutoWiredBaseTest {
 
         List<ProductStockInput> batchStockInputList = new ArrayList<>();
         ProductStockInput input = new ProductStockInput();
-        input.setProductStockId(33L);
-        input.setTradeWeight(BigDecimal.valueOf(430));
+        input.setProductStockId(productStock.getProductStockId());
+        input.setTradeWeight(BigDecimal.valueOf(11));
         batchStockInputList.add(input);
         TradeOrder tradeOrder = this.tradeOrderService.createSellTrade(tradeDto, batchStockInputList);
         Assertions.assertNotNull(tradeOrder);

@@ -9,15 +9,12 @@ import com.dili.trace.api.input.TradeDetailInputDto;
 import com.dili.trace.api.input.TradeDetailQueryDto;
 import com.dili.trace.api.input.TradeRequestHandleDto;
 import com.dili.trace.domain.*;
-import com.dili.trace.dto.TradeDetailInputWrapperDto;
 import com.dili.trace.dto.TradeDto;
-import com.dili.trace.dto.TradeRequestWrapperDto;
 import com.dili.trace.enums.*;
 import com.dili.trace.glossary.BizNumberType;
 import com.dili.trace.rpc.service.CustomerRpcService;
 import com.dili.trace.rpc.service.ProductRpcService;
 import com.dili.trace.rpc.service.UidRestfulRpcService;
-import com.google.common.collect.Lists;
 import one.util.streamex.StreamEx;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -65,12 +62,10 @@ public class TradeOrderService extends BaseServiceImpl<TradeOrder, Long> {
      */
     private void checkInput(TradeDto tradeDto, List<ProductStockInput> batchStockInputList) {
 
-        if (TradeOrderTypeEnum.NONE != tradeDto.getTradeOrderType()) {
-            CustomerExtendDto seller = customerRpcService.findCustomerById(tradeDto.getSeller().getSellerId(), tradeDto.getMarketId()).orElseThrow(() -> {
-                return new TraceBizException("卖家不存在");
-            });
-            tradeDto.getSeller().setSellerName(seller.getName());
-        }
+        CustomerExtendDto seller = customerRpcService.findCustomerById(tradeDto.getSeller().getSellerId(), tradeDto.getMarketId()).orElseThrow(() -> {
+            return new TraceBizException("卖家不存在");
+        });
+        tradeDto.getSeller().setSellerName(seller.getName());
 
         if (TradeOrderTypeEnum.SEPREATE != tradeDto.getTradeOrderType()) {
             CustomerExtendDto buyer = customerRpcService.findCustomerById(tradeDto.getBuyer().getBuyerId(), tradeDto.getMarketId()).orElseThrow(() -> {
@@ -123,41 +118,26 @@ public class TradeOrderService extends BaseServiceImpl<TradeOrder, Long> {
             if (notBelongToSeller) {
                 throw new TraceBizException("参数不匹配:有批次不属于当前卖家");
             }
+
         }
         LOGGER.debug("sellerId={},batchStockIdList={}", sellerId, batchStockIdList);
-        if (TradeOrderTypeEnum.NONE != tradeDto.getTradeOrderType()) {
-            // 判断是否全部是卖家的库存信息
-            boolean notSellerOwnedBatchBlock = StreamEx.of(this.productStockService.findByIdList(batchStockIdList))
-                    .map(ProductStock::getUserId).distinct().anyMatch(uid -> !uid.equals(sellerId));
-            if (notSellerOwnedBatchBlock) {
-                throw new TraceBizException("参数不匹配:有库存不属于当前卖家");
-            }
+        // 判断是否全部是卖家的库存信息
+        boolean notSellerOwnedBatchBlock = StreamEx.of(this.productStockService.findByIdList(batchStockIdList))
+                .map(ProductStock::getUserId).distinct().anyMatch(uid -> !uid.equals(sellerId));
+        if (notSellerOwnedBatchBlock) {
+            throw new TraceBizException("参数不匹配:有库存不属于当前卖家");
+        }
+
+        // 判断是否全部是卖家当前市场
+        boolean notSellerOwnedMarket = StreamEx.of(this.productStockService.findByIdList(batchStockIdList))
+                .map(ProductStock::getMarketId).distinct().anyMatch(mid -> !mid.equals(tradeDto.getMarketId()));
+        if (notSellerOwnedMarket) {
+            throw new TraceBizException("参数不匹配:有库存不属于当前卖家市场");
         }
 
 
     }
 
-    /**
-     * 创建TradeOrder
-     *
-     * @param tradeOrderStatusEnum
-     * @return
-     */
-    public TradeOrder createTradeOrder(TradeDto tradeDto, TradeOrderStatusEnum tradeOrderStatusEnum) {
-        TradeOrder tradeOrder = new TradeOrder();
-        tradeOrder.setBuyerId(tradeDto.getBuyer().getBuyerId());
-        tradeOrder.setBuyerName(tradeDto.getBuyer().getBuyerName());
-        tradeOrder.setBuyerMarketId(tradeDto.getMarketId());
-        tradeOrder.setBuyerType(tradeDto.getBuyer().getBuyerType().getCode());
-
-        tradeOrder.setSellerId(tradeDto.getSeller().getSellerId());
-        tradeOrder.setSellerName(tradeDto.getSeller().getSellerName());
-        tradeOrder.setSellerMarketId(tradeDto.getMarketId());
-//        tradeOrder.setOrderStatus(tradeOrderStatusEnum.getCode());
-        tradeOrder.setOrderType(tradeDto.getTradeOrderType().getCode());
-        this.insertSelective(tradeOrder);
-        return tradeOrder;
-    }
 
     /**
      * 处理购买请求
@@ -187,67 +167,98 @@ public class TradeOrderService extends BaseServiceImpl<TradeOrder, Long> {
     }
 
     /**
+     * 直接创建数据
+     *
+     * @param registerBill
+     * @param productStockId
+     * @return
+     */
+    private TradeDetail createTradeDetailForRegisterBill(RegisterBill registerBill, Long productStockId) {
+        TradeDetail tradeDetail = new TradeDetail();
+        tradeDetail.setBillId(registerBill.getBillId());
+        tradeDetail.setParentId(null);
+        tradeDetail.setWeightUnit(registerBill.getWeightUnit());
+        tradeDetail.setStockWeight(registerBill.getWeight());
+        tradeDetail.setTotalWeight(registerBill.getWeight());
+        tradeDetail.setSoftWeight(BigDecimal.ZERO);
+        tradeDetail.setProductName(registerBill.getProductName());
+        tradeDetail.setProductStockId(productStockId);
+        tradeDetail.setBuyerId(registerBill.getUserId());
+        tradeDetail.setBuyerName(registerBill.getName());
+        tradeDetail.setTradeType(TradeTypeEnum.NONE.getCode());
+        tradeDetail.setCheckinStatus(CheckinStatusEnum.NONE.getCode());
+        tradeDetail.setCheckoutStatus(CheckoutStatusEnum.NONE.getCode());
+        tradeDetail.setSaleStatus(SaleStatusEnum.NONE.getCode());
+        this.tradeDetailService.insertSelective(tradeDetail);
+
+        return tradeDetail;
+
+    }
+
+    /**
      * SB
      *
      * @param registerBill
      * @return
      */
     public Optional<TradeOrder> createTradeFromRegisterBill(RegisterBill registerBill) {
-        TradeDetail tdq=new TradeDetail();
+        TradeDetail tdq = new TradeDetail();
         tdq.setBillId(registerBill.getBillId());
         tdq.setTradeType(TradeTypeEnum.NONE.getCode());
-        boolean hasTD=this.tradeDetailService.listByExample(tdq).size()>0;
-        if(hasTD){
+        boolean hasTD = this.tradeDetailService.listByExample(tdq).size() > 0;
+        if (hasTD) {
             return Optional.empty();
         }
-
-
-        TradeDto tradeDto = new TradeDto();
-        tradeDto.setTradeOrderType(TradeOrderTypeEnum.NONE);
-        tradeDto.setMarketId(registerBill.getMarketId());
-        tradeDto.getBuyer().setBuyerName(registerBill.getName());
-        tradeDto.getBuyer().setBuyerId(registerBill.getUserId());
-        tradeDto.getBuyer().setBuyerType(BuyerTypeEnum.NORMAL_BUYER);
-
 
         ProductStock productStock = this.createOrFindProductStock(registerBill, registerBill.getUserId(), registerBill.getName()).orElseThrow(() -> {
             return new TraceBizException("创建/查询卖家库存失败");
         });
+
+        TradeDetail buyerTD=this.createTradeDetailForRegisterBill(registerBill, productStock.getProductStockId());
+
+
+//        TradeDto tradeDto = new TradeDto();
+//        tradeDto.setTradeOrderType(TradeOrderTypeEnum.NONE);
+//        tradeDto.setMarketId(registerBill.getMarketId());
+//        tradeDto.getBuyer().setBuyerName(registerBill.getName());
+//        tradeDto.getBuyer().setBuyerId(registerBill.getUserId());
+//        tradeDto.getBuyer().setBuyerType(BuyerTypeEnum.NORMAL_BUYER);
+
+
         ProductStock updatablePS = new ProductStock();
         updatablePS.setId(productStock.getId());
         updatablePS.setStockWeight(productStock.getStockWeight().add(registerBill.getWeight()));
         updatablePS.setTradeDetailNum(productStock.getTradeDetailNum() + 1);
         this.productStockService.updateSelective(updatablePS);
 
-        ProductStockInput psInput = new ProductStockInput();
-        psInput.setTradeWeight(registerBill.getWeight());
-        psInput.setProductStockId(productStock.getProductStockId());
-
-
-        List<TradeDetailInputDto> tradeDetailInputList = new ArrayList<>();
-        psInput.setTradeDetailInputList(tradeDetailInputList);
-
-        TradeDetailInputDto tradeDetailInputDto = new TradeDetailInputDto();
-        tradeDetailInputDto.setBillId(registerBill.getBillId());
-        tradeDetailInputDto.setTradeWeight(registerBill.getWeight());
-        tradeDetailInputList.add(tradeDetailInputDto);
-
-        this.checkInput(tradeDto, Arrays.asList(psInput));
-
-        TradeOrder tradeOrder = this.createTradeOrder(tradeDto);
-
-
-        List<TradeRequest> tradeRequestList = StreamEx.of(psInput).map(productStockInput -> {
-            TradeRequest tradeRequest = this.createTradeRequest(tradeDto, productStockInput, tradeOrder, productStockInput.getTradeWeight());
-            List<TradeRequestDetail> tradeRequestDetailList = this.createTradeRequestDetailForInput(productStockInput.getTradeDetailInputList(), tradeRequest);
-            return tradeRequest;
-        }).toList();
-
-
-        this.dealTradeOrder(tradeOrder.getTradeOrderId(), TradeOrderStatusEnum.FINISHED);
-//        this.productRpcService.create(registerBill, Optional.empty());
-        return Optional.of(tradeOrder);
-
+//        ProductStockInput psInput = new ProductStockInput();
+//        psInput.setTradeWeight(registerBill.getWeight());
+//        psInput.setProductStockId(productStock.getProductStockId());
+//
+//
+//        List<TradeDetailInputDto> tradeDetailInputList = new ArrayList<>();
+//        psInput.setTradeDetailInputList(tradeDetailInputList);
+//
+//        TradeDetailInputDto tradeDetailInputDto = new TradeDetailInputDto();
+//        tradeDetailInputDto.setBillId(registerBill.getBillId());
+//        tradeDetailInputDto.setTradeWeight(registerBill.getWeight());
+//        tradeDetailInputList.add(tradeDetailInputDto);
+//
+//        this.checkInput(tradeDto, Arrays.asList(psInput));
+//
+//        TradeOrder tradeOrder = this.createTradeOrder(tradeDto);
+//
+//
+//        List<TradeRequest> tradeRequestList = StreamEx.of(psInput).map(productStockInput -> {
+//            TradeRequest tradeRequest = this.createTradeRequest(tradeDto, productStockInput, tradeOrder, productStockInput.getTradeWeight());
+//            List<TradeRequestDetail> tradeRequestDetailList = this.createTradeRequestDetailForInput(productStockInput.getTradeDetailInputList(), tradeRequest);
+//            return tradeRequest;
+//        }).toList();
+//
+//        this.dealTradeOrder(tradeOrder, TradeOrderStatusEnum.FINISHED, tradeRequestList);
+//        return Optional.of(tradeOrder);
+        this.productRpcService.createRegCreate(buyerTD.getId(), productStock.getMarketId(), Optional.empty());
+        return Optional.empty();
     }
 
     /**
@@ -270,7 +281,7 @@ public class TradeOrderService extends BaseServiceImpl<TradeOrder, Long> {
             List<TradeRequestDetail> tradeRequestDetailList = this.createTradeRequestDetailForInput(productStockInput.getTradeDetailInputList(), tradeRequest);
             return tradeRequest;
         }).toList();
-        this.dealTradeOrder(tradeOrder.getTradeOrderId(), TradeOrderStatusEnum.FINISHED);
+        this.dealTradeOrder(tradeOrder, TradeOrderStatusEnum.FINISHED, tradeRequestList);
         return tradeOrder;
     }
 
@@ -294,7 +305,7 @@ public class TradeOrderService extends BaseServiceImpl<TradeOrder, Long> {
             List<TradeRequestDetail> tradeRequestDetailList = this.createTradeRequestDetailForInput(productStockInput.getTradeDetailInputList(), tradeRequest);
             return tradeRequest;
         }).toList();
-        this.dealTradeOrder(tradeOrder.getTradeOrderId(), TradeOrderStatusEnum.FINISHED);
+        this.dealTradeOrder(tradeOrder, TradeOrderStatusEnum.FINISHED, tradeRequestList);
         return tradeOrder;
     }
 
@@ -330,7 +341,7 @@ public class TradeOrderService extends BaseServiceImpl<TradeOrder, Long> {
 
         List<TradeRequest> tradeRequestList = StreamEx.of(productStockInputList).map(productStockInput -> {
             TradeRequest tradeRequest = this.createTradeRequest(tradeDto, productStockInput, tradeOrder, productStockInput.getTradeWeight());
-            List<TradeRequestDetail> tradeRequestDetailList = this.createTradeRequestDetailForInput(productStockInput.getTradeDetailInputList(), tradeRequest);
+            List<TradeRequestDetail> tradeRequestDetailList = this.findOrCreateTradeRequestDetail(tradeRequest);
             return tradeRequest;
         }).toList();
         return tradeOrder;
@@ -339,25 +350,22 @@ public class TradeOrderService extends BaseServiceImpl<TradeOrder, Long> {
     /**
      * deal trade order
      *
-     * @param tradeOrderId
+     * @param tradeOrderItem
      * @param tradeOrderStatusEnum
+     * @param tradeRequestList
      */
-    private void dealTradeOrder(Long tradeOrderId, TradeOrderStatusEnum tradeOrderStatusEnum) {
+    private void dealTradeOrder(TradeOrder tradeOrderItem, TradeOrderStatusEnum tradeOrderStatusEnum, List<TradeRequest> tradeRequestList) {
 
         if (TradeOrderStatusEnum.NONE == tradeOrderStatusEnum) {
             return;
         }
-        TradeOrder tradeOrderItem = this.get(tradeOrderId);
         TradeOrderTypeEnum tradeOrderTypeEnum = TradeOrderTypeEnum.fromCode(tradeOrderItem.getOrderType()).orElseThrow(() -> {
             return new TraceBizException("交易类型错误");
         });
 
-
-        TradeRequest trQ = new TradeRequest();
-        trQ.setTradeOrderId(tradeOrderId);
-        for (TradeRequest tradeRequest : this.tradeRequestService.listByExample(trQ)) {
+        for (TradeRequest tradeRequest : tradeRequestList) {
             if (tradeOrderStatusEnum.equalsToCode(tradeRequest.getOrderStatus())) {
-                return;
+                continue;
             }
             TradeRequest updatableTradeRequest = new TradeRequest();
             updatableTradeRequest.setId(tradeRequest.getId());
@@ -371,6 +379,110 @@ public class TradeOrderService extends BaseServiceImpl<TradeOrder, Long> {
     }
 
     /**
+     * 处理交易数据
+     *
+     * @param tradeRequest
+     * @param trd
+     * @param tradeOrderTypeEnum
+     */
+    private void dealTradeRequestDetail(TradeRequest tradeRequest, TradeRequestDetail trd, TradeOrderTypeEnum tradeOrderTypeEnum) {
+
+
+        TradeDetail sellerTD = this.tradeDetailService.get(trd.getTradeDetailId());
+        RegisterBill registerBill = this.billService.get(sellerTD.getBillId());
+//        if (TradeOrderTypeEnum.NONE != tradeOrderTypeEnum) {
+//            registerBill = this.billService.get(sellerTD.getBillId());
+//        }
+
+//        if (sellerTD != null) {
+        LOGGER.info("seller tradedetail id={},stockweight={}", sellerTD.getId(), sellerTD.getStockWeight());
+//        }
+        TradeDetail buyerTD = this.createTradeDetail(registerBill, tradeRequest);
+
+        TradeDetail updatableBuyerTD = new TradeDetail();
+        updatableBuyerTD.setId(buyerTD.getId());
+        updatableBuyerTD.setStockWeight(trd.getTradeWeight());
+        updatableBuyerTD.setTotalWeight(trd.getTradeWeight());
+        updatableBuyerTD.setSaleStatus(SaleStatusEnum.FOR_SALE.getCode());
+        updatableBuyerTD.setParentId(null);
+
+        //分销时候buyerProductStock为空
+        Optional<ProductStock> buyerProductStock = this.createOrFindProductStock(registerBill, tradeRequest.getBuyerId(), tradeRequest.getBuyerName());
+        buyerProductStock.ifPresent(bp -> {
+            updatableBuyerTD.setProductStockId(bp.getProductStockId());
+            LOGGER.debug("buyerProductStock id={},stockweight={},tradeweight={}", bp.getId(), bp.getStockWeight(), trd.getTradeWeight());
+        });
+//        if (TradeOrderTypeEnum.NONE == tradeOrderTypeEnum) {
+//            updatableBuyerTD.setBatchNo(this.tradeDetailService.buildParentBatchNo(registerBill));
+//            updatableBuyerTD.setParentBatchNo(this.tradeDetailService.buildParentBatchNo(registerBill));
+//            updatableBuyerTD.setTradeType(TradeTypeEnum.NONE.getCode());
+//            this.tradeDetailService.updateSelective(updatableBuyerTD);
+//            LOGGER.info("buyer tradedetail id={},stockweight={},tradeweight={}", updatableBuyerTD.getId(), updatableBuyerTD.getStockWeight(), trd.getTradeWeight());
+//            this.productRpcService.createRegCreate(updatableBuyerTD.getId(), tradeRequest.getBuyerMarketId(), Optional.empty());
+//            return;
+//        }
+
+        buyerProductStock.ifPresent(bp -> {
+
+            ProductStock updatableBuyerPS = new ProductStock();
+            updatableBuyerPS.setId(bp.getId());
+            updatableBuyerPS.setStockWeight(bp.getStockWeight().add(trd.getTradeWeight()));
+            updatableBuyerPS.setTradeDetailNum(bp.getTradeDetailNum() + 1);
+            this.productStockService.updateSelective(updatableBuyerPS);
+        });
+
+        LOGGER.debug("seller id={},name={}", sellerTD.getBuyerId(), sellerTD.getBuyerName());
+        updatableBuyerTD.setBatchNo(DateUtil.format(new Date(), "yyyy-MM-dd HH:mm:ss"));
+        updatableBuyerTD.setParentBatchNo(this.tradeDetailService.buildParentBatchNo(sellerTD));
+        updatableBuyerTD.setCheckinRecordId(sellerTD.getCheckinRecordId());
+        updatableBuyerTD.setCheckoutRecordId(sellerTD.getCheckoutRecordId());
+        updatableBuyerTD.setCheckinStatus(sellerTD.getCheckinStatus());
+        updatableBuyerTD.setCheckoutStatus(sellerTD.getCheckoutStatus());
+        updatableBuyerTD.setTradeType(TradeTypeEnum.SEPARATE_SALES.getCode());
+
+        ProductStock sellerProductStock = this.createOrFindProductStock(registerBill, sellerTD.getBuyerId(), sellerTD.getBuyerName()).orElseThrow(() -> {
+            return new TraceBizException("创建/查询卖家库存失败");
+        });
+        LOGGER.debug("sellerProductStock id={},sellerid={},stockweight={},tradeweight={}", sellerProductStock.getId(), sellerProductStock.getUserId(), sellerProductStock.getStockWeight(), trd.getTradeWeight());
+
+//        updatableSellerPS.setStockWeight(sellerProductStock.getStockWeight().subtract(trd.getTradeWeight()));
+
+        TradeDetail updatableSellerTD = new TradeDetail();
+        updatableSellerTD.setId(sellerTD.getId());
+        updatableSellerTD.setSoftWeight(sellerTD.getSoftWeight().subtract(trd.getTradeWeight()));
+        if (sellerTD.getStockWeight().compareTo(BigDecimal.ZERO) == 0 && updatableSellerTD.getSoftWeight().compareTo(BigDecimal.ZERO) == 0) {
+
+            updatableSellerTD.setSaleStatus(SaleStatusEnum.NOT_FOR_SALE.getCode());
+
+            ProductStock updatableSellerPS = new ProductStock();
+            updatableSellerPS.setId(sellerProductStock.getId());
+            updatableSellerPS.setTradeDetailNum(sellerProductStock.getTradeDetailNum() - 1);
+            this.productStockService.updateSelective(updatableSellerPS);
+        }
+
+//                    if (trd.getId() == null) {
+//                        this.tradeRequestDetailService.insertSelective(trd);
+//                    }
+
+        this.tradeDetailService.updateSelective(updatableSellerTD);
+        updatableBuyerTD.setParentId(sellerTD.getId());
+        LOGGER.info("buyer tradedetail id={},stockweight={}", updatableBuyerTD.getId(), updatableBuyerTD.getStockWeight());
+        this.tradeDetailService.updateSelective(updatableBuyerTD);
+
+
+        this.productRpcService.createRegCreate(updatableBuyerTD.getId(), tradeRequest.getBuyerMarketId(), Optional.empty());
+        this.productRpcService.release(sellerTD.getThirdPartyStockId(), sellerProductStock.getMarketId(), trd.getTradeWeight());
+        this.productRpcService.deductRegDetail(sellerTD.getTradeDetailId(), tradeRequest.getSellerMarketId(), trd.getTradeWeight(), Optional.empty());
+//                    this.productRpcService.handleTradeStocks(
+//                            Lists.newArrayList(this.tradeDetailService.get(updatableBuyerTD.getId()))
+//                            , Lists.newArrayList(this.tradeDetailService.get(updatableSellerTD.getId()))
+//                            , Optional.empty()
+//                            , tradeRequest.getSellerMarketId());
+
+    }
+
+
+    /**
      * 处理
      *
      * @param tradeRequest
@@ -378,109 +490,25 @@ public class TradeOrderService extends BaseServiceImpl<TradeOrder, Long> {
      * @param tradeOrderTypeEnum
      */
     private void dealTradeRequest(TradeRequest tradeRequest, TradeOrderStatusEnum tradeOrderStatusEnum, TradeOrderTypeEnum tradeOrderTypeEnum) {
-        {
-            List<TradeRequestDetail> tradeRequestDetailList = this.findOrCreateTradeRequestDetail(tradeRequest);
-            for (TradeRequestDetail trd : tradeRequestDetailList) {
+        List<TradeRequestDetail> tradeRequestDetailList = this.findOrCreateTradeRequestDetail(tradeRequest);
 
-                if (TradeOrderStatusEnum.FINISHED == tradeOrderStatusEnum) {
+        for (TradeRequestDetail trd : tradeRequestDetailList) {
+            if (TradeOrderStatusEnum.FINISHED == tradeOrderStatusEnum) {
+                dealTradeRequestDetail(tradeRequest, trd, tradeOrderTypeEnum);
+            } else if (TradeOrderStatusEnum.CANCELLED == tradeOrderStatusEnum) {
+                TradeDetail sellerTD = this.tradeDetailService.get(trd.getTradeDetailId());
+                TradeDetail td = new TradeDetail();
+                td.setId(sellerTD.getId());
+                td.setStockWeight(sellerTD.getStockWeight().add(trd.getTradeWeight()));
+                td.setSoftWeight(sellerTD.getSoftWeight().subtract(trd.getTradeWeight()));
+                this.tradeDetailService.updateSelective(td);
 
-                    RegisterBill registerBill = this.billService.get(trd.getBillId());
-                    TradeDetail sellerTD = this.tradeDetailService.get(trd.getTradeDetailId());
+                ProductStock productStock = this.productStockService.get(sellerTD.getProductStockId());
 
-                    if (TradeOrderTypeEnum.NONE != tradeOrderTypeEnum) {
-                        registerBill = this.billService.get(sellerTD.getBillId());
-                    }
-
-                    if (sellerTD != null) {
-                        LOGGER.info("seller tradedetail id={},stockweight={}", sellerTD.getId(), sellerTD.getStockWeight());
-                    }
-                    TradeDetail buyerTD = this.createTradeDetail(registerBill, tradeRequest);
-
-                    TradeDetail updatableBuyerTD = new TradeDetail();
-                    updatableBuyerTD.setId(buyerTD.getId());
-                    updatableBuyerTD.setStockWeight(trd.getTradeWeight());
-                    updatableBuyerTD.setTotalWeight(trd.getTradeWeight());
-                    updatableBuyerTD.setSaleStatus(SaleStatusEnum.FOR_SALE.getCode());
-                    updatableBuyerTD.setParentId(null);
-
-                    //分销时候buyerProductStock为空
-                    Optional<ProductStock> buyerProductStock = this.createOrFindProductStock(registerBill, tradeRequest.getBuyerId(), tradeRequest.getBuyerName());
-                    buyerProductStock.ifPresent(bp -> {
-                        updatableBuyerTD.setProductStockId(bp.getProductStockId());
-                        LOGGER.debug("buyerProductStock id={},stockweight={},tradeweight={}", bp.getId(), bp.getStockWeight(), trd.getTradeWeight());
-                    });
-                    if (TradeOrderTypeEnum.NONE == tradeOrderTypeEnum) {
-                        updatableBuyerTD.setBatchNo(this.tradeDetailService.buildParentBatchNo(registerBill));
-                        updatableBuyerTD.setParentBatchNo(this.tradeDetailService.buildParentBatchNo(registerBill));
-                        updatableBuyerTD.setTradeType(TradeTypeEnum.NONE.getCode());
-                        this.tradeDetailService.updateSelective(updatableBuyerTD);
-                        LOGGER.info("buyer tradedetail id={},stockweight={},tradeweight={}", updatableBuyerTD.getId(), updatableBuyerTD.getStockWeight(), trd.getTradeWeight());
-                        this.productRpcService.createRegCreate(updatableBuyerTD.getId(), tradeRequest.getBuyerMarketId(), Optional.empty());
-//                        this.productRpcService.handleTradeStocks(
-//                                Lists.newArrayList(this.tradeDetailService.get(updatableBuyerTD.getId()))
-//                                , Lists.newArrayList()
-//                                , Optional.empty()
-//                                , tradeRequest.getSellerMarketId());
-                        continue;
-                    }
-
-                    buyerProductStock.ifPresent(bp -> {
-
-                        ProductStock updatableBuyerPS = new ProductStock();
-                        updatableBuyerPS.setId(bp.getId());
-                        updatableBuyerPS.setStockWeight(bp.getStockWeight().add(trd.getTradeWeight()));
-                        updatableBuyerPS.setTradeDetailNum(bp.getTradeDetailNum() + 1);
-                        this.productStockService.updateSelective(updatableBuyerPS);
-                    });
-
-                    LOGGER.debug("seller id={},name={}", sellerTD.getBuyerId(), sellerTD.getBuyerName());
-                    updatableBuyerTD.setBatchNo(DateUtil.format(new Date(), "yyyy-MM-dd HH:mm:ss"));
-                    updatableBuyerTD.setParentBatchNo(this.tradeDetailService.buildParentBatchNo(sellerTD));
-                    updatableBuyerTD.setCheckinRecordId(sellerTD.getCheckinRecordId());
-                    updatableBuyerTD.setCheckoutRecordId(sellerTD.getCheckoutRecordId());
-                    updatableBuyerTD.setCheckinStatus(sellerTD.getCheckinStatus());
-                    updatableBuyerTD.setCheckoutStatus(sellerTD.getCheckoutStatus());
-                    updatableBuyerTD.setTradeType(TradeTypeEnum.SEPARATE_SALES.getCode());
-
-                    ProductStock sellerProductStock = this.createOrFindProductStock(registerBill, sellerTD.getBuyerId(), sellerTD.getBuyerName()).orElseThrow(() -> {
-                        return new TraceBizException("创建/查询卖家库存失败");
-                    });
-                    LOGGER.debug("sellerProductStock id={},sellerid={},stockweight={},tradeweight={}", sellerProductStock.getId(), sellerProductStock.getUserId(), sellerProductStock.getStockWeight(), trd.getTradeWeight());
-                    ProductStock updatableSellerPS = new ProductStock();
-                    updatableSellerPS.setId(sellerProductStock.getId());
-                    updatableSellerPS.setStockWeight(sellerProductStock.getStockWeight().subtract(trd.getTradeWeight()));
-
-                    TradeDetail updatableSellerTD = new TradeDetail();
-                    updatableSellerTD.setId(sellerTD.getId());
-                    updatableSellerTD.setStockWeight(sellerTD.getStockWeight().subtract(trd.getTradeWeight()));
-                    if (updatableSellerTD.getStockWeight().compareTo(BigDecimal.ZERO) == 0) {
-                        updatableSellerTD.setSaleStatus(SaleStatusEnum.NOT_FOR_SALE.getCode());
-                        updatableSellerPS.setTradeDetailNum(sellerProductStock.getTradeDetailNum() - 1);
-                    }
-                    this.productStockService.updateSelective(updatableSellerPS);
-//                    if (trd.getId() == null) {
-//                        this.tradeRequestDetailService.insertSelective(trd);
-//                    }
-
-                    this.tradeDetailService.updateSelective(updatableSellerTD);
-                    updatableBuyerTD.setParentId(sellerTD.getId());
-                    LOGGER.info("buyer tradedetail id={},stockweight={}", updatableBuyerTD.getId(), updatableBuyerTD.getStockWeight());
-                    this.tradeDetailService.updateSelective(updatableBuyerTD);
-
-
-                    this.productRpcService.createRegCreate(updatableBuyerTD.getId(), tradeRequest.getBuyerMarketId(), Optional.empty());
-                    this.productRpcService.deductRegDetail(sellerTD.getTradeDetailId(), tradeRequest.getSellerMarketId(), trd.getTradeWeight(), Optional.empty());
-//                    this.productRpcService.handleTradeStocks(
-//                            Lists.newArrayList(this.tradeDetailService.get(updatableBuyerTD.getId()))
-//                            , Lists.newArrayList(this.tradeDetailService.get(updatableSellerTD.getId()))
-//                            , Optional.empty()
-//                            , tradeRequest.getSellerMarketId());
-
-                }
-
+                this.productRpcService.release(sellerTD.getThirdPartyStockId(), productStock.getMarketId(), trd.getTradeWeight());
+            } else {
 
             }
-
 
         }
 
@@ -535,21 +563,31 @@ public class TradeOrderService extends BaseServiceImpl<TradeOrder, Long> {
         StreamEx.of(detailInputList).forEach(trinput -> {
             TradeRequestDetail tradeRequestDetail = new TradeRequestDetail();
             tradeRequestDetail.setTradeRequestId(tradeRequest.getTradeRequestId());
+            TradeDetail tradeDetail = new TradeDetail();
+            tradeDetail.setId(trinput.getTradeDetailId());
+
             if (trinput.getTradeDetailId() != null) {
-                TradeDetail tradeDetail = this.tradeDetailService.get(trinput.getTradeDetailId());
-                if (tradeDetail == null) {
+                TradeDetail td = this.tradeDetailService.get(trinput.getTradeDetailId());
+                if (td == null) {
                     throw new TraceBizException("批次数据不存在");
                 }
-                if (tradeDetail.getStockWeight().compareTo(trinput.getTradeWeight()) < 0) {
-                    throw new TraceBizException("购买[" + tradeDetail.getProductName() + "]重量不能超过批次库存重量");
+                if (td.getStockWeight().compareTo(trinput.getTradeWeight()) < 0) {
+                    throw new TraceBizException("购买[" + td.getProductName() + "]重量不能超过批次库存重量");
                 }
-                tradeRequestDetail.setTradeDetailId(tradeDetail.getTradeDetailId());
-                tradeRequestDetail.setBillId(tradeDetail.getBillId());
-            } else if (trinput.getBillId() != null) {
-                tradeRequestDetail.setBillId(trinput.getBillId());
+                tradeRequestDetail.setTradeDetailId(td.getTradeDetailId());
+                tradeRequestDetail.setBillId(td.getBillId());
+
+                tradeDetail.setSoftWeight(td.getSoftWeight().add(trinput.getTradeWeight()));
             } else {
                 throw new TraceBizException("批次参数错误");
             }
+            this.tradeDetailService.updateSelective(tradeDetail);
+
+            ProductStock productStock = new ProductStock();
+            productStock.setId(productStockItem.getId());
+            productStock.setStockWeight(productStockItem.getStockWeight().subtract(trinput.getTradeWeight()));
+            this.productStockService.updateSelective(productStock);
+
 
             tradeRequestDetail.setTradeWeight(trinput.getTradeWeight());
             this.tradeRequestDetailService.insertSelective(tradeRequestDetail);
@@ -557,6 +595,15 @@ public class TradeOrderService extends BaseServiceImpl<TradeOrder, Long> {
         });
 
         return tradeRequestDetailList;
+    }
+
+    /**
+     * @param tradeRequest
+     * @param tradeRequest
+     * @return
+     */
+    public List<TradeRequestDetail> createTradeRequestDetail(TradeRequest tradeRequest) {
+        return this.findOrCreateTradeRequestDetail(tradeRequest);
     }
 
     /**
@@ -585,6 +632,11 @@ public class TradeOrderService extends BaseServiceImpl<TradeOrder, Long> {
             return tradeRequestDetailList;
         }
 
+        ProductStock productStock = new ProductStock();
+        productStock.setId(productStockItem.getId());
+        productStock.setStockWeight(productStockItem.getStockWeight().subtract(totalTradeWeight));
+        this.productStockService.updateSelective(productStock);
+
         TradeDetailQueryDto tradeDetailQuery = new TradeDetailQueryDto();
         tradeDetailQuery.setSaleStatus(SaleStatusEnum.FOR_SALE.getCode());
         tradeDetailQuery.setProductStockId(productStockItem.getId());
@@ -593,22 +645,35 @@ public class TradeOrderService extends BaseServiceImpl<TradeOrder, Long> {
         tradeDetailQuery.setMinStockWeight(BigDecimal.ZERO);
 
         List<TradeDetail> tradeDetailList = this.tradeDetailService.listByExample(tradeDetailQuery);
-        for (TradeDetail td : tradeDetailList) {
+        for (TradeDetail tradeDetail : tradeDetailList) {
             if (BigDecimal.ZERO.compareTo(totalTradeWeight) >= 0) {
                 break;
             }
+            TradeDetail td = new TradeDetail();
+            td.setId(tradeDetail.getId());
+
             TradeRequestDetail tradeRequestDetail = new TradeRequestDetail();
-            tradeRequestDetail.setTradeDetailId(td.getTradeDetailId());
+            tradeRequestDetail.setTradeDetailId(tradeDetail.getTradeDetailId());
             tradeRequestDetail.setTradeRequestId(tradeRequest.getTradeRequestId());
-            if (totalTradeWeight.compareTo(td.getStockWeight()) >= 0) {
-                tradeRequestDetail.setTradeWeight(td.getStockWeight());
-                totalTradeWeight = totalTradeWeight.subtract(td.getStockWeight());
+
+            BigDecimal softWeight = BigDecimal.ZERO;
+            if (totalTradeWeight.compareTo(tradeDetail.getStockWeight()) >= 0) {
+                tradeRequestDetail.setTradeWeight(tradeDetail.getStockWeight());
+                td.setStockWeight(BigDecimal.ZERO);
+                totalTradeWeight = totalTradeWeight.subtract(tradeDetail.getStockWeight());
             } else {
                 tradeRequestDetail.setTradeWeight(totalTradeWeight);
+                td.setStockWeight(tradeDetail.getStockWeight().subtract(totalTradeWeight));
                 totalTradeWeight = BigDecimal.ZERO;
             }
+
             this.tradeRequestDetailService.insertSelective(tradeRequestDetail);
             tradeRequestDetailList.add(tradeRequestDetail);
+
+            td.setSoftWeight(tradeDetail.getSoftWeight().add(tradeRequestDetail.getTradeWeight()));
+            this.tradeDetailService.updateSelective(td);
+            this.productRpcService.lock(tradeDetail.getThirdPartyStockId(), productStockItem.getMarketId(), tradeRequestDetail.getTradeWeight());
+
         }
         return tradeRequestDetailList;
     }
@@ -625,6 +690,7 @@ public class TradeOrderService extends BaseServiceImpl<TradeOrder, Long> {
         }
         ProductStock psQuery = new ProductStock();
         psQuery.setUserId(userId);
+        psQuery.setMarketId(registerBill.getMarketId());
         // query.setPreserveType(tradeDetailItem.getPreserveType());
         psQuery.setProductId(registerBill.getProductId());
         psQuery.setWeightUnit(registerBill.getWeightUnit());
@@ -635,6 +701,7 @@ public class TradeOrderService extends BaseServiceImpl<TradeOrder, Long> {
         ProductStock batchStockItem = StreamEx.of(this.productStockService.listByExample(psQuery)).findFirst().orElseGet(() -> {
             //创建初始BatchStock
             ProductStock batchStock = new ProductStock();
+            batchStock.setMarketId(registerBill.getMarketId());
             batchStock.setUserId(userId);
             batchStock.setUserName(userName);
             batchStock.setPreserveType(registerBill.getPreserveType());
@@ -691,10 +758,8 @@ public class TradeOrderService extends BaseServiceImpl<TradeOrder, Long> {
         if (productStock == null) {
             throw new TraceBizException("购买商品不存在");
         }
-        if (TradeOrderTypeEnum.NONE != tradeDto.getTradeOrderType()) {
-            if (!seller.getSellerId().equals(productStock.getUserId())) {
-                throw new TraceBizException("没有权限销售当前商品");
-            }
+        if (!seller.getSellerId().equals(productStock.getUserId())) {
+            throw new TraceBizException("没有权限销售当前商品");
         }
 
 

@@ -10,7 +10,10 @@ import io.swagger.annotations.ApiModelProperty;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
+import javax.persistence.Column;
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.List;
 
 public class CreateRegisterBillInputDto {
@@ -216,6 +219,33 @@ public class CreateRegisterBillInputDto {
      */
     private String corporateName;
 
+
+    /**
+     * 到场时间
+     */
+    private Date arrivalDatetime;
+
+    /**
+     * 到货摊位
+     */
+    private List<String> arrivalTallynos;
+
+    public Date getArrivalDatetime() {
+        return arrivalDatetime;
+    }
+
+    public void setArrivalDatetime(Date arrivalDatetime) {
+        this.arrivalDatetime = arrivalDatetime;
+    }
+
+    public List<String> getArrivalTallynos() {
+        return arrivalTallynos;
+    }
+
+    public void setArrivalTallynos(List<String> arrivalTallynos) {
+        this.arrivalTallynos = arrivalTallynos;
+    }
+
     public String getName() {
         return name;
     }
@@ -335,6 +365,9 @@ public class CreateRegisterBillInputDto {
 //        registerBill.setIsCheckin(YesOrNoEnum.NO.getCode());
         registerBill.setCheckinStatus(CheckinStatusEnum.NONE.getCode());
 //        registerBill.setOrderType(this.getOrderType());
+
+        registerBill.setArrivalTallynos(this.getArrivalTallynos());
+        registerBill.setArrivalDatetime(this.getArrivalDatetime());
         return registerBill;
     }
 

@@ -34,7 +34,20 @@ public class UapRpcService {
     FirmRpcService firmRpcService;
     @Autowired
     UserUrlRedis userUrlRedis;
-
+    /**
+     * 当前登录用户名和id
+     * @return
+     */
+    public OperatorUser getCurrentOperatorOrEx() {
+        return this.getCurrentUserTicket().map(ut -> {
+            OperatorUser dto = new OperatorUser(ut.getId(), ut.getRealName());
+            dto.setMarketId(ut.getFirmId());
+            dto.setMarketName(ut.getFirmName());
+            return dto;
+        }).orElseThrow(()->{
+            return new TraceBizException("请先登录");
+        });
+    }
     /**
      * 当前登录用户名和id
      *
@@ -99,8 +112,9 @@ public class UapRpcService {
     }
 
     /**
-     * SB
+     * 是否有访问权限
      *
+     * @param method
      * @param url
      * @return
      */

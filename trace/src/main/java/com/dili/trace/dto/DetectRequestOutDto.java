@@ -1,5 +1,6 @@
 package com.dili.trace.dto;
 
+import com.alibaba.fastjson.annotation.JSONField;
 import com.dili.ss.domain.annotation.Like;
 import com.dili.ss.domain.annotation.Operator;
 import com.dili.trace.domain.DetectRecord;
@@ -14,6 +15,7 @@ import io.swagger.annotations.ApiModelProperty;
 import javax.persistence.Column;
 import javax.persistence.Transient;
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
 
@@ -166,6 +168,31 @@ public class DetectRequestOutDto extends DetectRequest {
      */
     @Transient
     private DetectRecord latestDetectRecord;
+
+    /**
+     * 到货摊位
+     */
+    @Transient
+    private List<String> arrivalTallynos;
+
+    @JSONField(format = "yyyy-MM-dd HH:mm")
+    private LocalDateTime arrivalDatetime;
+
+    public LocalDateTime getArrivalDatetime() {
+        return arrivalDatetime;
+    }
+
+    public void setArrivalDatetime(LocalDateTime arrivalDatetime) {
+        this.arrivalDatetime = arrivalDatetime;
+    }
+
+    public List<String> getArrivalTallynos() {
+        return arrivalTallynos;
+    }
+
+    public void setArrivalTallynos(List<String> arrivalTallynos) {
+        this.arrivalTallynos = arrivalTallynos;
+    }
 
     public Long getLatestDetectRecordId() {
         return latestDetectRecordId;

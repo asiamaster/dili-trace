@@ -324,4 +324,5 @@ public class QrCodeService {
             return argb;
         }
     }
+
 }

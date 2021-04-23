@@ -83,7 +83,7 @@ public class DetectTaskServiceImpl implements DetectTaskService {
 
                 RegisterBillDto domain = new RegisterBillDto();
                 domain.setIdList(billIdList);
-                domain.setSort("bill_type,id");
+                domain.setSort("bill_type,sample_code");
                 domain.setOrder("DESC,ASC");
                 List<RegisterBill> list = this.billService.listByExample(domain);
                 try {

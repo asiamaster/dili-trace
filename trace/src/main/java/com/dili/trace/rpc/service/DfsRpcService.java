@@ -129,13 +129,17 @@ public class DfsRpcService {
     private String uploadAndCheckOutput(MultipartFile multipartFile) {
         try {
             BaseOutput<String> out = this.dfsRpc.fileUpload(multipartFile, accessToken);
-            if (out != null && out.isSuccess() && StringUtils.isNotBlank(out.getData())) {
-                return out.getData();
+            if(out!=null){
+                if (out.isSuccess() && StringUtils.isNotBlank(out.getData())) {
+                    return out.getData();
+                }
+                logger.error("上传文件错误:{}",out.getMessage());
+            }else{
+                logger.error("上传文件错误:{}","没有返回BaseOutput");
             }
-            throw new TraceBizException(out.getMessage());
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
-            throw new TraceBizException("上传文件失败");
         }
+        throw new TraceBizException("上传文件失败");
     }
 }

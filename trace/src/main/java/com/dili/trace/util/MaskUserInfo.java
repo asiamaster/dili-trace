@@ -1,8 +1,5 @@
 package com.dili.trace.util;
 
-import com.dili.trace.domain.Customer;
-import com.dili.trace.domain.UserInfo;
-import com.dili.uap.sdk.session.SessionContext;
 import org.apache.commons.lang3.StringUtils;
 
 public class MaskUserInfo {
@@ -41,6 +38,7 @@ public class MaskUserInfo {
 		return phone;
 		
 	}
+
 
 	private static String replace(String str,int startIndex,int length,String replacement) {
 		

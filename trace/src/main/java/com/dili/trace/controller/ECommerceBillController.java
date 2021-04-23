@@ -197,8 +197,8 @@ public class ECommerceBillController {
      * @param modelMap
      * @return
      */
-    @RequestMapping(value = "/view/{id}", method = RequestMethod.GET)
-    public String view(ModelMap modelMap, @PathVariable Long id) {
+    @RequestMapping(value = "/view.html", method = RequestMethod.GET)
+    public String view(ModelMap modelMap,Long id) {
         RegisterBill bill = this.billService.get(id);
         if (bill == null) {
             return "";

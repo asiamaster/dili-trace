@@ -6,11 +6,16 @@ import com.dili.trace.domain.QualityTraceTradeBill;
 import javax.persistence.Column;
 import java.util.List;
 
-public interface QualityTraceTradeBillDto extends QualityTraceTradeBill {
-	@Column(name = "`match_status`")
-	@Operator(Operator.IN)
-	List<Integer> getMatchStatusList();
+public class QualityTraceTradeBillDto extends QualityTraceTradeBill {
+    @Column(name = "`match_status`")
+    @Operator(Operator.IN)
+    private List<Integer> matchStatusList;
 
-	void setMatchStatusList(List<Integer> matchStatusList);
+    public List<Integer> getMatchStatusList() {
+        return matchStatusList;
+    }
 
+    public void setMatchStatusList(List<Integer> matchStatusList) {
+        this.matchStatusList = matchStatusList;
+    }
 }

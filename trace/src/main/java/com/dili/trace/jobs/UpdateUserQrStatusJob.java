@@ -2,10 +2,13 @@ package com.dili.trace.jobs;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
 
+import com.dili.trace.dto.query.UserQrHistoryQueryDto;
 import com.dili.trace.service.RegisterBillService;
 
+import com.dili.trace.service.UserQrHistoryService;
 import org.apache.commons.lang3.time.DateFormatUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.slf4j.Logger;
@@ -20,15 +23,20 @@ public class UpdateUserQrStatusJob implements CommandLineRunner {
     private static final Logger logger = LoggerFactory.getLogger(UpdateUserQrStatusJob.class);
     @Autowired
     RegisterBillService billService;
+    @Autowired
+    UserQrHistoryService userQrHistoryService;
 
     @Scheduled(cron = "0 0/2 * * * ?")
     public void execute() {
         LocalDateTime now = LocalDateTime.now();
-        Date start = this.start(now);
-        Date end = this.end(now);
-        // logger.info("开始执行任务: 根据 {}-{} 之内报备单数据更新用户颜色码",DateFormatUtils.format(start, "yyyy-MM-dd HH:mm:ss"),DateFormatUtils.format(end, "yyyy-MM-dd HH:mm:ss") );
+        LocalDateTime start = this.start(now);
+        LocalDateTime end = this.end(now);
+        logger.info("开始执行任务: 根据 {}-{} 之内报备单数据更新用户颜色码",start.format(DateTimeFormatter.ofPattern( "yyyy-MM-dd HH:mm:ss")),end.format(DateTimeFormatter.ofPattern( "yyyy-MM-dd HH:mm:ss")) );
         try {
-            this.billService.updateAllUserQrStatusByRegisterBillNum(start, end);
+            UserQrHistoryQueryDto historyQueryDto=new UserQrHistoryQueryDto();
+            historyQueryDto.setCreatedStart(start);
+            historyQueryDto.setCreatedEnd(end);
+            this.userQrHistoryService.updateUserQrForExpire(historyQueryDto);
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
         }
@@ -40,23 +48,22 @@ public class UpdateUserQrStatusJob implements CommandLineRunner {
 
     }
 
-    protected Date start(LocalDateTime now) {
-        Date start = Date.from(
-                now.minusDays(6).atZone(ZoneId.systemDefault()).toInstant());
+    protected LocalDateTime start(LocalDateTime now) {
+        LocalDateTime start = now.minusDays(6);
         return start;
     }
 
-    protected Date end(LocalDateTime now) {
-        Date end = Date.from(now.atZone(ZoneId.systemDefault()).toInstant());
+    protected LocalDateTime end(LocalDateTime now) {
+        LocalDateTime end =now;
         return end;
     }
 
     public static void main(String[] args) {
         LocalDateTime now = LocalDateTime.now();
         UpdateUserQrStatusJob job = new UpdateUserQrStatusJob();
-        Date start = job.start(now);
-        Date end = job.end(now);
-        logger.info("{}-{}",DateFormatUtils.format(start, "yyyy-MM-dd HH:mm:ss"),DateFormatUtils.format(end, "yyyy-MM-dd HH:mm:ss") );
+        LocalDateTime start = job.start(now);
+        LocalDateTime end = job.end(now);
+        logger.info("{}-{}",start,end);
     }
 
 }

@@ -56,8 +56,6 @@ public class ECommerceBillApi {
     SeparateSalesRecordService separateSalesRecordService;
     @Autowired
     LoginSessionContext sessionContext;
-    @Autowired
-    UserService userService;
 
     /**
      * 当前用户

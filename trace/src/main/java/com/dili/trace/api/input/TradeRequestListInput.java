@@ -45,6 +45,17 @@ public class TradeRequestListInput extends TradeRequest {
     @Transient
     private List<ProductStockInput> batchStockList;
 
+    @Transient
+    private Long tradeMarketId;
+
+    public Long getTradeMarketId() {
+        return tradeMarketId;
+    }
+
+    public void setTradeMarketId(Long tradeMarketId) {
+        this.tradeMarketId = tradeMarketId;
+    }
+
     /**
      * @return List<BatchStockInput> return the batchStockList
      */

@@ -188,19 +188,7 @@
     group by verify_status
   </select>
 
-  <select id="selectUserIdWithouBill" parameterType="com.dili.trace.api.input.UserQueryDto" resultType="java.lang.Long">
-    select id from `user` where id not in(
-    select user_id from register_bill where is_deleted=0
-    <if test="createdStart != null">
-      <![CDATA[ AND #{createdStart}<=created ]]>
-    </if>
-    <if test="createdEnd != null">
-      <![CDATA[AND created <=#{createdEnd}]]>
-    </if>
-    )
-    <![CDATA[ AND `user`.qr_status <>#{qrStatus}]]>
-
-  </select>
+  
   <select id="selectBillReportData"  parameterType="com.dili.trace.dto.TraceReportQueryDto" resultType="com.dili.trace.dto.TraceReportDto">
 
     select * from (select DISTINCT  area from tally_area_no
@@ -745,18 +733,25 @@
   </select>
 
   <select id="groupByState" parameterType="com.dili.trace.dto.RegisterBillDto" resultType="com.dili.trace.dto.RegisterBillStaticsDto">
-    SELECT SUM( CASE WHEN r.`detect_result`=1 THEN 1 ELSE 0 END)AS 'passNum',
-    SUM( CASE WHEN r.`detect_result`=0 THEN 1 ELSE 0 END)AS 'nopassNum',
-    SUM( CASE WHEN (r.`detect_source`=2 AND r.`detect_result`  IN (0,1) )THEN 1 ELSE 0 END)AS 'checkNum',
-    SUM( CASE WHEN r.`detect_type`=30 THEN 1 ELSE 0 END)AS 'recheckNum',
-    SUM( CASE WHEN b.`has_origin_certifiy`=1 THEN 1 ELSE 0 END) AS 'hasOriginCertifiyNum',
-    SUM( CASE WHEN b.`has_detect_report`=1 THEN 1 ELSE 0 END) AS 'hasDetectReportNum',
-    SUM( CASE WHEN r.`detect_source`=1 THEN 1 ELSE 0 END)AS 'sampleCheckNum',
-    SUM( CASE WHEN r.`detect_source`=2 THEN 1 ELSE 0 END)AS 'autoCheckNum',
-    SUM( CASE WHEN b.`check_sheet_id` IS NOT NULL THEN 1 ELSE 0 END)AS 'hasCheckSheetNum',
-    COUNT( DISTINCT b.`check_sheet_id`)AS 'diffCheckSheetNum'
+    SELECT SUM( CASE WHEN (`detect_result`=1) THEN 1 ELSE 0 END)AS 'passNum',
+    SUM( CASE WHEN (`detect_result`=2) THEN 1 ELSE 0 END) AS 'nopassNum',
+    SUM( CASE WHEN (`detect_type`=20)THEN 1 ELSE 0 END) AS 'checkNum',
+    SUM( CASE WHEN (`detect_type`=30) THEN 1 ELSE 0 END) AS 'recheckNum',
+    SUM( CASE WHEN (`has_origin_certifiy`=1) THEN 1 ELSE 0 END) AS 'hasOriginCertifiyNum',
+    SUM( CASE WHEN (`has_detect_report`=1) THEN 1 ELSE 0 END) AS 'hasDetectReportNum',
+    SUM( CASE WHEN (`detect_source`=1) THEN 1 ELSE 0 END)AS 'sampleCheckNum',
+    SUM( CASE WHEN (`detect_source`=2) THEN 1 ELSE 0 END)AS 'autoCheckNum',
+    SUM( CASE WHEN (`check_sheet_id` IS NOT NULL) THEN 1 ELSE 0 END)AS 'hasCheckSheetNum',
+    COUNT( DISTINCT `check_sheet_id`)AS 'diffCheckSheetNum'
+
+    from (
+
+    select r.`detect_result`,r.`detect_type`,b.has_origin_certifiy,b.has_detect_report,r.detect_source,b.check_sheet_id
     FROM register_bill b LEFT JOIN detect_request r ON (b.`detect_request_id` = r.`id`)
     where 1=1
+    <if test="marketId != null">
+      and b.`market_id` = #{marketId}
+    </if>
     <if test="registerSource != null">
       and b.`register_source` = #{registerSource,jdbcType=TINYINT}
     </if>
@@ -769,16 +764,16 @@
     <if test="billType !=  null">
       and b.`bill_type` = #{billType}
     </if>
-    <if test="createdStart != null  and createdStart!=''">
+    <if test="createdStart != null ">
       and b.`created`>=  #{createdStart}
     </if>
-    <if test="createdEnd != null  and createdEnd!=''">
+    <if test="createdEnd != null">
       and #{createdEnd}>= b.`created`
     </if>
-    <if test="latestDetectTimeTimeStart != null and latestDetectTimeTimeStart!=''">
+    <if test="latestDetectTimeTimeStart != null">
       and b.`latest_detect_time`>=  #{latestDetectTimeTimeStart}
     </if>
-    <if test="latestDetectTimeTimeEnd != null  and latestDetectTimeTimeEnd!=''">
+    <if test="latestDetectTimeTimeEnd != null">
       and #{latestDetectTimeTimeEnd}>= b.`latest_detect_time`
     </if>
 
@@ -812,6 +807,8 @@
         AND (b.`check_sheet_id` is  null)
       </if>
     </if>
+    group by b.id
+    )bills
   </select>
 
   <update id="doRemoveReportAndCertifiy" parameterType="com.dili.trace.domain.RegisterBill">

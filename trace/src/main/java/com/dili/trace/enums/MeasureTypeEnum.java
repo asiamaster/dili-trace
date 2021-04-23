@@ -47,4 +47,9 @@ public enum  MeasureTypeEnum {
     public void setCode(Integer code) {
         this.code = code;
     }
+
+    //获取字符串类型编码  用于页面判断
+    public String getStringCode() {
+        return String.valueOf(this.code);
+    }
 }

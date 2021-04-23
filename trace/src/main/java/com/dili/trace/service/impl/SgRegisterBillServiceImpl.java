@@ -26,6 +26,7 @@ import com.dili.trace.service.*;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
 import com.google.common.collect.Lists;
+import com.dili.trace.rpc.service.UidRestfulRpcService;
 import one.util.streamex.StreamEx;
 import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.collections4.CollectionUtils;
@@ -51,7 +52,7 @@ import java.util.stream.Collectors;
 public class SgRegisterBillServiceImpl implements SgRegisterBillService {
     private static final Logger logger = LoggerFactory.getLogger(SgRegisterBillServiceImpl.class);
     @Autowired
-    com.dili.trace.rpc.service.UidRestfulRpcService uidRestfulRpcService;
+    UidRestfulRpcService uidRestfulRpcService;
     @Autowired
     QualityTraceTradeBillService qualityTraceTradeBillService;
     @Autowired
@@ -68,27 +69,24 @@ public class SgRegisterBillServiceImpl implements SgRegisterBillService {
     DetectTaskService detectTaskService;
     @Autowired
     BillService billService;
-    @Resource
+    @Autowired
     RegisterBillMapper billMapper;
     @Autowired
     ImageCertService imageCertService;
     @Autowired
     DetectRequestService detectRequestService;
-    @Resource
+    @Autowired
     RegisterBillService registerBillService;
+    @Autowired
+    UapRpcService uapRpcService;
 
     @Transactional
     @Override
-    public Long createRegisterBill(RegisterBill inputBill,OperatorUser operatorUser) {
-//        BaseOutput recheck = checkBill(registerBill);
-//        if (!recheck.isSuccess()) {
-//            throw new TraceBizException(recheck.getMessage());
-//        }
+    public Long createRegisterBill(RegisterBill inputBill, OperatorUser operatorUser) {
 
         inputBill.setHasDetectReport(0);
         inputBill.setHasOriginCertifiy(0);
         inputBill.setHasHandleResult(0);
-        inputBill.setVersion(1);
         inputBill.setCreated(new Date());
         inputBill.setModified(new Date());
         inputBill.setIsDeleted(YesOrNoEnum.NO.getCode());
@@ -277,14 +275,14 @@ public class SgRegisterBillServiceImpl implements SgRegisterBillService {
 //	}
     @Transactional
     @Override
-    public int auditRegisterBill(Long id, BillVerifyStatusEnum verifyStatusEnum,OperatorUser operatorUser) {
+    public int auditRegisterBill(Long id, BillVerifyStatusEnum verifyStatusEnum, OperatorUser operatorUser) {
         RegisterBill registerBill = this.billService.getAvaiableBill(id).orElseThrow(()->{
             return new TraceBizException("数据不存在或已删除");
         });
         return auditRegisterBill(verifyStatusEnum, registerBill,operatorUser);
     }
 
-    private int auditRegisterBill(BillVerifyStatusEnum verifyStatusEnum, RegisterBill registerBill,OperatorUser operatorUser) {
+    private int auditRegisterBill(BillVerifyStatusEnum verifyStatusEnum, RegisterBill registerBill, OperatorUser operatorUser) {
         if (BillVerifyStatusEnum.WAIT_AUDIT.equalsToCode(registerBill.getVerifyStatus())) {
             registerBill.setOperatorName(operatorUser.getName());
             registerBill.setOperatorId(operatorUser.getId());
@@ -315,7 +313,7 @@ public class SgRegisterBillServiceImpl implements SgRegisterBillService {
 
     @Transactional
     @Override
-    public int undoRegisterBill(Long id,OperatorUser operatorUser) {
+    public int undoRegisterBill(Long id, OperatorUser operatorUser) {
         return billService.getAvaiableBill(id).map(item -> {
 
             // 待审核、已退回 可以撤销
@@ -344,7 +342,7 @@ public class SgRegisterBillServiceImpl implements SgRegisterBillService {
 
     @Transactional
     @Override
-    public int autoCheckRegisterBillFromApp(Long id , OperatorUser operatorUser) {
+    public int autoCheckRegisterBillFromApp(Long id, OperatorUser operatorUser) {
         RegisterBill registerBillItem = this.billService.getAvaiableBill(id).orElseThrow(()->{
             return new TraceBizException("数据不存在或已删除");
         });
@@ -410,7 +408,7 @@ public class SgRegisterBillServiceImpl implements SgRegisterBillService {
 
     @Transactional
     @Override
-    public BaseOutput doBatchUndo(List<Long> idList,OperatorUser operatorUser) {
+    public BaseOutput doBatchUndo(List<Long> idList, OperatorUser operatorUser) {
 
         StreamEx.of(idList).forEach(registerBillId -> {
             try {
@@ -424,7 +422,7 @@ public class SgRegisterBillServiceImpl implements SgRegisterBillService {
     }
 
     @Override
-    public BaseOutput doBatchSamplingCheck(List<Long> idList,OperatorUser operatorUser) {
+    public BaseOutput doBatchSamplingCheck(List<Long> idList, OperatorUser operatorUser) {
         BatchResultDto<String> dto = new BatchResultDto<>();
         for (Long id : idList) {
             RegisterBill registerBill = this.billService.getAvaiableBill(id).orElse(null);
@@ -508,7 +506,7 @@ public class SgRegisterBillServiceImpl implements SgRegisterBillService {
 
     @Transactional
     @Override
-    public int samplingCheckRegisterBill(Long id,OperatorUser operatorUser) {
+    public int samplingCheckRegisterBill(Long id, OperatorUser operatorUser) {
         RegisterBill registerBill = this.billService.getAvaiableBill(id).orElseThrow(()->{
             return new TraceBizException("数据不存在或已删除");
         });
@@ -524,7 +522,7 @@ public class SgRegisterBillServiceImpl implements SgRegisterBillService {
         return samplingCheckRegisterBill(registerBill, operatorUser);
     }
 
-    private int samplingCheckRegisterBill(RegisterBill registerBillItem,OperatorUser operatorUser) {
+    private int samplingCheckRegisterBill(RegisterBill registerBillItem, OperatorUser operatorUser) {
         if(BillVerifyStatusEnum.NO_PASSED.equalsToCode(registerBillItem.getVerifyStatus())||BillVerifyStatusEnum.DELETED.equalsToCode(registerBillItem.getVerifyStatus())){
             throw new TraceBizException("当前登记单不能进行接单");
         }
@@ -562,7 +560,7 @@ public class SgRegisterBillServiceImpl implements SgRegisterBillService {
 
     @Transactional
     @Override
-    public int spotCheckRegisterBill(Long id,OperatorUser operatorUser) {
+    public int spotCheckRegisterBill(Long id, OperatorUser operatorUser) {
         RegisterBill registerBill = this.billService.getAvaiableBill(id).orElseThrow(()->{
             return new TraceBizException("数据不存在或已删除");
         });
@@ -571,7 +569,7 @@ public class SgRegisterBillServiceImpl implements SgRegisterBillService {
 
     @Transactional
     @Override
-    public int spotCheckRegisterBillFromApp(Long id ,OperatorUser operatorUser) {
+    public int spotCheckRegisterBillFromApp(Long id, OperatorUser operatorUser) {
         RegisterBill registerBillItem = this.billService.getAvaiableBill(id).orElseThrow(()->{
             return new TraceBizException("数据不存在或已删除");
         });
@@ -607,7 +605,7 @@ public class SgRegisterBillServiceImpl implements SgRegisterBillService {
 
     @Transactional
     @Override
-    public int reviewCheckRegisterBill(Long id,OperatorUser operatorUser) {
+    public int reviewCheckRegisterBill(Long id, OperatorUser operatorUser) {
         RegisterBill registerBill = this.billService.getAvaiableBill(id).orElseThrow(()->{
             return new TraceBizException("数据不存在或已删除");
         });
@@ -669,6 +667,7 @@ public class SgRegisterBillServiceImpl implements SgRegisterBillService {
 //        return this.billService.update(updatableBill);
     }
 
+
     @Override
     public QualityTraceTradeBillOutDto findQualityTraceTradeBill(String tradeNo) {
         if (StringUtils.isBlank(tradeNo)) {
@@ -678,7 +677,7 @@ public class SgRegisterBillServiceImpl implements SgRegisterBillService {
         if (qualityTraceTradeBill == null) {
             return null;
         }
-        QualityTraceTradeBillOutDto dto = DTOUtils.newDTO(QualityTraceTradeBillOutDto.class);
+        QualityTraceTradeBillOutDto dto = new QualityTraceTradeBillOutDto();
         dto.setQualityTraceTradeBill(qualityTraceTradeBill);
 
         RegisterBill registerBill = new RegisterBill();
@@ -713,7 +712,7 @@ public class SgRegisterBillServiceImpl implements SgRegisterBillService {
         }
         // 查询交易单信息
         // if(StringUtils.isNotBlank(registerBill.getCode())) {
-        // QualityTraceTradeBill example = DTOUtils.newDTO(QualityTraceTradeBill.class);
+        // QualityTraceTradeBill example = new QualityTraceTradeBill();
         // example.setRegisterBillCode(registerBill.getCode());
         // List<QualityTraceTradeBill> qualityTraceTradeBillList =
         // this.qualityTraceTradeBillService
@@ -726,11 +725,7 @@ public class SgRegisterBillServiceImpl implements SgRegisterBillService {
         return dto;
     }
 
-    @Override
-    public RegisterBillStaticsDto groupByState(RegisterBillDto dto) {
-        dto.setBillType(BillTypeEnum.REGISTER_BILL.getCode());
-        return this.billMapper.groupByState(dto);
-    }
+
 
     @Override
     public RegisterBillOutputDto conversionDetailOutput(RegisterBill registerBill) {
@@ -742,7 +737,7 @@ public class SgRegisterBillServiceImpl implements SgRegisterBillService {
             BeanUtil.copyProperties(registerBill, outputDto);
         }
         // 查询交易单信息
-        QualityTraceTradeBill example = DTOUtils.newDTO(QualityTraceTradeBill.class);
+        QualityTraceTradeBill example = new QualityTraceTradeBill();
         example.setRegisterBillCode(registerBill.getCode());
         List<QualityTraceTradeBill> qualityTraceTradeBillList = this.qualityTraceTradeBillService
                 .listByExample(example);
@@ -860,40 +855,6 @@ public class SgRegisterBillServiceImpl implements SgRegisterBillService {
         return registerBill.getId();
     }
 
-    @Override
-    public Long doEdit(RegisterBill input) {
-        if (input == null || input.getId() == null) {
-            throw new TraceBizException("参数错误");
-        }
-        RegisterBill registerBill = this.billService.getAvaiableBill(input.getId()).orElseThrow(() -> {
-            return new TraceBizException("数据错误");
-        });
-
-        if (BillVerifyStatusEnum.WAIT_AUDIT.equalsToCode(registerBill.getVerifyStatus())) {
-            throw new TraceBizException("数据状态错误");
-        }
-
-        //if (input.getRegisterSource().intValue() == RegisterSourceEnum.TALLY_AREA.getCode().intValue()) {
-        // 理货区
-        registerBill.setPlate(input.getPlate());
-        //} else {
-
-        //}
-        this.checkPlate(registerBill);
-        this.usualAddressService.increaseUsualAddressTodayCount(UsualAddressTypeEnum.REGISTER,
-                registerBill.getOriginId(), input.getOriginId());
-        registerBill.setProductId(input.getProductId());
-        registerBill.setProductName(input.getProductName());
-
-        registerBill.setOriginId(input.getOriginId());
-        registerBill.setOriginName(input.getOriginName());
-
-        registerBill.setWeight(input.getWeight());
-
-        // registerBill.setOriginCertifiyUrl(input.getOriginCertifiyUrl());
-        this.billService.updateSelective(registerBill);
-        return registerBill.getId();
-    }
 
     @Override
     public Long doUploadDetectReport(RegisterBill input) {
@@ -994,7 +955,7 @@ public class SgRegisterBillServiceImpl implements SgRegisterBillService {
     }
 
     @Override
-    public BaseOutput doRemoveReportAndCertifiyNew(ReportAndCertifiyRemoveDto removeDto) {
+    public BaseOutput doRemoveReportAndCertifiyNew(ReportAndCertifiyRemoveDto removeDto, OperatorUser operatorUser) {
         RegisterBill item = this.billService.getAvaiableBill(removeDto.getId()).orElseThrow(()->{
             return new TraceBizException("数据不存在或已删除");
         });
@@ -1053,9 +1014,10 @@ public class SgRegisterBillServiceImpl implements SgRegisterBillService {
     }
 
     @Override
-    public RegisterBill findHighLightBill(RegisterBillDto input,OperatorUser operatorUser) throws Exception {
+    public RegisterBill findHighLightBill(RegisterBillDto input, OperatorUser operatorUser) throws Exception {
         RegisterBillDto dto = new RegisterBillDto();
         dto.setOperatorId(operatorUser.getId());
+        dto.setMarketId(operatorUser.getMarketId());
 //        dto.setState(RegisterBillStateEnum.WAIT_AUDIT.getCode());
         dto.setVerifyStatus(BillVerifyStatusEnum.WAIT_AUDIT.getCode());
         dto.setRows(1);
@@ -1099,61 +1061,7 @@ public class SgRegisterBillServiceImpl implements SgRegisterBillService {
         return out.toString();
     }
 
-    @Override
-    public String listStaticsPage(RegisterBillDto dto) throws Exception {
-        if (StringUtils.isNotBlank(dto.getAttrValue())) {
-            switch (dto.getAttr()) {
-                case "code":
-                    dto.setCode(dto.getAttrValue());
-                    break;
-                case "plate":
-                    dto.setLikePlate(dto.getAttrValue());
-                    break;
-                case "tallyAreaNo":
-                    // registerBill.setTallyAreaNo(registerBill.getAttrValue());
-                    dto.setLikeTallyAreaNo(dto.getAttrValue());
-                    break;
-                case "latestDetectOperator":
-                    dto.setLatestDetectOperator(dto.getAttrValue());
-                    break;
-                case "name":
-                    dto.setName(dto.getAttrValue());
-                    break;
-                case "productName":
-                    dto.setLikeProductName(dto.getAttrValue());
-                    break;
-                case "likeSampleCode":
-                    dto.setLikeSampleCode(dto.getAttrValue());
-                    break;
-            }
-        }
-        StringBuilder sql = this.buildDynamicCondition(dto);
-        if (sql.length() > 0) {
-            dto.setMetadata(IDTO.AND_CONDITION_EXPR, sql.toString());
-        }
-        dto.setBillType(BillTypeEnum.REGISTER_BILL.getCode());
-//        dto.setLatestDetectTimeTimeStart(StringUtils.trimToNull(dto.getLatestDetectTimeTimeStart()));
-//        dto.setLatestDetectTimeTimeEnd(StringUtils.trimToNull(dto.getLatestDetectTimeTimeEnd()));
 
-//        dto.setCreatedStart(StringUtils.trimToNull(dto.getCreatedStart()));
-//        dto.setCreatedEnd(StringUtils.trimToNull(dto.getCreatedEnd()));
-        if (dto.getPage() == null || dto.getPage() < 0) {
-            dto.setPage(1);
-        }
-        if (dto.getRows() == null || dto.getRows() <= 0) {
-            dto.setRows(10);
-        }
-        PageHelper.startPage(dto.getPage(), dto.getRows());
-        PageHelper.orderBy(dto.getSort() + " " + dto.getOrder());
-        List<RegisterBillDto> list = this.billMapper.queryListByExample(dto);
-        Page<RegisterBillDto> page = (Page) list;
-
-        EasyuiPageOutput out = new EasyuiPageOutput();
-        List results = ValueProviderUtils.buildDataByProvider(dto, list);
-        out.setRows(results);
-        out.setTotal(page.getTotal());
-        return out.toString();
-    }
 
     private StringBuilder buildDynamicCondition(RegisterBillDto registerBill) {
         StringBuilder sql = new StringBuilder();

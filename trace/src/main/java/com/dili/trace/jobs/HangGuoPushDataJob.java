@@ -9,7 +9,7 @@ import com.dili.ss.dto.IDTO;
 import com.dili.ss.util.DateUtils;
 import com.dili.trace.dao.RegisterBillMapper;
 import com.dili.trace.domain.*;
-import com.dili.trace.domain.hangguo.HangGuoCategory;
+import com.dili.trace.domain.Category;
 import com.dili.trace.dto.DetectRecordParam;
 import com.dili.trace.dto.OperatorUser;
 import com.dili.trace.dto.PushDataQueryDto;
@@ -38,12 +38,12 @@ import java.util.stream.Collectors;
  *
  * @author asa.lee
  */
-@Component
+//@Component
 public class HangGuoPushDataJob implements CommandLineRunner {
     private static final Logger logger = LoggerFactory.getLogger(HangGuoPushDataJob.class);
     @Autowired
     DataReportService dataReportService;
-    @Resource
+    @Autowired
     RegisterBillMapper registerBillMapper;
     @Autowired
     private MarketService marketService;
@@ -562,13 +562,13 @@ public class HangGuoPushDataJob implements CommandLineRunner {
             newPushFlag = false;
         }
 
-        HangGuoCategory category = new HangGuoCategory();
+        Category category = new Category();
         category.setType(CategoryTypeEnum.SUPPLEMENT.getCode());
         category.setIsShow(CategoryIsShowEnum.IS_SHOW.getCode());
         if (!newPushFlag) {
             category.setMetadata(IDTO.AND_CONDITION_EXPR, " modified >= '" + DateUtils.format(updateTime) + "'");
         }
-        List<HangGuoCategory> allQrHistories = categoryService.listByExample(category);
+        List<Category> allQrHistories = categoryService.listByExample(category);
         List<GoodsDto> categoryDtos = new ArrayList<>();
         StreamEx.of(allQrHistories).nonNull().forEach(c -> {
             GoodsDto categoryDto = new GoodsDto();

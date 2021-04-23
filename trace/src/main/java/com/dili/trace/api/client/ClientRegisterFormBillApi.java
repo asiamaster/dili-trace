@@ -95,68 +95,6 @@ public class ClientRegisterFormBillApi {
 
 	}
 
-	/**
-	 * 保存多个进门登记单
-	 * @param createListBillParam
-	 * @return
-	 */
-	@ApiOperation("保存多个进门登记单")
-	@RequestMapping(value = "/createRegisterFormBillList.api", method = RequestMethod.POST)
-	public BaseOutput<List<String>> createRegisterFormBillList(@RequestBody CreateListBillParam createListBillParam) {
-		logger.info("保存多个进门登记单:{}", JSON.toJSONString(createListBillParam));
-		if (createListBillParam == null || createListBillParam.getRegisterBills() == null) {
-			return BaseOutput.failure("参数错误");
-		}
-		try {
-
-			SessionData sessionData=this.sessionContext.getSessionData();
-			Long userId = sessionData.getUserId();
-
-			List<CreateRegisterBillInputDto> registerBills = StreamEx.of(createListBillParam.getRegisterBills())
-					.nonNull().toList();
-			if (registerBills == null) {
-				return BaseOutput.failure("没有进门登记单");
-			}
-			logger.info("保存多个进门登记单操作用户:{}，{}", sessionData.getUserId(), sessionData.getUserName());
-			List<RegisterBill> billList = this.registerBillService.createRegisterFormBillList(registerBills,createListBillParam.getUserId(), Optional.empty(), sessionData.getMarketId());
-			List<String> codeList = StreamEx.of(billList).nonNull().map(RegisterBill::getCode).toList();
-			return BaseOutput.success().setData(codeList);
-		} catch (TraceBizException e) {
-			return BaseOutput.failure(e.getMessage());
-		} catch (Exception e) {
-			logger.error(e.getMessage(), e);
-			return BaseOutput.failure("服务端出错");
-		}
-	}
-
-	/**
-	 * 单修改进门登记
-	 * @param dto
-	 * @return
-	 */
-	@ApiOperation("单修改进门登记")
-	@RequestMapping(value = "/doEditRegisterBill.api", method = RequestMethod.POST)
-	public BaseOutput doEditRegisterBill(@RequestBody CreateRegisterBillInputDto dto) {
-		logger.info("修改进门登记单:{}", JSON.toJSONString(dto));
-		if (dto == null || dto.getBillId() == null) {
-			return BaseOutput.failure("参数错误");
-		}
-		try {
-			SessionData sessionData=this.sessionContext.getSessionData();
-			CustomerExtendDto customer = this.customerRpcService
-					.findCustomerByIdOrEx(sessionContext.getSessionData().getUserId()
-							, sessionContext.getSessionData().getMarketId());
-			RegisterBill registerBill = dto.build(customer,sessionData.getMarketId());
-			logger.info("保存进门登记单:{}", JSON.toJSONString(registerBill));
-			this.registerBillService.doEditFormBill(registerBill, dto.getImageCertList(), Optional.empty());
-		} catch (TraceBizException e) {
-			return BaseOutput.failure(e.getMessage());
-		} catch (Exception e) {
-			logger.error(e.getMessage(), e);
-			return BaseOutput.failure("服务端出错");
-		}
-		return BaseOutput.success();
-	}
 
 	/**
 	 * 作废进门登记单
@@ -184,37 +122,6 @@ public class ClientRegisterFormBillApi {
 		}
 		return BaseOutput.success();
 	}
-
-	/**
-	 * 进门登记单审核(通过/进门/不通过/退回/进门待检)
-	 * @param inputDto
-	 * @return
-	 */
-	@ApiOperation(value = "进门登记单审核(通过/进门/不通过/退回/进门待检)")
-	@RequestMapping(value = "/doVerify.api", method = RequestMethod.POST)
-	public BaseOutput<Long> doVerify(@RequestBody VerifyBillInputDto inputDto) {
-		logger.info("进门登记单审核(通过/进门/不通过/退回/进门待检):{}", inputDto.getBillId());
-		try {
-			if (inputDto == null || inputDto.getVerifyStatus() == null || inputDto.getBillId() == null) {
-				return BaseOutput.failure("参数错误");
-			}
-			SessionData sessionData = this.sessionContext.getSessionData();
-
-			OperatorUser operatorUser = new OperatorUser(sessionData.getUserId(),sessionData.getUserName());
-			RegisterBill input = new RegisterBill();
-			input.setId(inputDto.getBillId());
-			input.setVerifyStatus(inputDto.getVerifyStatus());
-			input.setReason(inputDto.getReason());
-			Long id = this.registerBillService.doVerifyFormCheckIn(input,Optional.ofNullable(operatorUser));
-			return BaseOutput.success().setData(id);
-		} catch (TraceBizException e) {
-			return BaseOutput.failure(e.getMessage());
-		} catch (Exception e) {
-			logger.error(e.getMessage(), e);
-			return BaseOutput.failure("操作失败：服务端出错");
-		}
-	}
-
 	/**
 	 * 不同审核状态数据统计
 	 */

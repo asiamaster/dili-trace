@@ -1,5 +1,6 @@
 package com.dili.trace.dto;
 
+import com.dili.ss.domain.annotation.Like;
 import com.dili.ss.domain.annotation.Operator;
 import com.dili.trace.domain.RegisterHead;
 import io.swagger.annotations.ApiModelProperty;
@@ -35,6 +36,20 @@ public class RegisterHeadDto extends RegisterHead {
     @Column(name = "`remain_weight`")
     @Operator(Operator.GREAT_THAN)
     private BigDecimal minRemainWeight;
+
+    @Column(name = "`id`")
+    @Operator(Operator.IN)
+    private List<Long> idList;
+
+
+
+    /**
+     * 商品名称
+     */
+    @ApiModelProperty(value = "商品名称")
+    @Column(name = "`product_name`")
+    @Operator(Like.BOTH)
+    private String likeProductName;
     /**
      * 查询关键字
      */
@@ -47,6 +62,14 @@ public class RegisterHeadDto extends RegisterHead {
      */
     @Transient
     private String marketName;
+
+    public List<Long> getIdList() {
+        return idList;
+    }
+
+    public void setIdList(List<Long> idList) {
+        this.idList = idList;
+    }
 
     public String getCreatedStart() {
         return createdStart;
@@ -87,5 +110,13 @@ public class RegisterHeadDto extends RegisterHead {
 
     public void setMinRemainWeight(BigDecimal minRemainWeight) {
         this.minRemainWeight = minRemainWeight;
+    }
+
+    public String getLikeProductName() {
+        return likeProductName;
+    }
+
+    public void setLikeProductName(String likeProductName) {
+        this.likeProductName = likeProductName;
     }
 }

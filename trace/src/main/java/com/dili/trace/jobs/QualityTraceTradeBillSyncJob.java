@@ -55,7 +55,7 @@ public class QualityTraceTradeBillSyncJob {
 
             QualityTraceTradeBillSyncPoint pointItem = this.getSyncPoint();
             if (pointItem == null) {
-                pointItem = DTOUtils.newDTO(QualityTraceTradeBillSyncPoint.class);
+                pointItem = new QualityTraceTradeBillSyncPoint();
 
             }
             if(pointItem.getBillId()==null){
@@ -98,7 +98,7 @@ public class QualityTraceTradeBillSyncJob {
      */
     private QualityTraceTradeBillSyncPoint getSyncPoint() {
 
-        QualityTraceTradeBillSyncPoint domain = DTOUtils.newDTO(QualityTraceTradeBillSyncPoint.class);
+        QualityTraceTradeBillSyncPoint domain = new QualityTraceTradeBillSyncPoint();
 
         List<QualityTraceTradeBillSyncPoint> list = this.qualityTraceTradeBillSyncPointService.listPageByExample(domain)
                 .getDatas();

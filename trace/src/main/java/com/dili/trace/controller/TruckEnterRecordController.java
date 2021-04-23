@@ -64,13 +64,13 @@ public class TruckEnterRecordController {
     CarTypeRpcService carTypeRpcService;
     @Autowired
     UapRpcService uapRpcService;
-    @Resource
+    @Autowired
     FirmRpc firmRpc;
-    @Resource
+    @Autowired
     CustomerRpc customerRpc;
-    @Resource
+    @Autowired
     VehicleRpc vehicleRpc;
-    @Resource
+    @Autowired
     CarTypeRpc carTypeRpc;
 
     /**

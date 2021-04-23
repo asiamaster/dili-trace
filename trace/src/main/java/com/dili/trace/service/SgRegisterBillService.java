@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import com.dili.trace.events.RegisterBillMessageEvent;
+import com.dili.common.entity.SessionData;
 import com.dili.ss.domain.BaseOutput;
 import com.dili.trace.domain.ImageCert;
 import com.dili.trace.dto.*;
@@ -20,7 +21,7 @@ public interface SgRegisterBillService {
     /**
      * 查询第一条需要被高亮显示的登记单
      */
-    public RegisterBill findHighLightBill(RegisterBillDto dto,OperatorUser operatorUser) throws Exception;
+    public RegisterBill findHighLightBill(RegisterBillDto dto, OperatorUser operatorUser) throws Exception;
 
     /**
      * 分页查询数据
@@ -33,10 +34,7 @@ public interface SgRegisterBillService {
      */
     public String listBasePageByExample(RegisterBillDto query) throws Exception;
 
-    /**
-     * 查询统计页面分页数据
-     */
-    public String listStaticsPage(RegisterBillDto dto) throws Exception;
+
 
     // /**
     // * 查找任务
@@ -70,7 +68,7 @@ public interface SgRegisterBillService {
      * @param registerBill
      * @return
      */
-    Long createRegisterBill(RegisterBill registerBill,OperatorUser operatorUser);
+    Long createRegisterBill(RegisterBill registerBill, OperatorUser operatorUser);
 
     /**
      * 审核登记单
@@ -79,7 +77,7 @@ public interface SgRegisterBillService {
      * @param pass
      * @return
      */
-    int auditRegisterBill(Long id, BillVerifyStatusEnum verifyStatusEnum,OperatorUser operatorUser);
+    int auditRegisterBill(Long id, BillVerifyStatusEnum verifyStatusEnum, OperatorUser operatorUser);
 
     /**
      * 撤销交易单
@@ -87,7 +85,7 @@ public interface SgRegisterBillService {
      * @param id
      * @return
      */
-    int undoRegisterBill(Long id,OperatorUser operatorUser);
+    int undoRegisterBill(Long id, OperatorUser operatorUser);
 
     /**
      * 自动送检标记
@@ -103,7 +101,7 @@ public interface SgRegisterBillService {
      * @param id
      * @return
      */
-    int autoCheckRegisterBillFromApp(Long id,  OperatorUser operatorUser);
+    int autoCheckRegisterBillFromApp(Long id, OperatorUser operatorUser);
 
     /**
      * 采样检测标记
@@ -111,7 +109,7 @@ public interface SgRegisterBillService {
      * @param id
      * @return
      */
-    int samplingCheckRegisterBill(Long id,OperatorUser operatorUser);
+    int samplingCheckRegisterBill(Long id, OperatorUser operatorUser);
 
     /**
      * 采样检测标记-app
@@ -119,7 +117,7 @@ public interface SgRegisterBillService {
      * @param id
      * @return
      */
-    int samplingCheckRegisterBillFromApp(Long id ,OperatorUser operatorUser);
+    int samplingCheckRegisterBillFromApp(Long id, OperatorUser operatorUser);
 
     /**
      * 抽检标记
@@ -127,7 +125,7 @@ public interface SgRegisterBillService {
      * @param id
      * @return
      */
-    int spotCheckRegisterBill(Long id,OperatorUser operatorUser);
+    int spotCheckRegisterBill(Long id, OperatorUser operatorUser);
 
     /**
      * 抽检标记-app
@@ -135,7 +133,7 @@ public interface SgRegisterBillService {
      * @param id
      * @return
      */
-    int spotCheckRegisterBillFromApp(Long id ,OperatorUser operatorUser);
+    int spotCheckRegisterBillFromApp(Long id, OperatorUser operatorUser);
 
     /**
      * 复检标记
@@ -143,7 +141,7 @@ public interface SgRegisterBillService {
      * @param id
      * @return
      */
-    int reviewCheckRegisterBill(Long id,OperatorUser operatorUser);
+    int reviewCheckRegisterBill(Long id, OperatorUser operatorUser);
 
     /**
      * 通过交易单查询，未绑定就绑定
@@ -153,13 +151,7 @@ public interface SgRegisterBillService {
      */
     public QualityTraceTradeBillOutDto findQualityTraceTradeBill(String tradeNo);
 
-    /**
-     * 根据状态统计数据
-     *
-     * @param dto
-     * @return
-     */
-    public RegisterBillStaticsDto groupByState(RegisterBillDto dto);
+
 
     /**
      * 通过登记单，获取详情
@@ -209,13 +201,6 @@ public interface SgRegisterBillService {
      */
     public Long doAuditWithoutDetect(RegisterBill input);
 
-    /**
-     * 修改登记单
-     *
-     * @param input
-     * @return
-     */
-    public Long doEdit(RegisterBill input);
 
     /**
      * 批量主动送检
@@ -231,7 +216,7 @@ public interface SgRegisterBillService {
      * @param idList
      * @return
      */
-    public BaseOutput doBatchUndo(List<Long> idList,OperatorUser operatorUser);
+    public BaseOutput doBatchUndo(List<Long> idList, OperatorUser operatorUser);
 
     /**
      * 批量采样检测
@@ -239,7 +224,7 @@ public interface SgRegisterBillService {
      * @param idList
      * @return
      */
-    public BaseOutput doBatchSamplingCheck(List<Long> idList,OperatorUser operatorUser);
+    public BaseOutput doBatchSamplingCheck(List<Long> idList, OperatorUser operatorUser);
 
     /**
      * 批量审核
@@ -247,7 +232,7 @@ public interface SgRegisterBillService {
      * @param batchAuditDto
      * @return
      */
-    public BaseOutput doBatchAudit(BatchAuditDto batchAuditDto,OperatorUser operatorUser);
+    public BaseOutput doBatchAudit(BatchAuditDto batchAuditDto, OperatorUser operatorUser);
 
     /**
      * 删除产地证明及检测报告
@@ -264,7 +249,7 @@ public interface SgRegisterBillService {
      * @param removeDto
      * @return
      */
-    public BaseOutput doRemoveReportAndCertifiyNew(ReportAndCertifiyRemoveDto removeDto);
+    public BaseOutput doRemoveReportAndCertifiyNew(ReportAndCertifiyRemoveDto removeDto, OperatorUser operatorUser);
 
     /**
      * 通过采样单编号 查询登记单

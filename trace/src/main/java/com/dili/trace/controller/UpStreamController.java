@@ -1,7 +1,7 @@
 package com.dili.trace.controller;
 
 import com.dili.customer.sdk.domain.dto.CustomerExtendDto;
-import com.dili.customer.sdk.domain.query.CustomerQueryInput;
+
 import com.dili.customer.sdk.rpc.CustomerRpc;
 import com.dili.ss.domain.BaseOutput;
 import com.dili.ss.domain.BasePage;
@@ -54,7 +54,7 @@ import java.util.stream.Collectors;
 @RequestMapping("/upStream")
 public class UpStreamController {
     private static final Logger LOGGER = LoggerFactory.getLogger(UpStreamController.class);
-    @Resource
+    @Autowired
     private UserRpc userRpc;
     @Autowired
     private UpStreamService upStreamService;
@@ -235,15 +235,17 @@ public class UpStreamController {
     /**
      * 根据关键字查询
      *
-     * @param userId
-     * @param keyword
+     * @param query
      * @return
      */
-    @RequestMapping(value = "/listByKeyWord.action", method = {RequestMethod.GET, RequestMethod.POST})
+    @RequestMapping(value = "/listByKeyWord.action", method = {RequestMethod.POST})
     @ResponseBody
-    public BaseOutput queryUpStream(@RequestParam(required = true, name = "userId") Long userId, @RequestParam(required = true, name = "query") String keyword) {
+    public BaseOutput queryUpStream(@RequestBody UpStreamDto query) {
         try {
-            List<UpStream> list = this.upStreamService.queryUpStreamByKeyword(userId, keyword);
+            if(query==null||query.getUserId()==null){
+                return BaseOutput.successData(Lists.newArrayList());
+            }
+            List<UpStream> list = this.upStreamService.queryUpStreamByKeyword(query.getUserId(), query.getKeyword());
             return BaseOutput.success().setData(list);
 
         } catch (Exception e) {

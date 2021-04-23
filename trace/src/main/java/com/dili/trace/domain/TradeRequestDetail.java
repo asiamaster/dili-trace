@@ -22,13 +22,16 @@ public class TradeRequestDetail extends BaseDomain {
 
     @Column(name = "`bill_Id`")
     private Long billId;
+
     @Column(name = "`trade_weight`")
     private BigDecimal tradeWeight;
+
     /**
      * 创建时间
      */
     @Column(name = "`created`")
     private Date created;
+
 
     @Override
     public Long getId() {

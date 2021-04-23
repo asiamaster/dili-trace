@@ -2,7 +2,7 @@ package com.dili.trace.service;
 
 import com.dili.ss.base.BaseService;
 import com.dili.trace.domain.*;
-import com.dili.trace.domain.hangguo.HangGuoCategory;
+import com.dili.trace.domain.Category;
 import com.dili.trace.domain.hangguo.HangGuoTrade;
 import com.dili.trace.domain.hangguo.HangGuoUser;
 import com.dili.trace.dto.PushDataQueryDto;
@@ -23,14 +23,14 @@ public interface HangGuoDataService extends BaseService<HangGuoUser, Long> {
      *
      * @param commodityList
      */
-    void bachInsertCommodityList(List<HangGuoCategory> commodityList);
+    void bachInsertCommodityList(List<Category> commodityList);
 
     /**
      * 杭果商品插入后更新parentId
      *
      * @param category
      */
-    void updateHangGuoCommodityParent(HangGuoCategory category);
+    void updateHangGuoCommodityParent(Category category);
 
     /**
      * 根据第三方编码获取用户更新列表
@@ -53,7 +53,7 @@ public interface HangGuoDataService extends BaseService<HangGuoUser, Long> {
      * @param codeList
      * @return
      */
-    List<HangGuoCategory> getCategoryListByThirdCode(List<String> codeList);
+    List<Category> getCategoryListByThirdCode(List<String> codeList);
 
     /**
      * 根据第三方编码删除商品
@@ -192,7 +192,7 @@ public interface HangGuoDataService extends BaseService<HangGuoUser, Long> {
      * @param category
      * @return
      */
-    List<HangGuoCategory> getCategoryFaultList(HangGuoCategory category);
+    List<Category> getCategoryFaultList(Category category);
 
     /**
      * 获取商品详情
@@ -200,12 +200,12 @@ public interface HangGuoDataService extends BaseService<HangGuoUser, Long> {
      * @param parentCode
      * @return
      */
-    HangGuoCategory getCategoryByThirdCode(String parentCode);
+    Category getCategoryByThirdCode(String parentCode);
 
     /**
      * 更新商品信息
      *
      * @param categoryList
      */
-    void batchUpdateCategoryByThirdCode(List<HangGuoCategory> categoryList);
+    void batchUpdateCategoryByThirdCode(List<Category> categoryList);
 }

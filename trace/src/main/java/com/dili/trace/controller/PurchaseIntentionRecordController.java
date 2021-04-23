@@ -46,11 +46,11 @@ public class PurchaseIntentionRecordController {
     PurchaseIntentionRecordService purchaseIntentionRecordService;
     @Autowired
     UapRpcService uapRpcService;
-    @Resource
+    @Autowired
     CustomerRpc customerRpc;
     @Autowired
     MarketService marketService;
-    @Resource
+    @Autowired
     FirmRpc firmRpc;
 
 

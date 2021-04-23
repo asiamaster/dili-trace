@@ -17,6 +17,7 @@ import com.dili.trace.domain.TradeType;
 import com.dili.trace.service.TradeTypeService;
 import com.google.common.collect.Lists;
 import org.apache.commons.collections4.CollectionUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
@@ -32,7 +33,7 @@ import java.util.Map;
 public class TradeTypeProvider implements ValueProvider {
 
 
-    @Resource
+    @Autowired
     TradeTypeService tradeTypeService;
 
     @Override

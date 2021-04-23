@@ -33,9 +33,7 @@ public class TradeInfoController {
 
     @Autowired
     private CustomerRpcService customerRpcService;
-    @Resource
-    private UserService userService;
-    @Resource
+    @Autowired
     private UserPlateService userPlateService;
     @Autowired
     UapRpcService uapRpcService;
@@ -51,7 +49,7 @@ public class TradeInfoController {
     public BaseOutput<Customer> findCustomerById(@PathVariable String customerCode) {
         Customer cust = new Customer();
         cust.setCustomerId(customerCode);
-        return customerRpcService.findCustomer(cust,uapRpcService.getCurrentFirm().get().getId()).map(c -> {
+        return customerRpcService.findCustomer(cust, uapRpcService.getCurrentFirm().get().getId()).map(c -> {
             return BaseOutput.success().setData(c);
         }).orElse(BaseOutput.failure());
     }
@@ -67,7 +65,7 @@ public class TradeInfoController {
     public BaseOutput<Customer> findCustomerByCardNo(@PathVariable String printingCard) {
         Customer cust = new Customer();
         cust.setPrintingCard(printingCard);
-        return customerRpcService.findCustomer(cust,uapRpcService.getCurrentFirm().get().getId()).map(c -> {
+        return customerRpcService.findCustomer(cust, uapRpcService.getCurrentFirm().get().getId()).map(c -> {
             return BaseOutput.success().setData(c);
         }).orElse(BaseOutput.failure());
     }
@@ -81,12 +79,8 @@ public class TradeInfoController {
     @ApiOperation("根据理货区号获取客户获取")
     @RequestMapping(value = "/tallyAreaNo/{tallyAreaNo}", method = {RequestMethod.GET, RequestMethod.POST})
     public BaseOutput<UserInfo> findUserByTallyAreaNo(@PathVariable String tallyAreaNo) {
-        UserInfo user = userService.findByTallyAreaNo(tallyAreaNo, MarketUtil.returnMarket());
-        if (user != null) {
-            return BaseOutput.success().setData(this.maskUser(user));
-        } else {
-            return BaseOutput.failure();
-        }
+
+        return BaseOutput.failure();
     }
 
     /**
@@ -104,21 +98,5 @@ public class TradeInfoController {
         return BaseOutput.success().setData(list);
     }
 
-    /**
-     * 对用户敏感信息进行遮罩
-     *
-     * @param user
-     * @return
-     */
-    private UserInfo maskUser(UserInfo user) {
-        if (this.uapRpcService.hasAccess("registerBill/create.html#user")) {
-            return user;
-        } else {
-            user.setCardNo(MaskUserInfo.maskIdNo(user.getCardNo()));
-            user.setAddr(MaskUserInfo.maskAddr(user.getAddr()));
-            return user;
-        }
-
-    }
 
 }

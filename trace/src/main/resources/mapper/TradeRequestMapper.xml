@@ -15,18 +15,6 @@
      ]]>
   </select>
 
-  <select id="selectBuyerIdWithouTradeRequest" parameterType="com.dili.trace.api.input.UserQueryDto" resultType="java.lang.Long">
-    select id from `user` where id not in(
-    select t.buyer_id from trade_request t, trade_order o where t.return_status != 20 and o.order_status=10
-    <if test="createdStart != null">
-      <![CDATA[ AND #{createdStart}<=t.created ]]>
-    </if>
-    <if test="createdEnd != null">
-      <![CDATA[AND t.created <=#{createdEnd}]]>
-    </if>
-    )
-    <![CDATA[ AND `user`.qr_status <>#{qrStatus}]]>
-  </select>
 
   <select id="selectScanOrderReport" parameterType="com.dili.trace.dto.PushDataQueryDto" resultType="com.dili.trace.dto.thirdparty.report.ReportScanCodeOrderDto">
     SELECT r.`created` orderTime, r.`buyer_id` thirdBuyId, r.`id` thirdOrderId, r.`seller_id` thirdSellId

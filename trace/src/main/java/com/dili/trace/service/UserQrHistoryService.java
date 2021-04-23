@@ -1,6 +1,5 @@
 package com.dili.trace.service;
 
-import java.text.ParseException;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Date;
@@ -9,15 +8,17 @@ import java.util.Optional;
 import com.dili.common.exception.TraceBizException;
 import com.dili.commons.glossary.YesOrNoEnum;
 import com.dili.ss.base.BaseServiceImpl;
-import com.dili.ss.dto.DTOUtils;
-import com.dili.trace.domain.RegisterBill;
-import com.dili.trace.domain.UserInfo;
-import com.dili.trace.domain.UserQrHistory;
+import com.dili.ss.domain.BasePage;
+import com.dili.trace.dao.UserQrHistoryMapper;
+import com.dili.trace.domain.*;
+import com.dili.trace.dto.query.UserQrHistoryQueryDto;
 import com.dili.trace.enums.BillVerifyStatusEnum;
-import com.dili.trace.glossary.TFEnum;
+import com.dili.trace.enums.QrHistoryEventTypeEnum;
 import com.dili.trace.glossary.UserQrStatusEnum;
-import com.google.common.base.Objects;
 
+import java.util.List;
+
+import com.github.pagehelper.Page;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Service;
@@ -25,240 +26,346 @@ import org.springframework.stereotype.Service;
 import one.util.streamex.StreamEx;
 
 @Service
-public class UserQrHistoryService extends BaseServiceImpl<UserQrHistory, Long> implements CommandLineRunner {
-	@Autowired
-	UserService userService;
-	@Autowired
-	RegisterBillService registerBillService;
-	@Autowired
-	TradeRequestService tradeRequestService;
+public class UserQrHistoryService extends TraceBaseService<UserQrHistory, Long> implements CommandLineRunner {
 
-	public void run(String... args) {
+    @Autowired
+    UserInfoService userInfoService;
+    @Autowired
+    RegisterBillService registerBillService;
+    @Autowired
+    TradeRequestService tradeRequestService;
+    @Autowired
+    BillService billService;
+    @Autowired
+    UserQrHistoryMapper qrHistoryMapper;
 
-	}
+    public void run(String... args) {
 
-	public UserQrHistory createUserQrHistoryForWithousBills(Long userId) {
-		if (userId == null) {
-			return null;
-		}
-		UserInfo userItem = this.userService.get(userId);
-		if (userItem == null) {
-			return null;
-		}
-		Integer qrStatus = UserQrStatusEnum.BLACK.getCode();
-		this.updateUserQrStatus(userItem.getId(), qrStatus);
-		return this.findLatestUserQrHistoryByUserId(userItem.getId()).filter(qrhis -> {
-			return Objects.equal(qrhis.getQrStatus(), qrStatus);
-		}).orElseGet(() -> {
-			String color = UserQrStatusEnum.fromCode(qrStatus).map(UserQrStatusEnum::getDesc)
-					.orElse(UserQrStatusEnum.BLACK.getDesc());
+    }
 
-			UserQrHistory userQrHistory = this.buildUserQrHistory(userItem, qrStatus);
-			userQrHistory.setContent("最近七天无报备且无交易单" + ",变为" + color + "码");
-			this.insertSelective(userQrHistory);
-			return userQrHistory;
-		});
+    /**
+     * 分页查询数据
+     *
+     * @param domain
+     * @return
+     */
+    public BasePage<UserQrHistory> listPageByUserQrHistoryQuery(UserQrHistoryQueryDto domain) {
+        return super.buildQuery(domain).listPageByFun(q -> {
+            return this.qrHistoryMapper.listPageByUserQrHistoryQuery(q);
+        });
+    }
 
-	}
+    /**
+     * 更新过期用户的状态
+     *
+     * @param historyQueryDto
+     */
+    public void updateUserQrForExpire(UserQrHistoryQueryDto historyQueryDto) {
+        UserQrStatusEnum qrStatusEnum = UserQrStatusEnum.BLACK;
+        //查询出符合条件的userid
+        List<Long> userInfoIdList = this.qrHistoryMapper.selectUserInfoIdWithoutHistory(historyQueryDto.getCreatedStart(), historyQueryDto.getCreatedEnd(), YesOrNoEnum.YES.getCode());
 
-	public UserQrHistory createUserQrHistoryForUserRegist(Long userId, Integer qrStatus) {
-		if (userId == null) {
-			return null;
-		}
-		UserInfo userItem = this.userService.get(userId);
-		if (userItem == null) {
-			return null;
-		}
+        StreamEx.of(userInfoIdList).forEach(userInfoId -> {
+            //锁定对应的userinfo对象
+            this.userInfoService.selectByUserIdForUpdate(userInfoId).ifPresent(userInfoItem -> {
+                //插入qrhistory对象
+                String content = "最近七天无报备且无交易单" + ",变为" + qrStatusEnum.getDesc() + "码";
+                this.buildUserQrHistory(userInfoId, qrStatusEnum, QrHistoryEventTypeEnum.NO_DATA, null).ifPresent(userQrHistory -> {
+                    userQrHistory.setContent(content);
+                    this.insertSelective(userQrHistory);
 
-		this.updateUserQrStatus(userItem.getId(), qrStatus);
+                    //更新userinfo的qr信息
+                    UserInfo userInfo = new UserInfo();
+                    userInfo.setId(userInfoItem.getId());
+                    userInfo.setQrHistoryId(userQrHistory.getId());
+                    userInfo.setPreQrStatus(userInfoItem.getQrStatus());
+                    userInfo.setQrStatus(qrStatusEnum.getCode());
+                    userInfo.setQrContent(content);
+                    this.userInfoService.updateSelective(userInfo);
+                });
+            });
 
-		return this.findLatestUserQrHistoryByUserId(userItem.getId()).filter(qrhis -> {
-			return Objects.equal(qrhis.getQrStatus(), qrStatus);
-		}).orElseGet(() -> {
-			String color = UserQrStatusEnum.fromCode(qrStatus).map(UserQrStatusEnum::getDesc)
-					.orElse(UserQrStatusEnum.BLACK.getDesc());
+        });
 
-			UserQrHistory userQrHistory = this.buildUserQrHistory(userItem, qrStatus);
-			userQrHistory.setContent("完成注册,默认为" + color + "码");
-			this.insertSelective(userQrHistory);
-			return userQrHistory;
-		});
-	}
+    }
 
-	public UserQrHistory createUserQrHistoryForVerifyBill(RegisterBill billItem,Long userId) {
-		if (billItem == null) {
-			return null;
-		}
-		BillVerifyStatusEnum billVerifyStatusEnum = BillVerifyStatusEnum.fromCode(billItem.getVerifyStatus())
-				.orElse(null);
-		if (billVerifyStatusEnum == null) {
-			return null;
-		}
-		UserQrStatusEnum userQrStatus = UserQrStatusEnum.BLACK;
-		switch (billVerifyStatusEnum) {
-			case PASSED:
-				userQrStatus = UserQrStatusEnum.GREEN;
-				break;
-			case NO_PASSED:
-				userQrStatus = UserQrStatusEnum.RED;
-				break;
-			case RETURNED:
-				userQrStatus = UserQrStatusEnum.YELLOW;
-				break;
-			case WAIT_AUDIT:
-				userQrStatus = UserQrStatusEnum.YELLOW;
-				break;
-			default:
-				throw new TraceBizException("错误");
-		}
-		Integer qrStatus = userQrStatus.getCode();
-		UserInfo userItem = this.userService.get(userId);
-		if (userItem == null) {
-			return null;
-		}
+    /**
+     * createUserQrHistoryForUserRegist
+     *
+     * @param userInfoItem
+     * @param marketId
+     */
+    public void createUserQrHistoryForUserRegist(UserInfo userInfoItem, Long marketId) {
 
-		this.updateUserQrStatus(userItem.getId(), qrStatus);
-		return this.findLatestUserQrHistoryByUserId(userItem.getId()).filter(qrhis -> {
-			return Objects.equal(qrhis.getQrStatus(), qrStatus);
-		}).orElseGet(() -> {
-			String color = UserQrStatusEnum.fromCode(qrStatus).map(UserQrStatusEnum::getDesc)
-					.orElse(UserQrStatusEnum.BLACK.getDesc());
-			UserQrHistory userQrHistory = this.buildUserQrHistory(userItem, qrStatus);
-			userQrHistory.setBillId(billItem.getId());
-			userQrHistory.setVerifyStatus(billVerifyStatusEnum.getCode());
-			userQrHistory.setContent("最新操作报备单审核状态是" + billVerifyStatusEnum.getName() + ",变为" + color + "码");
-			this.insertSelective(userQrHistory);
-			return userQrHistory;
-		});
-	}
+        if (userInfoItem.getQrHistoryId() != null) {
+            return;
+        }
+        UserQrStatusEnum qrStatusEnum = UserQrStatusEnum.BLACK;
+        //插入qrhistory对象
+        String content = "完成注册,默认为" + qrStatusEnum.getDesc() + "码";
+        this.buildUserQrHistory(userInfoItem.getId(), qrStatusEnum, QrHistoryEventTypeEnum.NEW_USER, null).ifPresent(userQrHistory -> {
 
-	public UserQrHistory createUserQrHistoryForOrder(Long tradeRequestId, Long userId) {
-		if (userId == null) {
-			return null;
-		}
-		UserInfo userItem = this.userService.get(userId);
-		if (userItem == null) {
-			return null;
-		}
-		Integer qrStatus = UserQrStatusEnum.GREEN.getCode();
-		this.updateUserQrStatus(userItem.getId(), UserQrStatusEnum.GREEN.getCode());
+            userQrHistory.setContent(content);
+            this.insertSelective(userQrHistory);
 
-		return this.findLatestUserQrHistoryByUserId(userItem.getId()).filter(qrhis -> {
-			return Objects.equal(qrhis.getQrStatus(), qrStatus);
-		}).orElseGet(() -> {
-			String color = UserQrStatusEnum.fromCode(qrStatus).map(UserQrStatusEnum::getDesc)
-					.orElse(UserQrStatusEnum.GREEN.getDesc());
+            //更新userinfo的qr信息
+            UserInfo userInfo = new UserInfo();
+            userInfo.setId(userInfoItem.getId());
+            userInfo.setQrHistoryId(userQrHistory.getId());
+            userInfo.setPreQrStatus(userInfoItem.getQrStatus());
+            userInfo.setQrStatus(qrStatusEnum.getCode());
+            userInfo.setQrContent(content);
+            this.userInfoService.updateSelective(userInfo);
+        });
+    }
 
-			UserQrHistory userQrHistory = this.buildUserQrHistory(userItem, qrStatus);
-			userQrHistory.setContent("订单交易完成, 变为" + color + "码");
-			userQrHistory.setTradeRequestId(tradeRequestId);
-			this.insertSelective(userQrHistory);
-			return userQrHistory;
-		});
-	}
+    /**
+     * createUserQrHistoryForVerifyBill
+     *
+     * @param billId
+     */
+    public void createUserQrHistoryForVerifyBill(Long billId) {
+        RegisterBill billItem = this.billService.getAvaiableBill(billId).orElseThrow(() -> {
+            return new TraceBizException("登记单不存在");
+        });
+        if (billItem == null) {
+            return;
+        }
+        this.createUserQrHistoryForVerifyBill(billItem, billItem.getUserId());
+    }
+
+    /**
+     * createUserQrHistoryForVerifyBill
+     *
+     * @param billItem
+     * @param userId
+     */
+    public void createUserQrHistoryForVerifyBill(RegisterBill billItem, Long userId) {
+        if (billItem == null) {
+            return;
+        }
+        BillVerifyStatusEnum billVerifyStatusEnum = BillVerifyStatusEnum.fromCode(billItem.getVerifyStatus())
+                .orElse(null);
+        if (billVerifyStatusEnum == null) {
+            return;
+        }
+        UserQrStatusEnum userQrStatus = getUserQrStatusEnum(billVerifyStatusEnum);
+        String content = "最新操作报备单审核状态是" + billVerifyStatusEnum.getName() + ",变为" + userQrStatus.getDesc() + "码";
+
+        this.userInfoService.saveUserInfo(userId, billItem.getMarketId()).ifPresent(userInfoItem -> {
+
+//            if (userInfoItem.getQrHistoryId() != null) {
+//                return;
+//            }
+            UserQrStatusEnum qrStatusEnum = UserQrStatusEnum.BLACK;
+            //插入qrhistory对象
+            this.buildUserQrHistory(userInfoItem.getId(), qrStatusEnum, QrHistoryEventTypeEnum.REGISTER_BILL, billItem.getId()).ifPresent(userQrHistory -> {
+
+                userQrHistory.setContent(content);
+                this.insertSelective(userQrHistory);
+
+                //更新userinfo的qr信息
+                UserInfo userInfo = new UserInfo();
+                userInfo.setId(userInfoItem.getId());
+                userInfo.setQrHistoryId(userQrHistory.getId());
+                userInfo.setPreQrStatus(userInfoItem.getQrStatus());
+                userInfo.setQrStatus(qrStatusEnum.getCode());
+                userInfo.setQrContent(content);
+                this.userInfoService.updateSelective(userInfo);
+            });
+
+        });
+    }
+
+    private UserQrStatusEnum getUserQrStatusEnum(BillVerifyStatusEnum billVerifyStatusEnum) {
+        switch (billVerifyStatusEnum) {
+            case PASSED:
+                return UserQrStatusEnum.GREEN;
+            case NO_PASSED:
+                return UserQrStatusEnum.RED;
+            case RETURNED:
+                return UserQrStatusEnum.YELLOW;
+            case WAIT_AUDIT:
+                return UserQrStatusEnum.YELLOW;
+            default:
+                return UserQrStatusEnum.BLACK;
+        }
+
+    }
+
+    /**
+     * createUserQrHistoryForTradeRequest
+     *
+     * @param tradeRequestId
+     * @param userId
+     */
+    public void createUserQrHistoryForTradeRequest(Long tradeRequestId, Long userId) {
+
+        UserQrStatusEnum qrStatusEnum = UserQrStatusEnum.GREEN;
+        String content = "订单交易完成, 变为" + qrStatusEnum.getDesc() + "码";
+
+        this.userInfoService.saveUserInfo(userId, null).ifPresent(userInfoItem -> {
+
+            if (userInfoItem.getQrHistoryId() != null) {
+                return;
+            }
+
+            //插入qrhistory对象
+            this.buildUserQrHistory(userId, qrStatusEnum, QrHistoryEventTypeEnum.TRADE_REQUEST, tradeRequestId).ifPresent(userQrHistory -> {
+                userQrHistory.setContent(content);
+                this.insertSelective(userQrHistory);
+
+                //更新userinfo的qr信息
+                UserInfo userInfo = new UserInfo();
+                userInfo.setId(userInfoItem.getId());
+                userInfo.setQrHistoryId(userQrHistory.getId());
+                userInfo.setPreQrStatus(userInfoItem.getQrStatus());
+                userInfo.setQrStatus(qrStatusEnum.getCode());
+                userInfo.setQrContent(content);
+                this.userInfoService.updateSelective(userInfo);
+            });
+
+        });
 
 
-	public void rollbackUserQrStatusForOrderReturn(Long tradeRequestId, Long userId) throws ParseException {
-		if (tradeRequestId != null) {
-			UserQrHistory domain = new UserQrHistory();
-			// domain.setBillId(deletedBillId);
-			domain.setIsValid(YesOrNoEnum.NO.getCode());
+    }
 
-			UserQrHistory condition = new UserQrHistory();
-			condition.setTradeRequestId(tradeRequestId);
-			condition.setUserId(userId);
-			this.updateSelectiveByExample(domain, condition);
+    /**
+     * 计算开始时间
+     *
+     * @param now
+     * @return
+     */
+    protected Date start(LocalDateTime now) {
+        Date start = Date.from(
+                now.minusDays(6).atZone(ZoneId.systemDefault()).toInstant());
+        return start;
+    }
 
-			UserQrHistory query = new UserQrHistory();
-			query.setUserId(userId);
-			query.setPage(1);
-			query.setRows(1);
-			query.setSort("id");
-			query.setOrder("desc");
-			query.setIsValid(YesOrNoEnum.YES.getCode());
-			Integer userQrStatus = this.listPageByExample(query).getDatas().stream().findFirst()
-					.map(UserQrHistory::getQrStatus).orElse(UserQrStatusEnum.BLACK.getCode());
-			this.updateUserQrStatus(userId, userQrStatus);
-
-		}
-	}
-
-	protected Date start(LocalDateTime now) {
-		Date start = Date.from(
-				now.minusDays(6).atZone(ZoneId.systemDefault()).toInstant());
-		return start;
-	}
-
-	protected Date end(LocalDateTime now) {
-		Date end = Date.from(now.atZone(ZoneId.systemDefault()).toInstant());
-		return end;
-	}
+    /**
+     * 计算结束时间
+     *
+     * @param now
+     * @return
+     */
+    protected Date end(LocalDateTime now) {
+        Date end = Date.from(now.atZone(ZoneId.systemDefault()).toInstant());
+        return end;
+    }
 
 
-	/**
-	 * 禁止删除的报备单对应的状态记录，并恢复到前一个有效的用户二维码颜色
-	 * 
-	 * @param deletedBillId
-	 * @param userId
-	 */
-	public void rollbackUserQrStatus(Long deletedBillId, Long userId) {
-		if (deletedBillId != null) {
-			UserQrHistory domain = new UserQrHistory();
-			// domain.setBillId(deletedBillId);
-			domain.setIsValid(YesOrNoEnum.NO.getCode());
+    private Optional<UserQrHistory> buildUserQrHistory(Long userInfoId,
+                                                       UserQrStatusEnum qrStatusEnum,
+                                                       QrHistoryEventTypeEnum historyEventTypeEnum,
+                                                       Long qrHistoryEventId) {
+        return StreamEx.of(this.userInfoService.get(userInfoId)).nonNull().map(userItem -> {
+            return this.buildUserQrHistory(userItem, qrStatusEnum, historyEventTypeEnum, qrHistoryEventId);
+        }).findFirst();
 
-			UserQrHistory condition = new UserQrHistory();
-			condition.setBillId(deletedBillId);
-			condition.setUserId(userId);
-			this.updateSelectiveByExample(domain, condition);
+    }
 
-			UserQrHistory query = new UserQrHistory();
-			query.setUserId(userId);
-			query.setPage(1);
-			query.setRows(1);
-			query.setSort("id");
-			query.setOrder("desc");
-			query.setIsValid(YesOrNoEnum.YES.getCode());
-			Integer userQrStatus = this.listPageByExample(query).getDatas().stream().findFirst()
-					.map(UserQrHistory::getQrStatus).orElse(UserQrStatusEnum.BLACK.getCode());
-			this.updateUserQrStatus(userId, userQrStatus);
+    private UserQrHistory buildUserQrHistory(UserInfo userItem,
+                                             UserQrStatusEnum qrStatusEnum,
+                                             QrHistoryEventTypeEnum historyEventTypeEnum,
+                                             Long qrHistoryEventId) {
 
-		}
+        UserQrHistory userQrHistory = new UserQrHistory();
+        userQrHistory.setUserInfoId(userItem.getId());
+        userQrHistory.setQrStatus(qrStatusEnum.getCode());
+        userQrHistory.setCreated(new Date());
+        userQrHistory.setModified(new Date());
+        userQrHistory.setIsValid(YesOrNoEnum.YES.getCode());
+        userQrHistory.setQrHistoryEventId(qrHistoryEventId);
+        userQrHistory.setQrHistoryEventType(historyEventTypeEnum.getCode());
+        return userQrHistory;
 
-	}
+    }
 
-	private void updateUserQrStatus(Long userId, Integer qrStatus) {
 
-		UserInfo user = new UserInfo();
-		user.setId(userId);
-		user.setQrStatus(qrStatus);
-		// user.setPreQrStatus(userItem.getQrStatus());
-		this.userService.updateSelective(user);
+    /**
+     * 回退交易二维码记录
+     *
+     * @param tradeRequest
+     */
+    public void rollBackByTradeRequest(TradeRequest tradeRequest) {
 
-	}
+        if (tradeRequest == null || tradeRequest.getId() == null) {
+            return;
+        }
+        TradeRequest item = this.tradeRequestService.get(tradeRequest.getId());
+        Long userId = item.getBuyerId();
+        Long marketId = item.getBuyerMarketId();
+        this.userInfoService.findByUserId(userId, marketId).ifPresent(userInfo -> {
+            this.rollback(userInfo.getQrHistoryId(), userInfo.getId());
+        });
 
-	private UserQrHistory buildUserQrHistory(UserInfo userItem, Integer qrStatus) {
 
-		UserQrHistory userQrHistory = new UserQrHistory();
-		userQrHistory.setUserId(userItem.getId());
-		userQrHistory.setUserName(userItem.getName());
-		userQrHistory.setQrStatus(qrStatus);
-		userQrHistory.setCreated(new Date());
-		userQrHistory.setModified(new Date());
-		userQrHistory.setIsValid(YesOrNoEnum.YES.getCode());
-		return userQrHistory;
+    }
 
-	}
+    /**
+     * 回退报备单二维码颜色记录
+     *
+     * @param registerBill
+     */
+    public void rollbackByBill(RegisterBill registerBill) {
 
-	private Optional<UserQrHistory> findLatestUserQrHistoryByUserId(Long userId) {
-		UserQrHistory query = new UserQrHistory();
-		query.setUserId(userId);
-		query.setSort("id");
-		query.setOrder("desc");
-		query.setPage(1);
-		query.setRows(1);
-		query.setIsValid(YesOrNoEnum.YES.getCode());
-		return StreamEx.of(this.listPageByExample(query).getDatas()).findFirst();
-	}
+        if (registerBill == null || registerBill.getId() == null) {
+            return;
+        }
+        RegisterBill item = this.billService.get(registerBill.getId());
+        if (item == null) {
+            return;
+        }
+        Long userId = item.getUserId();
+        Long marketId = item.getMarketId();
+        this.userInfoService.findByUserId(userId, marketId).ifPresent(userInfo -> {
+            this.rollback(userInfo.getQrHistoryId(), userInfo.getId());
+        });
+
+    }
+
+    /**
+     * 回退记录
+     *
+     * @param userqrhistoryId
+     * @param userInfoId
+     */
+    private void rollback(Long userqrhistoryId, Long userInfoId) {
+        if (userqrhistoryId == null || userInfoId == null) {
+            return;
+        }
+
+        UserQrHistory domain = new UserQrHistory();
+        domain.setId(userqrhistoryId);
+        domain.setIsValid(YesOrNoEnum.NO.getCode());
+        this.updateSelective(domain);
+
+        UserQrHistory query = new UserQrHistory();
+        query.setUserInfoId(userInfoId);
+        query.setPage(1);
+        query.setRows(1);
+        query.setSort("id");
+        query.setOrder("desc");
+        query.setIsValid(YesOrNoEnum.YES.getCode());
+
+        UserQrHistory qrHistoryItem = StreamEx.of(this.listPageByExample(query).getDatas()).findFirst().orElse(null);
+
+        if (qrHistoryItem == null) {
+            return;
+        }
+
+        UserInfo userInfo = this.userInfoService.get(qrHistoryItem.getUserInfoId());
+        if (userInfo != null) {
+            UserInfo u = new UserInfo();
+            u.setId(userInfo.getId());
+            u.setQrHistoryId(qrHistoryItem.getId());
+            u.setPreQrStatus(userInfo.getQrStatus());
+            u.setQrStatus(qrHistoryItem.getQrStatus());
+            u.setQrContent(qrHistoryItem.getContent());
+            this.userInfoService.updateSelective(u);
+
+        }
+
+    }
 
 }

@@ -21,10 +21,10 @@ class EcommerceBillGrid extends ListPage {
         $('#printSeperatePrintReport-btn').on('click', async () => await this.openPrintSeperatePrintReport());
         $('#detail-btn').on('click', async () => await this.doDetail());
 
-        this.initAutoComplete($("[name='productName']"), function (query, done) {
+        this.initTraceAutoComplete($("[name='productName']"), function (query, done) {
             categoryController.lookupCategories(query, done)
         });
-        this.initAutoComplete($("[name='originName']"), function (query, done) {
+        this.initTraceAutoComplete($("[name='originName']"), function (query, done) {
             cityController.lookupCities(query, done)
         });
         this.grid.on('check.bs.table uncheck.bs.table', async () => await this.resetButtons());
@@ -418,7 +418,7 @@ class EcommerceBillGrid extends ListPage {
             return;
         }
         let selected_id = row[0].id;
-        let url = this.toUrl('/ecommerceBill/view/' + selected_id);
+        let url = this.toUrl('/ecommerceBill/view.html?id=' + selected_id);
         //@ts-ignore
         var dia = bs4pop.dialog({
             title: '查看电商登记单',

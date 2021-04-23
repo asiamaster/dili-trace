@@ -46,7 +46,7 @@ public class HangGuoDataUtil {
     private UserExtService userExtService;
     @Autowired
     private HangGuoDataService hangGuoDataService;
-    @Resource
+    @Autowired
     private UidRestfulRpcService uidRestfulRpcService;
     @Autowired
     private TradeOrderService tradeOrderService;
@@ -93,7 +93,7 @@ public class HangGuoDataUtil {
             c.setItemUnitName(c.getItemUnitName() == null ? null : c.getItemUnitName().trim());
         });
         List<String> list = StreamEx.of(commodityList).nonNull().map(c -> c.getItemNumber()).collect(Collectors.toList());
-        List<HangGuoCategory> existsCateGoryList = getCategoryListByThirdCode(list);
+        List<Category> existsCateGoryList = getCategoryListByThirdCode(list);
 
         Set<String> existsCodeSet = new HashSet<>();
         StreamEx.of(existsCateGoryList).nonNull().forEach(u -> {
@@ -207,13 +207,13 @@ public class HangGuoDataUtil {
         commodityCode = StreamEx.of(commodityCode).nonNull().distinct().collect(Collectors.toList());
         billNos = StreamEx.of(billNos).nonNull().distinct().collect(Collectors.toList());
         List<UserInfo> userList = getUserListByThirdPartyCode(userCode);
-        List<HangGuoCategory> categoryList = getCategoryListByThirdCode(commodityCode);
+        List<Category> categoryList = getCategoryListByThirdCode(commodityCode);
         if (CollectionUtils.isEmpty(userList) || CollectionUtils.isEmpty(categoryList)) {
             logger.info("交易数据没有对应的经营户或者商品,无法关联,不创建正式交易单");
             return;
         }
         Map<String, UserInfo> userMap = StreamEx.of(userList).nonNull().collect(Collectors.toMap(UserInfo::getThirdPartyCode, user -> user, (key1, key2) -> key1));
-        Map<String, HangGuoCategory> categoryMap = StreamEx.of(categoryList).nonNull().collect(Collectors.toMap(HangGuoCategory::getCode, category -> category, (key1, key2) -> key1));
+        Map<String, Category> categoryMap = StreamEx.of(categoryList).nonNull().collect(Collectors.toMap(Category::getCode, category -> category, (key1, key2) -> key1));
 
         //报备单库存map
         Map<Long, TradeDetail> billMap = new HashMap<>(16);
@@ -268,7 +268,7 @@ public class HangGuoDataUtil {
      * @param createTime
      * @return
      */
-    private List<TradeDetail> getTradeOrderDetailRequestList(List<HangGuoTrade> tradeList, Map<String, UserInfo> userMap, Map<String, HangGuoCategory> categoryMap,
+    private List<TradeDetail> getTradeOrderDetailRequestList(List<HangGuoTrade> tradeList, Map<String, UserInfo> userMap, Map<String, Category> categoryMap,
                                                              Map<Long, TradeDetail> billMap, Map<String, TradeRequest> tradeRequestMap, Date createTime) {
         List<TradeDetail> detailList = new ArrayList<>();
         Integer isBatched = 1;
@@ -372,7 +372,7 @@ public class HangGuoDataUtil {
      * @param createTime
      * @return
      */
-    private List<TradeRequest> getTradeOrderRequestList(List<HangGuoTrade> tradeList, Map<String, UserInfo> userMap, Map<String, HangGuoCategory> categoryMap, Map<String, TradeOrder> orderMap, Map<Long, TradeDetail> billMap, Date createTime) {
+    private List<TradeRequest> getTradeOrderRequestList(List<HangGuoTrade> tradeList, Map<String, UserInfo> userMap, Map<String, Category> categoryMap, Map<String, TradeOrder> orderMap, Map<Long, TradeDetail> billMap, Date createTime) {
         List<TradeRequest> requestList = new ArrayList<>();
         BigDecimal reportMaxAmount = new BigDecimal(reportMaxAmountInt);
         //createTime
@@ -517,11 +517,11 @@ public class HangGuoDataUtil {
     private void updateCacheTradeReportFlag(Date createTime) {
 
         //获取其用户商品集合
-        HangGuoCategory category = new HangGuoCategory();
+        Category category = new Category();
         category.setMarketId(HGMarketId);
-        List<HangGuoCategory> categoryList = categoryService.list(category);
+        List<Category> categoryList = categoryService.list(category);
         Map<String, UserInfo> userMap = getUserMap();
-        Map<String, HangGuoCategory> categoryMap = StreamEx.of(categoryList).nonNull().collect(Collectors.toMap(HangGuoCategory::getCode, c -> c, (a, b) -> a));
+        Map<String, Category> categoryMap = StreamEx.of(categoryList).nonNull().collect(Collectors.toMap(Category::getCode, c -> c, (a, b) -> a));
 
         //patch由于没有对应用户或商品导致之前的交易单没有处理
         updateCacheTradeReportFlagToTrue(userMap, categoryMap, createTime);
@@ -535,7 +535,7 @@ public class HangGuoDataUtil {
      * @param categoryMap
      * @param createTime
      */
-    private void updateCacheTradeReportFlagToFalse(Map<String, UserInfo> userMap, Map<String, HangGuoCategory> categoryMap, Date createTime) {
+    private void updateCacheTradeReportFlagToFalse(Map<String, UserInfo> userMap, Map<String, Category> categoryMap, Date createTime) {
         //大于指定的交易金额patch为无需上报
         hangGuoDataService.updateTradeReportListByBeyondAmount(reportMaxAmountInt);
         //交易单对应商品或用户关联不到
@@ -570,7 +570,7 @@ public class HangGuoDataUtil {
      *
      * @param createTime
      */
-    private void updateCacheTradeReportFlagToTrue(Map<String, UserInfo> userMap, Map<String, HangGuoCategory> categoryMap, Date createTime) {
+    private void updateCacheTradeReportFlagToTrue(Map<String, UserInfo> userMap, Map<String, Category> categoryMap, Date createTime) {
         //查询当前缓存表中无需处理的交易数据昨天-今天
         HangGuoTrade trade = new HangGuoTrade();
         trade.setHandleFlag(DataHandleFlagEnum.UN_NEED_HANDLE.getCode());
@@ -613,12 +613,12 @@ public class HangGuoDataUtil {
      */
     private void addCateGory(List<HangGuoCommodity> commodityList, Date createTime) {
 
-        List<HangGuoCategory> categoryList = conversionCommodityList(commodityList, createTime);
+        List<Category> categoryList = conversionCommodityList(commodityList, createTime);
 
         //先将杭果商品插入到溯源系统
         hangGuoDataService.bachInsertCommodityList(categoryList);
         //patch当天杭果商品的parent_id
-        HangGuoCategory category = new HangGuoCategory();
+        Category category = new Category();
         category.setType(CategoryTypeEnum.SUPPLEMENT.getCode());
         category.setCreated(createTime);
         category.setMarketId(HGMarketId);
@@ -631,9 +631,9 @@ public class HangGuoDataUtil {
      * 杭果商品容错处理,由于其上级品种编码与预定规则不符时,作一次特殊处理patch
      */
     private void hangGuoCategoryLevelFaultTolerant() {
-        HangGuoCategory category = new HangGuoCategory();
+        Category category = new Category();
         category.setMarketId(HGMarketId);
-        List<HangGuoCategory> categoryFaultList = hangGuoDataService.getCategoryFaultList(category);
+        List<Category> categoryFaultList = hangGuoDataService.getCategoryFaultList(category);
         StreamEx.of(categoryFaultList).nonNull().forEach(c -> {
             if (StringUtils.isNotBlank(c.getParentCode())) {
                 String parentCode = c.getParentCode();
@@ -654,14 +654,14 @@ public class HangGuoDataUtil {
      * @param c
      * @param count
      */
-    private void recursionCategoty(HangGuoCategory c, String parentCode, int count) {
+    private void recursionCategoty(Category c, String parentCode, int count) {
         if (count <= 0) {
             logger.info("递归结束");
             return;
         }
         logger.info("递归处理商品父节点,parentCode:" + parentCode + " |count:" + count);
         parentCode = turnSubStr(parentCode);
-        HangGuoCategory parentCategory = hangGuoDataService.getCategoryByThirdCode(parentCode);
+        Category parentCategory = hangGuoDataService.getCategoryByThirdCode(parentCode);
         if (null != parentCategory) {
             c.setParentCode(parentCategory.getCode());
             c.setParentId(parentCategory.getId());
@@ -690,7 +690,7 @@ public class HangGuoDataUtil {
      * @param createTime
      */
     private void updateCateGoryByThirdCode(List<HangGuoCommodity> updateHangGuoCommodityList, Date createTime) {
-        List<HangGuoCategory> categoryList = conversionCommodityList(updateHangGuoCommodityList, createTime);
+        List<Category> categoryList = conversionCommodityList(updateHangGuoCommodityList, createTime);
         //更新商品信息
         hangGuoDataService.batchUpdateCategoryByThirdCode(categoryList);
     }
@@ -702,12 +702,12 @@ public class HangGuoDataUtil {
      * @param createTime
      * @return
      */
-    private List<HangGuoCategory> conversionCommodityList(List<HangGuoCommodity> commodityList, Date createTime) {
-        List<HangGuoCategory> categoryList = new ArrayList();
+    private List<Category> conversionCommodityList(List<HangGuoCommodity> commodityList, Date createTime) {
+        List<Category> categoryList = new ArrayList();
         //品种集合
         CopyOnWriteArraySet<String> varietySet = new CopyOnWriteArraySet<>();
         StreamEx.of(commodityList).nonNull().forEach(c -> {
-            HangGuoCategory category = new HangGuoCategory();
+            Category category = new Category();
             category.setFullName(c.getItemName() == null ? null : c.getItemName().trim());
             category.setName(c.getItemName() == null ? null : c.getItemName().trim());
             category.setSpecification(c.getItemUnitName() == null ? null : c.getItemUnitName().trim());
@@ -745,7 +745,7 @@ public class HangGuoDataUtil {
      * @param commodity
      * @return
      */
-    private void setCommodityLevel(HangGuoCategory category, HangGuoCommodity commodity) {
+    private void setCommodityLevel(Category category, HangGuoCommodity commodity) {
         String goodsCode = commodity.getItemNumber().trim();
         String first = commodity.getFirstCateg().trim();
         String second = commodity.getSecondCateg().trim();
@@ -780,7 +780,7 @@ public class HangGuoDataUtil {
      * @param commodityCode
      * @return
      */
-    private List<HangGuoCategory> getCategoryListByThirdCode(List<String> commodityCode) {
+    private List<Category> getCategoryListByThirdCode(List<String> commodityCode) {
         if (CollectionUtils.isEmpty(commodityCode)) {
             return null;
         }

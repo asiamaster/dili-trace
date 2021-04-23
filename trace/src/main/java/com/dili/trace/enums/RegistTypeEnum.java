@@ -1,5 +1,6 @@
 package com.dili.trace.enums;
 
+import com.fasterxml.jackson.annotation.JsonValue;
 import one.util.streamex.StreamEx;
 
 import java.util.Optional;
@@ -48,6 +49,7 @@ public enum RegistTypeEnum {
 		return BillVerifyStatusEnum.WAIT_AUDIT.equalsToCode(code) || BillVerifyStatusEnum.RETURNED.equalsToCode(code);
 	}
 
+	@JsonValue
 	public Integer getCode() {
 		return code;
 	}

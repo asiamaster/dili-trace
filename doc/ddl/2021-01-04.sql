@@ -1,1 +1,0 @@
-ALTER TABLE `detect_request` ADD `detect_code` varchar(20) DEFAULT NULL COMMENT '检测单编号';

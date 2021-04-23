@@ -22,9 +22,11 @@ import com.dili.trace.api.output.VerifyStatusCountOutputDto;
 import com.dili.trace.domain.DetectRecord;
 import com.dili.trace.domain.DetectRequest;
 import com.dili.trace.domain.RegisterBill;
+import com.dili.trace.domain.RegisterTallyAreaNo;
 import com.dili.trace.dto.DetectRecordInputDto;
 import com.dili.trace.dto.DetectRequestOutDto;
 import com.dili.trace.dto.OperatorUser;
+import com.dili.trace.enums.BillTypeEnum;
 import com.dili.trace.enums.DetectResultEnum;
 import com.dili.trace.enums.DetectStatusEnum;
 import com.dili.trace.enums.DetectTypeEnum;
@@ -33,6 +35,7 @@ import com.dili.trace.service.*;
 import com.dili.trace.util.DetectRecordUtil;
 import com.dili.uap.sdk.domain.User;
 import com.dili.uap.sdk.domain.UserTicket;
+import com.google.common.collect.Lists;
 import io.swagger.annotations.Api;
 import one.util.streamex.StreamEx;
 import org.apache.commons.collections4.CollectionUtils;
@@ -74,6 +77,8 @@ public class ClientDetectRequestApi {
     SgRegisterBillService registerBillService;
     @Autowired
     CommissionBillService commissionBillService;
+    @Autowired
+    RegisterTallyAreaNoService registerTallyAreaNoService;
 
 //    /**
 //     * 用户创建场外委托单
@@ -220,6 +225,14 @@ public class ClientDetectRequestApi {
             DetectRequestQueryDto detectRequest = new DetectRequestQueryDto();
             detectRequest.setId(id);
             DetectRequestOutDto detail = detectRequestService.getDetectRequestDetail(detectRequest);
+
+
+            List<String> arrivalTallynos=StreamEx.ofNullable(detail.getBillCode()).filter(StringUtils::isNotBlank).map(this.billService::findByCode)
+                    .nonNull().flatCollection(bill->
+                    this.registerTallyAreaNoService.findTallyAreaNoByBillIdAndType(bill.getBillId(), BillTypeEnum.REGISTER_BILL)
+            ).nonNull().map(RegisterTallyAreaNo::getTallyareaNo).toList();
+
+            detail.setArrivalTallynos(arrivalTallynos);
 
             output= BaseOutput.successData(detail);
         } catch (TraceBizException e) {

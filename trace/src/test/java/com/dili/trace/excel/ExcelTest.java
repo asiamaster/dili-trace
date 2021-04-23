@@ -37,7 +37,7 @@ public class ExcelTest extends AutoWiredBaseTest {
             for (Map<String,Object> data : datas.get(0) ) {
                 UserInfo user = JSONObject.parseObject(JSONObject.toJSONString(data),UserInfo.class);
                 user.setValidateState(40);
-                user.setPassword("123456");
+//                user.setPassword("123456");
 //                userService.register(user,false);
 //
 //                int relen = StringUtils.length(user.getTallyAreaNos());

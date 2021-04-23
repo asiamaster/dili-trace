@@ -6,8 +6,8 @@ class NewRegisterBillGrid extends ListPage {
         this.uid = _.uniqueId("trace_id_");
         let categoryController = new CategoryController();
         let cityController = new CityController();
-        this.initAutoComplete($("[name='productName']"), function (query, done) { categoryController.lookupCategories(query, done); });
-        this.initAutoComplete($("[name='originName']"), function (query, done) { cityController.lookupCities(query, done); });
+        this.initTraceAutoComplete($("[name='productName']"), function (query, done) { categoryController.lookupCategories(query, done); });
+        this.initTraceAutoComplete($("[name='originName']"), function (query, done) { cityController.lookupCities(query, done); });
         $(window).on('resize', () => this.grid.bootstrapTable('resetView'));
         var cthis = this;
         window['RegisterBillGridObj'] = this;
@@ -470,7 +470,7 @@ class NewRegisterBillGrid extends ListPage {
         });
     }
     openCreatePage() {
-        let url = this.toUrl("/newRegisterBill/create.html");
+        let url = this.toUrl("/newRegisterBill/add.html");
         var createDia = bs4pop.dialog({
             title: '新增报备单',
             content: url,

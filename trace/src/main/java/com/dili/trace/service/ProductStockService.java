@@ -64,9 +64,10 @@ public class ProductStockService extends BaseServiceImpl<ProductStock, Long> {
      */
     @Transactional
     public ProductStock findOrCreateBatchStock(Long buyerId, RegisterBill billItem) {
-
+        Long marketId=billItem.getMarketId();
         ProductStock query = new ProductStock();
         query.setUserId(buyerId);
+        query.setMarketId(marketId);
         // query.setPreserveType(tradeDetailItem.getPreserveType());
         query.setProductId(billItem.getProductId());
         query.setWeightUnit(billItem.getWeightUnit());
@@ -74,11 +75,12 @@ public class ProductStockService extends BaseServiceImpl<ProductStock, Long> {
         query.setBrandId(billItem.getBrandId());
         ProductStock batchStockItem = StreamEx.of(this.listByExample(query)).findFirst().orElseGet(() -> {
             // 创建初始BatchStock
-            CustomerExtendDto cust=this.customerRpcService.findCustomerByIdOrEx(buyerId,billItem.getMarketId());
+            CustomerExtendDto cust=this.customerRpcService.findCustomerByIdOrEx(buyerId,marketId);
             return this.registerBillService.selectByIdForUpdate(billItem.getId()).map(bill -> {
                 ProductStock batchStock = new ProductStock();
                 batchStock.setUserId(cust.getId());
                 batchStock.setUserName(cust.getName());
+                batchStock.setMarketId(marketId);
                 batchStock.setPreserveType(bill.getPreserveType());
                 batchStock.setProductId(bill.getProductId());
                 batchStock.setProductName(bill.getProductName());

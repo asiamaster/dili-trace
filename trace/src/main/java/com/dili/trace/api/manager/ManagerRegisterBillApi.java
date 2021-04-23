@@ -98,23 +98,16 @@ public class ManagerRegisterBillApi {
      */
     @ApiOperation(value = "为经营户创建登记单")
     @RequestMapping(value = "/createRegisterBillForSeller.api", method = RequestMethod.POST)
-    public BaseOutput createRegisterBillForSeller(@RequestBody CreateListBillParam createListBillParam) {
-        logger.info("保存多个登记单:{}", JSON.toJSONString(createListBillParam));
-        if (createListBillParam == null || createListBillParam.getRegisterBills() == null) {
+    public BaseOutput createRegisterBillForSeller(@RequestBody CreateListBillParam input) {
+        logger.info("保存多个登记单:{}", JSON.toJSONString(input));
+        if (input == null || input.getRegisterBills() == null) {
             return BaseOutput.failure("参数错误");
         }
+        SessionData sessionData = this.sessionContext.getSessionData();
         try {
-            SessionData sessionData = this.sessionContext.getSessionData();
-            List<CreateRegisterBillInputDto> registerBills = StreamEx.of(createListBillParam.getRegisterBills())
-                    .nonNull().map(dto->{
-                        dto.setMarketId(sessionData.getMarketId());
-                        return dto;
-                    }).toList();
-            if (registerBills.isEmpty()) {
-                return BaseOutput.failure("没有登记单");
-            }
+
             logger.info("保存多个登记单操作用户:{}，{}", sessionData.getUserId(), sessionData.getUserName());
-            List<Long> idList = this.registerBillService.createBillList(registerBills, createListBillParam.getUserId()
+            List<Long> idList = this.registerBillService.createRegisterBillList(sessionData.getMarketId(),input.getRegisterBills(), input.getUserId()
                     , sessionData.getOptUser(),
                     CreatorRoleEnum.MANAGER);
             return BaseOutput.success().setData(idList);

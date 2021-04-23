@@ -226,6 +226,7 @@ public class CustomerRpcService {
         CustomerQueryInput queyrQueryInput = new CustomerQueryInput();
         queyrQueryInput.setMarketId(marketId);
         queyrQueryInput.setIdSet(idSet);
+
         return StreamEx.ofNullable(this.list(queyrQueryInput)).flatCollection(Function.identity()).nonNull()
                 .mapToEntry(CustomerExtendDto::getId, Function.identity()).toMap();
 

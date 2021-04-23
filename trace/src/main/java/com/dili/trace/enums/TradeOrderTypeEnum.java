@@ -13,7 +13,7 @@ public enum TradeOrderTypeEnum {
 	/**
 	 * 自有
 	 */
-	NONE(0, "自有"),
+//	NONE(0, "自有"),
 	/**
 	 * 购买
 	 */

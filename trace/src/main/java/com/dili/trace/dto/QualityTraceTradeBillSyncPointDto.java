@@ -5,10 +5,16 @@ import com.dili.trace.domain.QualityTraceTradeBillSyncPoint;
 
 import javax.persistence.Column;
 
-public interface QualityTraceTradeBillSyncPointDto extends QualityTraceTradeBillSyncPoint {
-	@Column(name = "`bill_id`")
-	@Operator(Operator.LITTLE_THAN)
-	Long getMinBillId();
+public class QualityTraceTradeBillSyncPointDto extends QualityTraceTradeBillSyncPoint {
+    @Column(name = "`bill_id`")
+    @Operator(Operator.LITTLE_THAN)
+    private Long minBillId;
 
-	void setMinBillId(Long minBillId);
+    public Long getMinBillId() {
+        return minBillId;
+    }
+
+    public void setMinBillId(Long minBillId) {
+        this.minBillId = minBillId;
+    }
 }

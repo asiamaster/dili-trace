@@ -3,6 +3,7 @@ package com.dili.trace.rpc.service;
 import com.alibaba.fastjson.JSON;
 import com.dili.common.exception.TraceBizException;
 import com.dili.ss.domain.BaseOutput;
+import com.dili.ss.exception.BusinessException;
 import com.dili.trace.domain.ProductStock;
 import com.dili.trace.domain.RegisterBill;
 import com.dili.trace.domain.TradeDetail;
@@ -255,6 +256,7 @@ public class ProductRpcService {
 //
 //        return createDtoList;
 //    }
+
     /**
      * 增加白细美库存
      *
@@ -263,15 +265,15 @@ public class ProductRpcService {
      */
     public void increaseRegDetail(Long tradeDetailId, Long marketId, BigDecimal increaseWeight, Optional<OperatorUser> optUser) {
 
-        if(tradeDetailId==null){
+        if (tradeDetailId == null) {
             return;
         }
         TradeDetail tradeDetail = this.tradeDetailService.get(tradeDetailId);
-        if(tradeDetail==null){
+        if (tradeDetail == null) {
             return;
         }
-        logger.debug("increaseRegDetail tradeDetailId={},thirdPartyStockId={}",tradeDetailId,tradeDetail.getThirdPartyStockId());
-        if(tradeDetail.getThirdPartyStockId()==null){
+        logger.debug("increaseRegDetail tradeDetailId={},thirdPartyStockId={}", tradeDetailId, tradeDetail.getThirdPartyStockId());
+        if (tradeDetail.getThirdPartyStockId() == null) {
             return;
         }
 
@@ -284,7 +286,7 @@ public class ProductRpcService {
 
         StockReduceRequestDto obj = new StockReduceRequestDto();
         obj.setFirmId(marketId);
-        this.firmRpcService.getFirmById(marketId).ifPresent(mk->{
+        this.firmRpcService.getFirmById(marketId).ifPresent(mk -> {
             obj.setFirmName(mk.getName());
         });
 
@@ -295,7 +297,7 @@ public class ProductRpcService {
 
 
         try {
-            logger.debug("incByStockIds obj={}",JSON.toJSONString(obj));
+            logger.debug("incByStockIds obj={}", JSON.toJSONString(obj));
             BaseOutput<List<StockReductResultDto>> out = this.productRpc.incByStockIds(obj);
             if (out.isSuccess()) {
                 return;
@@ -307,22 +309,23 @@ public class ProductRpcService {
 
 
     }
+
     /**
      * 扣减批次库存
      *
      * @param deductWeight
      * @param optUser
      */
-    public void deductRegDetail(Long tradeDetailId, Long marketId,BigDecimal deductWeight, Optional<OperatorUser> optUser) {
-        if(tradeDetailId==null){
+    public void deductRegDetail(Long tradeDetailId, Long marketId, BigDecimal deductWeight, Optional<OperatorUser> optUser) {
+        if (tradeDetailId == null) {
             return;
         }
         TradeDetail tradeDetail = this.tradeDetailService.get(tradeDetailId);
-        if(tradeDetail==null){
+        if (tradeDetail == null) {
             return;
         }
-        logger.debug("deductRegDetail tradeDetailId={},thirdPartyStockId={}",tradeDetailId,tradeDetail.getThirdPartyStockId());
-        if(tradeDetail.getThirdPartyStockId()==null){
+        logger.debug("deductRegDetail tradeDetailId={},thirdPartyStockId={}", tradeDetailId, tradeDetail.getThirdPartyStockId());
+        if (tradeDetail.getThirdPartyStockId() == null) {
             return;
         }
         StockReduceDto stockReduceDto = new StockReduceDto();
@@ -334,7 +337,7 @@ public class ProductRpcService {
 
         StockReduceRequestDto obj = new StockReduceRequestDto();
         obj.setFirmId(marketId);
-        this.firmRpcService.getFirmById(marketId).ifPresent(mk->{
+        this.firmRpcService.getFirmById(marketId).ifPresent(mk -> {
             obj.setFirmName(mk.getName());
         });
 
@@ -344,7 +347,7 @@ public class ProductRpcService {
 
 
         try {
-            logger.debug("reduceByStockIds obj={}",JSON.toJSONString(obj));
+            logger.debug("reduceByStockIds obj={}", JSON.toJSONString(obj));
             BaseOutput<List<StockReductResultDto>> out = this.productRpc.reduceByStockIds(obj);
             if (out.isSuccess()) {
                 return;
@@ -378,7 +381,7 @@ public class ProductRpcService {
                         condition.setId(createDto.getTradeDetailId());
                         condition.setThirdPartyStockId(detailDto.getStockId());
                         tradeDetailService.updateSelective(condition);
-                        logger.debug("createRegCreate tradeDetailId={},thirdPartyStockId={}",condition.getId(),condition.getThirdPartyStockId());
+                        logger.debug("createRegCreate tradeDetailId={},thirdPartyStockId={}", condition.getId(), condition.getThirdPartyStockId());
                         return;
                     }
                     logger.error("返回的数据不符合接口");
@@ -404,7 +407,7 @@ public class ProductRpcService {
         TradeDetail tradeDetail = this.tradeDetailService.get(buyerTradeDetailId);
         RegisterBill registerBill = this.billService.get(tradeDetail.getBillId());
         ProductStock buyerProductStock = this.productStockService.get(tradeDetail.getProductStockId());
-        if(buyerProductStock==null){
+        if (buyerProductStock == null) {
             return Optional.empty();
         }
 
@@ -424,10 +427,10 @@ public class ProductRpcService {
         });
         // 库存系统要校验InStockNo字段唯一，传报备单主键交易场景有问题，所以生成个唯一单号
         createDto.setInStockNo(uidRestfulRpcService.bizNumber(BizNumberType.STOCK_CODE));
-        if(optUser.isPresent()){
+        if (optUser.isPresent()) {
             createDto.setOperatorId(optUser.get().getId());
             createDto.setOperatorName(optUser.get().getName());
-        }else{
+        } else {
             createDto.setOperatorId(buyerProductStock.getUserId());
             createDto.setOperatorName(buyerProductStock.getUserName());
         }
@@ -479,53 +482,48 @@ public class ProductRpcService {
 
 
     /**
-     * 根据报备单构建库存创建 DTO
+     * 锁定 or 释放库存
      *
-     * @param bill
-     * @param optUser
-     * @param marketId
+     * @param lockReleaseRequestDto
      * @return
      */
-//    private RegCreateDto buildCreateDtoFromBill(RegisterBill bill, Optional<OperatorUser> optUser, Long marketId) {
-//        RegCreateDto obj = new RegCreateDto();
-//        obj.setFirmId(marketId);
-//        this.firmRpcService.getFirmById(marketId).ifPresent(firm -> {
-//            obj.setFirmName(firm.getName());
-//        });
-//        // 库存系统要校验InStockNo字段唯一，传报备单主键交易场景有问题，所以生成个唯一单号
-//        obj.setInStockNo(uidRestfulRpcService.bizNumber(BizNumberType.STOCK_CODE.getType()));
-//        optUser.ifPresent(o -> {
-//            obj.setOperatorId(o.getId());
-//            obj.setOperatorName(o.getName());
-//        });
-//        obj.setPlateNo(bill.getPlate());
-//
-//        //库存详情信息
-//        RegDetailDto detailDto = new RegDetailDto();
-//        detailDto.setBrand(bill.getBrandName());
-//        detailDto.setSpec(bill.getSpecName());
-//        // 买家增加库存
-//        detailDto.setCustomerId(bill.getUserId());
-//        detailDto.setCustomerName(bill.getName());
-//        detailDto.setCateId(bill.getProductId());
-//        detailDto.setCname(bill.getProductName());
-//
-//        if (WeightUnitEnum.JIN.equalsToCode(bill.getWeightUnit())) {
-//            detailDto.setInUnit(StockInUnitEnum.JIN.getCode());
-//        } else if (WeightUnitEnum.KILO.equalsToCode(bill.getWeightUnit())) {
-//            detailDto.setInUnit(StockInUnitEnum.KILO.getCode());
-//        } else {
-//            detailDto.setInUnit(StockInUnitEnum.PIECE.getCode());
-//        }
-//        detailDto.setPlace(bill.getOriginName());
-//        detailDto.setPrice(bill.getUnitPrice());
-//        detailDto.setWeight(bill.getWeight());
-//        detailDto.setProductId(bill.getProductId());
-//        detailDto.setProductName(bill.getProductName());
-//
-//        obj.setRegDetailDtos(Lists.newArrayList(detailDto));
-//        obj.setSource(StockRegisterSourceEnum.REG.getCode());
-//        // obj.setInStockNo(bill.getCode());
-//        return obj;
-//    }
+    private void lockOrRelease(LockReleaseRequestDto lockReleaseRequestDto) {
+        logger.debug("lockOrRelease={}",JSON.toJSONString(lockReleaseRequestDto));
+        BaseOutput<?> baseOutput = productRpc.lockOrRelease(lockReleaseRequestDto);
+        if (!baseOutput.isSuccess()) {
+            throw new TraceBizException("锁定or释放库存接口失败：" + baseOutput.getMessage());
+        }
+    }
+
+    /**
+     * 锁定库存
+     *
+     * @param thirdPartyStockId
+     * @param marketId
+     * @param tradeWeight
+     */
+    public void lock(Long thirdPartyStockId, Long marketId, BigDecimal tradeWeight) {
+
+        LockReleaseItem item = new LockReleaseItem(tradeWeight.floatValue(), thirdPartyStockId, 1);
+        List<LockReleaseItem> items = new ArrayList<>();
+        items.add(item);
+        LockReleaseRequestDto lockReleaseRequestDto = new LockReleaseRequestDto(marketId, this.firmRpcService.getFirmById(marketId).get().getName(), items);
+        this.lockOrRelease(lockReleaseRequestDto);
+    }
+
+    /**
+     * 释放库存
+     *
+     * @param thirdPartyStockId
+     * @param marketId
+     * @param tradeWeight
+     */
+    public void release(Long thirdPartyStockId, Long marketId, BigDecimal tradeWeight) {
+        LockReleaseItem item = new LockReleaseItem(tradeWeight.floatValue(), thirdPartyStockId, 0);
+        List<LockReleaseItem> items = new ArrayList<>();
+        items.add(item);
+        LockReleaseRequestDto lockReleaseRequestDto = new LockReleaseRequestDto(marketId, this.firmRpcService.getFirmById(marketId).get().getName(), items);
+        this.lockOrRelease(lockReleaseRequestDto);
+    }
+
 }

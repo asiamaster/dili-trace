@@ -2,7 +2,7 @@ package com.dili.trace.dao;
 
 import com.dili.ss.base.MyMapper;
 import com.dili.trace.domain.*;
-import com.dili.trace.domain.hangguo.HangGuoCategory;
+import com.dili.trace.domain.Category;
 import com.dili.trace.domain.hangguo.HangGuoTrade;
 import com.dili.trace.domain.hangguo.HangGuoUser;
 import com.dili.trace.dto.PushDataQueryDto;
@@ -24,14 +24,14 @@ public interface HangGuoDataMapper extends MyMapper<HangGuoUser> {
      *
      * @param commodityList
      */
-    void bachInsertCommodityList(@Param("list") List<HangGuoCategory> commodityList);
+    void bachInsertCommodityList(@Param("list") List<Category> commodityList);
 
     /**
      * 更新商品正式表杭果商品数据patentId
      *
      * @param category
      */
-    void updateHangGuoCommodityParent(HangGuoCategory category);
+    void updateHangGuoCommodityParent(Category category);
 
     /**
      * 根据第三方编码获取更新列表
@@ -54,7 +54,7 @@ public interface HangGuoDataMapper extends MyMapper<HangGuoUser> {
      * @param tradeList
      * @return
      */
-    List<HangGuoCategory> getCategoryListByThirdCode(@Param("list") List<String> tradeList);
+    List<Category> getCategoryListByThirdCode(@Param("list") List<String> tradeList);
 
     /**
      * 根据第三方编码刪除商品信息
@@ -177,24 +177,35 @@ public interface HangGuoDataMapper extends MyMapper<HangGuoUser> {
      * @param category
      * @return
      */
-    List<HangGuoCategory> getCategoryFaultList(HangGuoCategory category);
+    List<Category> getCategoryFaultList(Category category);
 
     /**
      * 获取商品按code
      * @param parentCode
      * @return
      */
-    HangGuoCategory getCategoryByThirdCode(@Param("code") String parentCode);
+    Category getCategoryByThirdCode(@Param("code") String parentCode);
 
     /**
      * 更新商品信息
      * @param categoryList
      */
-    void batchUpdateCategoryByThirdCode(@Param("list") List<HangGuoCategory> categoryList);
+    void batchUpdateCategoryByThirdCode(@Param("list") List<Category> categoryList);
 
     /**
      * 根据UapId更新parentId
      * @param category
      */
-    void updateParentByUapId(HangGuoCategory category);
+    void updateParentByUapId(Category category);
+
+
+    /**
+     * 新增或忽略
+     *
+     * @param category
+     * @return
+     */
+    public int insertIgnoreCategory(Category category);
+
+
 }

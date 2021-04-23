@@ -4,7 +4,7 @@ import com.dili.ss.base.BaseServiceImpl;
 import com.dili.ss.util.DateUtils;
 import com.dili.trace.dao.HangGuoDataMapper;
 import com.dili.trace.domain.*;
-import com.dili.trace.domain.hangguo.HangGuoCategory;
+import com.dili.trace.domain.Category;
 import com.dili.trace.domain.hangguo.HangGuoTrade;
 import com.dili.trace.domain.hangguo.HangGuoUser;
 import com.dili.trace.dto.PushDataQueryDto;
@@ -38,16 +38,16 @@ public class HangGuoDataServiceImpl extends BaseServiceImpl<HangGuoUser, Long> i
      * 最大处理条数，超出的则在下一次执行job中再处理
      */
     private Integer maxPageCountSize = 15000;
-    @Resource
+    @Autowired
     private HangGuoDataMapper hangGuoDataMapper;
 
     @Override
-    public void bachInsertCommodityList(List<HangGuoCategory> commodityList) {
+    public void bachInsertCommodityList(List<Category> commodityList) {
         hangGuoDataMapper.bachInsertCommodityList(commodityList);
     }
 
     @Override
-    public void updateHangGuoCommodityParent(HangGuoCategory category) {
+    public void updateHangGuoCommodityParent(Category category) {
         hangGuoDataMapper.updateHangGuoCommodityParent(category);
     }
 
@@ -62,7 +62,7 @@ public class HangGuoDataServiceImpl extends BaseServiceImpl<HangGuoUser, Long> i
     }
 
     @Override
-    public List<HangGuoCategory> getCategoryListByThirdCode(List<String> codeList) {
+    public List<Category> getCategoryListByThirdCode(List<String> codeList) {
         return hangGuoDataMapper.getCategoryListByThirdCode(codeList);
     }
 
@@ -156,17 +156,17 @@ public class HangGuoDataServiceImpl extends BaseServiceImpl<HangGuoUser, Long> i
     }
 
     @Override
-    public List<HangGuoCategory> getCategoryFaultList(HangGuoCategory category) {
+    public List<Category> getCategoryFaultList(Category category) {
         return hangGuoDataMapper.getCategoryFaultList(category);
     }
 
     @Override
-    public HangGuoCategory getCategoryByThirdCode(String parentCode) {
+    public Category getCategoryByThirdCode(String parentCode) {
         return hangGuoDataMapper.getCategoryByThirdCode(parentCode);
     }
 
     @Override
-    public void batchUpdateCategoryByThirdCode(List<HangGuoCategory> categoryList) {
+    public void batchUpdateCategoryByThirdCode(List<Category> categoryList) {
         hangGuoDataMapper.batchUpdateCategoryByThirdCode(categoryList);
     }
 

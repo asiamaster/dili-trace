@@ -21,6 +21,8 @@ import org.apache.commons.lang3.StringUtils;
 
 public class RegisterBillOutputDto extends RegisterBill {
     private static final long serialVersionUID = 1L;
+
+    private RegisterHead registerHead;
     /**
      * 交易单明细集合
      */
@@ -64,6 +66,19 @@ public class RegisterBillOutputDto extends RegisterBill {
 
         Map<ImageCertTypeEnum, List<ImageCert>>map= StreamEx.ofNullable(this.getImageCertList()).flatCollection(Function.identity()).nonNull().filter(item->item.getCertType()!=null)
                 .mapToEntry(item -> ImageCertTypeEnum.fromCode(item.getCertType()).orElse(null), Function.identity()).filterKeys(Objects::nonNull)
+                .grouping();
+        StreamEx.of(ImageCertTypeEnum.values()).filter(e->{
+            return !map.containsKey(e);
+        }).forEach(e->{
+            map.put(e,new ArrayList<>());
+        });
+        return map;
+    }
+    @JSONField(serialize = false)
+    public Map<ImageCertTypeEnum, List<String>> getGroupedImageUidList() {
+
+        Map<ImageCertTypeEnum, List<String>>map= StreamEx.ofNullable(this.getImageCertList()).flatCollection(Function.identity()).nonNull().filter(item->item.getCertType()!=null)
+                .mapToEntry(item -> ImageCertTypeEnum.fromCode(item.getCertType()).orElse(null), item->item.getUid()).filterKeys(Objects::nonNull)
                 .grouping();
         StreamEx.of(ImageCertTypeEnum.values()).filter(e->{
             return !map.containsKey(e);
@@ -140,5 +155,13 @@ public class RegisterBillOutputDto extends RegisterBill {
 
     public void setDetectType(Integer detectType) {
         this.detectType = detectType;
+    }
+
+    public RegisterHead getRegisterHead() {
+        return registerHead;
+    }
+
+    public void setRegisterHead(RegisterHead registerHead) {
+        this.registerHead = registerHead;
     }
 }

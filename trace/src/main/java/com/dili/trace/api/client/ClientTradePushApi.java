@@ -6,23 +6,24 @@ import com.dili.common.annotation.Role;
 import com.dili.common.entity.LoginSessionContext;
 import com.dili.common.entity.SessionData;
 import com.dili.common.exception.TraceBizException;
-import com.dili.customer.sdk.enums.CustomerEnum;
+import com.dili.commons.glossary.YesOrNoEnum;
 import com.dili.ss.domain.BaseOutput;
 import com.dili.ss.domain.BasePage;
 import com.dili.ss.dto.IDTO;
-import com.dili.trace.api.enums.LoginIdentityTypeEnum;
+import com.dili.trace.api.output.ProductStockExtendDataDto;
 import com.dili.trace.domain.*;
-import com.dili.trace.dto.OperatorUser;
 import com.dili.trace.enums.BillTypeEnum;
 import com.dili.trace.enums.PushTypeEnum;
 import com.dili.trace.service.*;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import one.util.streamex.StreamEx;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 /**
@@ -91,6 +92,21 @@ public class ClientTradePushApi {
             pushLog.setOrder("asc");
             List<TradePushLog> tradePushLogs = tradePushService.listByExample(pushLog);
             registerBill.setTradePushLogs(tradePushLogs);
+
+            ProductStockExtendDataDto productStockExtendDataDto=new ProductStockExtendDataDto();
+
+
+            productStockExtendDataDto.setDetectFailedWeight(BigDecimal.ZERO);
+            registerBill.setProductStockExtendDataDto(productStockExtendDataDto);
+            if (pushType.equals(PushTypeEnum.DOWN.getCode())) {
+                BigDecimal pushDownWeight= this.tradePushService.findTradePushByTradeDetailId(tradeDetailId,PushTypeEnum.DOWN)
+                        .map(TradePushLog::getOperationWeight).orElse(BigDecimal.ZERO);
+                productStockExtendDataDto.setPushDownWeight(pushDownWeight);
+            }
+
+
+            productStockExtendDataDto.setBuyingWeight(tradeDetail.getSoftWeight());
+
             return BaseOutput.success().setData(registerBill);
         } catch (TraceBizException e) {
             return BaseOutput.failure(e.getMessage());

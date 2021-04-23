@@ -21,7 +21,6 @@ public interface TradeRequestMapper extends MyMapper<TradeRequest> {
     * @param user
     * @return
     */
-   List<Long> selectBuyerIdWithouTradeRequest(UserQueryDto user);
 
    public List<ReportScanCodeOrderDto> selectScanOrderReport(PushDataQueryDto dto);
 

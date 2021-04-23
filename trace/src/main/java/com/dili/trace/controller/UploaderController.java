@@ -33,7 +33,7 @@ public class UploaderController {
      * @return
      */
     @RequestMapping(value = "/uploadImage.action", method = RequestMethod.POST)
-    public BaseOutput<String> uploadImage(@RequestParam MultipartFile file, @RequestParam Integer type, @RequestParam(required = false) Boolean compress) {
+    public BaseOutput<String> uploadImage(@RequestParam MultipartFile file, @RequestParam(required = false) Integer type, @RequestParam(required = false) Boolean compress) {
         try {
             return BaseOutput.successData(this.dfsRpcService.uploadImage(file));
         } catch (TraceBizException e) {
@@ -52,7 +52,7 @@ public class UploaderController {
      * @return
      */
     @RequestMapping(value = "/uploadFile.action", method = RequestMethod.POST)
-    public BaseOutput<String> uploadFile(@RequestParam MultipartFile file, @RequestParam Integer type, @RequestParam(required = false) Boolean compress) {
+    public BaseOutput<String> uploadFile(@RequestParam MultipartFile file, @RequestParam(required = false) Integer type, @RequestParam(required = false) Boolean compress) {
         try {
             return BaseOutput.successData(this.dfsRpcService.uploadFile(file));
         } catch (TraceBizException e) {

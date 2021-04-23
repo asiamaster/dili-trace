@@ -45,8 +45,7 @@ public class ClientRegisterBillApiTest extends AutoWiredBaseTest {
 	ClientRegisterBillApi clientRegisterBillApi;
 	@Autowired
 	RegisterBillService registerBillService;
-	@Autowired
-	UserService userService;
+
 	@Autowired
 	BrandService brandService;
 	// @MockBean
@@ -55,18 +54,6 @@ public class ClientRegisterBillApiTest extends AutoWiredBaseTest {
 	// @Injectable
 	private UserInfo userItem;
 
-	@BeforeEach
-	public void before() {
-		MockitoAnnotations.initMocks(this);
-		userItem = this.userService.listPageByExample(new UserInfo()).getDatas().stream().findFirst()
-				.orElse(null);
-		assertNotNull(userItem);
-		// Mockito.doReturn(userItem.getId()).when(sessionContext).getAccountId();
-		// Mockito.doReturn(userItem.getName()).when(sessionContext).getUserName();
-		// Mockito.doReturn(new OperatorUser(userItem.getId(),
-		// userItem.getName())).when(this.sessionContext)
-		// .getLoginUserOrException(Mockito.any());
-	}
 
 	@Test
 	public void createRegisterBillList() {

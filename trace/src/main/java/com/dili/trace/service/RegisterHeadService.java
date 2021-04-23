@@ -94,4 +94,12 @@ public interface RegisterHeadService extends BaseService<RegisterHead, Long> {
 	 */
 	public BasePage<RegisterHead> listPageApi(RegisterHeadDto input);
 
+
+	/**
+	 * 根据code查询
+	 * @param registerHeadCode
+	 * @return
+	 */
+	public Optional<RegisterHead>findByCode(String registerHeadCode);
+
 }

@@ -65,7 +65,7 @@ public class CheckSheetService extends BaseServiceImpl<CheckSheet, Long> {
         // 生成编号，插入数据库
         String checkSheetCode = this.uidRestfulRpcService.nextCheckSheetCode(triple.getRight());
         checkSheet.setCode(checkSheetCode);
-        checkSheet.setQrcodeUrl(this.baseWebPath + "/checkSheet/detail/" + checkSheetCode);
+        checkSheet.setQrcodeUrl(this.baseWebPath + "/checkSheet/detail.html?checkSheetCode=" + checkSheetCode);
         checkSheet.setOperatorId(operatorUser.getId());
         checkSheet.setOperatorName(operatorUser.getName());
         this.insertExact(checkSheet);
@@ -138,7 +138,7 @@ public class CheckSheetService extends BaseServiceImpl<CheckSheet, Long> {
      * @return
      */
     private CheckSheetPrintOutput buildPrintDTOMap(CheckSheet checkSheet, List<CheckSheetDetail> checkSheetDetailList) {
-        String detailUrl = this.baseWebPath + "/checkSheet/detail/";
+        String detailUrl = this.baseWebPath + "/checkSheet/detail.html?checkSheetCode=";
         ApproverInfo approverInfo = this.approverInfoService.get(checkSheet.getApproverInfoId());
         if (approverInfo == null) {
             throw new TraceBizException("提交的数据错误");

@@ -41,7 +41,7 @@ public class PurchaseIntentionRecordService extends BaseServiceImpl<PurchaseInte
     private BillService billService;
     @Autowired
     private UidRestfulRpcService uidRestfulRpcService;
-    @Resource
+    @Autowired
     private CustomerRpc customerRpc;
     /**
      * 买家报备新增

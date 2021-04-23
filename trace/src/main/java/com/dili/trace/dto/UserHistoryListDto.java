@@ -10,51 +10,107 @@ import java.util.Date;
 
 /**
  * 由MyBatis Generator工具自动生成
- * 
+ * <p>
  * This file was generated on 2019-07-26 09:20:35.
  */
-public interface UserHistoryListDto extends UserHistory {
+public class UserHistoryListDto extends UserHistory {
     @Column(name = "`created`")
     @Operator(Operator.GREAT_EQUAL_THAN)
-    Date getCreatedStart();
-    void setCreatedStart(Date createdStart);
+    private Date createdStart;
 
     @Column(name = "`created`")
     @Operator(Operator.LITTLE_EQUAL_THAN)
-    Date getCreatedEnd();
-    void setCreatedEnd(Date createdEnd);
-    
-    
+    private Date createdEnd;
+
+
     @Column(name = "`modified`")
     @Operator(Operator.GREAT_EQUAL_THAN)
-    Date getModifiedStart();
-    void setModifiedStart(Date modifiedStart);
+    private Date modifiedStart;
 
     @Column(name = "`modified`")
     @Operator(Operator.LITTLE_EQUAL_THAN)
-    Date getModifiedEnd();
-    void setModifiedEnd(Date modifiedEnd);
+    private Date modifiedEnd;
 
     /**
      * 昵称模糊查询
+     *
      * @return
      */
     @Column(name = "tally_area_nos")
     @Like
-    String getLikeTallyAreaNos();
-    void setLikeTallyAreaNos(String likeTallyAreaNos);
-    
+    private String likeTallyAreaNos;
+
     @Transient
-    Boolean getHasBusinessLicense();
-    void setHasBusinessLicense(Boolean hasBusinessLicense);
-    
+    private Boolean hasBusinessLicense;
+
     @Column(name = "user_plates")
     @Like
-    String getLikeUserPlates();
-    void setLikeUserPlates(String likeUserPlates);
-    
-    @Transient
-    Long getOffSet();
-    void setOffSet(Long offSet);
+    private String likeUserPlates;
 
+    @Transient
+    private Long offSet;
+
+    public Date getCreatedStart() {
+        return createdStart;
+    }
+
+    public void setCreatedStart(Date createdStart) {
+        this.createdStart = createdStart;
+    }
+
+    public Date getCreatedEnd() {
+        return createdEnd;
+    }
+
+    public void setCreatedEnd(Date createdEnd) {
+        this.createdEnd = createdEnd;
+    }
+
+    public Date getModifiedStart() {
+        return modifiedStart;
+    }
+
+    public void setModifiedStart(Date modifiedStart) {
+        this.modifiedStart = modifiedStart;
+    }
+
+    public Date getModifiedEnd() {
+        return modifiedEnd;
+    }
+
+    public void setModifiedEnd(Date modifiedEnd) {
+        this.modifiedEnd = modifiedEnd;
+    }
+
+    public String getLikeTallyAreaNos() {
+        return likeTallyAreaNos;
+    }
+
+    public void setLikeTallyAreaNos(String likeTallyAreaNos) {
+        this.likeTallyAreaNos = likeTallyAreaNos;
+    }
+
+    public Boolean getHasBusinessLicense() {
+        return hasBusinessLicense;
+    }
+
+    public void setHasBusinessLicense(Boolean hasBusinessLicense) {
+        this.hasBusinessLicense = hasBusinessLicense;
+    }
+
+    public String getLikeUserPlates() {
+        return likeUserPlates;
+    }
+
+    public void setLikeUserPlates(String likeUserPlates) {
+        this.likeUserPlates = likeUserPlates;
+    }
+
+    public Long getOffSet() {
+        return offSet;
+    }
+
+    public void setOffSet(Long offSet) {
+        this.offSet = offSet;
+    }
 }

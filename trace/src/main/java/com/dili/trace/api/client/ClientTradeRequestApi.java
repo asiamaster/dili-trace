@@ -105,7 +105,8 @@ public class ClientTradeRequestApi {
             }
             if (condition.getBuyerId() != null) {
                 condition.setBuyerMarketId(this.sessionContext.getSessionData().getMarketId());
-                condition.setMetadata(IDTO.AND_CONDITION_EXPR, "  trade_order_id not  in( select id from trade_order  where  order_type ="+TradeOrderTypeEnum.NONE.getCode()+" and `buyer_id` = "+condition.getBuyerId()+" and `buyer_market_id` = "+condition.getBuyerMarketId()+")");
+                String orderTypeStrs=StreamEx.of(TradeOrderTypeEnum.values()).map(TradeOrderTypeEnum::getCode).joining(",");
+                condition.setMetadata(IDTO.AND_CONDITION_EXPR, "  trade_order_id not  in( select id from trade_order  where  order_type not in("+orderTypeStrs+") and `buyer_id` = "+condition.getBuyerId()+" and `buyer_market_id` = "+condition.getBuyerMarketId()+")");
             }
             if (condition.getSellerId() != null) {
                 condition.setSellerMarketId(this.sessionContext.getSessionData().getMarketId());
@@ -171,8 +172,12 @@ public class ClientTradeRequestApi {
      */
     @ApiOperation(value = "创建购买请求")
     @RequestMapping(value = "/createBuyProductRequest.api", method = RequestMethod.POST)
-    public BaseOutput<?> createBuyProductRequest(@RequestBody List<ProductStockInput> inputDto) {
-        if (inputDto == null) {
+    public BaseOutput<?> createBuyProductRequest(@RequestBody TradeRequestListInput inputDto) {
+        if (inputDto == null||inputDto.getTradeMarketId()==null||inputDto.getBatchStockList()==null) {
+            return BaseOutput.failure("参数错误");
+        }
+        List<ProductStockInput> batchStockInputList=StreamEx.of(inputDto.getBatchStockList()).nonNull().toList();
+        if (batchStockInputList.isEmpty()) {
             return BaseOutput.failure("参数错误");
         }
         try {
@@ -186,7 +191,7 @@ public class ClientTradeRequestApi {
             tradeDto.getBuyer().setBuyerId(sessionData.getUserId());
             tradeDto.getBuyer().setBuyerName(sessionData.getUserName());
             tradeDto.getBuyer().setBuyerType(BuyerTypeEnum.NORMAL_BUYER);
-            TradeOrder tradeOrder = this.tradeOrderService.createBuyTrade(tradeDto, inputDto);
+            TradeOrder tradeOrder = this.tradeOrderService.createBuyTrade(tradeDto, batchStockInputList);
             return BaseOutput.success();
         } catch (TraceBizException e) {
             return BaseOutput.failure(e.getMessage());

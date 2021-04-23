@@ -3,8 +3,8 @@ package com.dili.trace.async;
 import com.dili.assets.sdk.dto.CusCategoryDTO;
 import com.dili.assets.sdk.dto.CusCategoryQuery;
 import com.dili.customer.sdk.domain.dto.CustomerExtendDto;
+import com.dili.trace.domain.Category;
 import com.dili.trace.domain.UserInfo;
-import com.dili.trace.domain.hangguo.HangGuoCategory;
 import com.dili.trace.rpc.service.CustomerRpcService;
 import com.dili.trace.service.AssetsRpcService;
 import com.dili.trace.service.CategoryService;
@@ -46,7 +46,7 @@ public class AsyncService {
      * @param consumer
      */
     @Async
-    public void syncCategoryInfo(HangGuoCategory category, Consumer<CusCategoryDTO> consumer) {
+    public void syncCategoryInfo(Category category, Consumer<CusCategoryDTO> consumer) {
         if (category == null || category.getMarketId() == null || category.getId() == null || category.getCategoryId() == null) {
             return;
         }

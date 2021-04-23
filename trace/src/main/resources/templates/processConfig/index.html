@@ -1,0 +1,68 @@
+<#bs4Body>
+
+<div class="container-fluid pb-5" id="app">
+    <form id="saveForm" role="form" novalidate>
+        <input type="hidden" name="id" value="${processConfig.id}">
+        <div class="" style="width: 500px">
+            <div class="row row-cols-1">
+                <div class="form-group col">
+                    <label>管理员所属市场</label>
+                    <input type="text" class="form-control" id="firmName" name="firmName" value="${currentFirm.name}"
+                           data-value-type="skip" readonly/>
+                </div>
+            </div>
+            <div class="row row-cols-3">
+                <div class="form-group col">
+                    <input type="hidden"   name="isAutoVerifyPassed" value="0" />
+                    <input type="checkbox" name="isAutoVerifyPassed" value="1"  <%if(processConfig.isAutoVerifyPassed==1){%>checked="checked"<%}%> >
+                    <label for="">登记审核</label>
+                </div>
+                <div class="form-group col">
+                    <input type="hidden"   name="canDoCheckInWithoutWeight" value="0" />
+                    <input type="checkbox" name="canDoCheckInWithoutWeight" value="1" <%if(processConfig.canDoCheckInWithoutWeight==1){%>checked="checked"<%}%>>
+                    <label for="">进门称重</label>
+                </div>
+                <div class="form-group col">
+                    <input type="hidden"   name="isManullyCheckIn" value="1" />
+                    <input type="checkbox" checked="checked" disabled="disabled" readonly="readonly">
+                    <label for="">进门审核</label>
+                </div>
+            </div>
+
+        </div>
+</div>
+</form>
+</div>
+<div class="text-center">
+    <button class="btn-main2 btn-sm" id="saveBtn" onclick="save()">保存</button>&nbsp;&nbsp;
+</div>
+<#webGlobalConfig/>
+<script src="${contextPath!}/resources/assets/dep/underscore/underscore-min.js"></script>
+<script src="${contextPath!}/resources/js/jquery.serializejson.js"></script>
+<script src="${contextPath!}/resources/assets/dep/readonly/readonly.js"></script>
+<script src="${contextPath!}/resources/js/Utils.js"></script>
+<script src="${contextPath!}/resources/js/WebConfig.js"></script>
+<script>
+
+   async function  save() {
+        if ($('#saveForm').validate().form() != true) {
+            return;
+        }
+        let data = $('#saveForm').serializeJSON({ useIntKeysAsArrayIndex: true });
+        let url = "${contextPath!}/processConfig/doUpdate.action";
+        try {
+            let resp = await jq.postJsonWithProcessing(url, data);
+            if (!resp.success) {
+                bs4pop.alert(resp.message, { type: 'error' });
+                return;
+            }
+            bs4pop.alert('操作成功', { type: 'info', autoClose: 600 });
+        }
+        catch (e) {
+            debugger;
+            bs4pop.alert('远程访问失败', { type: 'error' });
+        }
+    }
+
+</script>
+</#bs4Body>

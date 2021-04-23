@@ -2,23 +2,43 @@ package com.dili.trace.dto;
 
 import java.util.List;
 
+import com.dili.ss.domain.BaseDomain;
 import com.dili.ss.dto.IBaseDomain;
 import com.dili.trace.domain.RegisterBill;
 import com.dili.trace.domain.SeparateSalesRecord;
 import com.dili.trace.domain.QualityTraceTradeBill;
 
-public interface QualityTraceTradeBillOutDto extends IBaseDomain {
+public class QualityTraceTradeBillOutDto extends BaseDomain {
 
-	public RegisterBill getRegisterBill();
+    private RegisterBill registerBill;
 
-	public void setRegisterBill(RegisterBill registerBill);
-	
-	public List<SeparateSalesRecord> getSeparateSalesRecords();
 
-	public void setSeparateSalesRecords(List<SeparateSalesRecord> separateSalesRecords);
+    private List<SeparateSalesRecord> separateSalesRecords;
 
-	public QualityTraceTradeBill getQualityTraceTradeBill();
 
-	public void setQualityTraceTradeBill(QualityTraceTradeBill qualityTraceTradeBill);
+    private QualityTraceTradeBill qualityTraceTradeBill;
 
+    public RegisterBill getRegisterBill() {
+        return registerBill;
+    }
+
+    public void setRegisterBill(RegisterBill registerBill) {
+        this.registerBill = registerBill;
+    }
+
+    public List<SeparateSalesRecord> getSeparateSalesRecords() {
+        return separateSalesRecords;
+    }
+
+    public void setSeparateSalesRecords(List<SeparateSalesRecord> separateSalesRecords) {
+        this.separateSalesRecords = separateSalesRecords;
+    }
+
+    public QualityTraceTradeBill getQualityTraceTradeBill() {
+        return qualityTraceTradeBill;
+    }
+
+    public void setQualityTraceTradeBill(QualityTraceTradeBill qualityTraceTradeBill) {
+        this.qualityTraceTradeBill = qualityTraceTradeBill;
+    }
 }

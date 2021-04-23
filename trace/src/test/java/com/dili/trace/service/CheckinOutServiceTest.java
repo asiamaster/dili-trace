@@ -95,13 +95,7 @@ public class CheckinOutServiceTest extends AutoWiredBaseTest {
 
 	}
 
-	@Test
-	public void doCheckin() {
-		List<Long> billIdList = Lists.newArrayList(397L);
-		this.checkinOutRecordService.doCheckin(Optional.of(new OperatorUser(1L, "")), billIdList,
-				CheckinStatusEnum.ALLOWED);
-	}
-	
+
 		
 
 }

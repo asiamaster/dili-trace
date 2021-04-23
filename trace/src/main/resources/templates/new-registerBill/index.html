@@ -9,38 +9,18 @@
                 <select id="registType" name="registType" class="form-control"></select>
                 <#bcomboProvider _id="registType" _provider="registTypeProvider" _value="" _onLoadSuccess=""/>
             </div>
-
-
-            <!--div class="form-group col">
-                <label for="registerSource">登记来源</label>
-                <select id="registerSource" name="registerSource" class="form-control"></select>
-                <#bcomboProvider _id="registerSource" _provider="registerSourceProvider" _value="" _onLoadSuccess=""/>
-            </div-->
-
             <div class="form-group col">
                 <label for="likeProductName">商品</label>
                 <input type="hidden" id="productId" name="productId"  class="form-control"/>
                 <input id="likeProductName" name="likeProductName" class="form-control" for="productId" />
             </div>
-
-<!--            <div class="form-group col">-->
-<!--                <label for="tradeTypeId">交易区</label>-->
-<!--                <select id="tradeTypeId" name="tradeTypeId" class="form-control"></select>-->
-<!--                <#bcomboProvider _id="tradeTypeId" _provider="tradeTypeProvider" _value="" _onLoadSuccess=""/>-->
-<!--            </div>-->
-
+            <% if (@filedNameRetMap.containsKey('originId') && @filedNameRetMap.get('originId').getDisplayed() == @com.dili.commons.glossary.YesOrNoEnum.YES.getCode()) { %>
             <div class="form-group col">
                 <label for="originName">产地</label>
                 <input type="hidden" id="originId" name="originId"  class="form-control"/>
                 <input id="originName" name="originName" class="form-control"   for="originId" />
             </div>
-
-            <!--div class="form-group col">
-                <label for="detectType">检测类型</label>
-                <select id="detectType" name="detectType" class="form-control"></select>
-                <#bcomboProvider _id="detectType" _provider="detectTypeEnumProvider" _value="" _onLoadSuccess=""/>
-            </div-->
-
+            <% } %>
             <div class="form-group col">
                 <label for="detectResultSelect">检测结果</label>
                 <select id="detectResultSelect" name="detectResultSelect" class="form-control" data-value-type="skip">
@@ -53,17 +33,12 @@
                 <input type="hidden" name="detectType"  class="form-control">
                 <input type="hidden" name="detectResult"  class="form-control">
             </div>
-
-            <!--div class="form-group col">
-                <label for="likeTallyAreaNo">理货区号</label>
-                <input type="text" class="form-control" name="likeTallyAreaNo" id="likeTallyAreaNo"/>
-            </div-->
-
+            <% if (@filedNameRetMap.containsKey('plate') && @filedNameRetMap.get('plate').getDisplayed() == @com.dili.commons.glossary.YesOrNoEnum.YES.getCode()) { %>
             <div class="form-group col">
                 <label for="likePlate">车牌号</label>
                 <input type="text" class="form-control" name="likePlate" id="likePlate"/>
             </div>
-
+            <% } %>
             <div class="form-group col">
                 <label for="verifyStatus">审核状态</label>
                 <select id="verifyStatus" name="verifyStatus" class="form-control"></select>
@@ -184,10 +159,10 @@
     <hr>
     <div>
         <div id="toolbar" class="btn-group" role="group" aria-label="工具栏">
-            <#resource code="newRegisterBill#add_hide">
+            <#resource code="newRegisterBill#add">
                 <button id="btn_add" type="button" class="btn btn-primary"><i class="fa fa-plus"></i> 新增</button>
             </#resource>
-            <#resource code="newRegisterBill#edit_hide">
+            <#resource code="newRegisterBill#edit">
                 <button id="edit-btn" style="display: none" type="button" class="btn btn-primary"><i class="fa fa-pencil-square-o"></i> 修改</button>
             </#resource>
             <#resource code="newRegisterBill#audit">
@@ -264,9 +239,6 @@
                 <th data-field="sampleCode"  data-sort-name="sample_code" data-sortable="true" data-align="center">
                     采样编号
                 </th>
-                <!--th data-field="sourceDesc"  data-sort-name="" data-sortable="false" data-align="center">
-                    登记来源
-                </th-->
                 <th data-field="detectStatusName" data-sort-name="detect_status" data-sortable="true" data-align="center" >
                     检测状态
                 </th>
@@ -283,21 +255,27 @@
                 <th data-field="corporateName" data-sort-name="corporate_name" data-sortable="true" data-align="center">
                     企业名称
                 </th>
+                <% if (@filedNameRetMap.containsKey('plate') && @filedNameRetMap.get('plate').getDisplayed() == @com.dili.commons.glossary.YesOrNoEnum.YES.getCode()) { %>
                 <th data-field="plate" data-sortable="true" data-align="center">
                     车牌
                 </th>
+                <% } %>
                 <th data-field="productName" data-sort-name="product_name" data-sortable="true" data-align="center">
                     商品
                 </th>
+                <% if (@filedNameRetMap.containsKey('brandName') && @filedNameRetMap.get('brandName').getDisplayed() == @com.dili.commons.glossary.YesOrNoEnum.YES.getCode()) {%>
                 <th data-field="brandName"  data-sort-name="brand_name" data-sortable="true" data-align="center">
                     品牌
                 </th>
+                <% } %>
                 <th data-field="weight" data-sortable="true" data-align="center">
                     重量
                 </th>
+                <% if (@filedNameRetMap.containsKey('originId') && @filedNameRetMap.get('originId').getDisplayed() == @com.dili.commons.glossary.YesOrNoEnum.YES.getCode()) { %>
                 <th data-field="originName" data-sort-name="origin_name" data-sortable="true" data-align="center">
                     产地
                 </th>
+                <% } %>
                 <th data-field="hasDetectReportName" data-sort-name="has_detect_report" data-sortable="true" data-align="center">
                     检测报告
                 </th>

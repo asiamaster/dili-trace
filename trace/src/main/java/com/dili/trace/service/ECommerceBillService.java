@@ -60,7 +60,7 @@ public class ECommerceBillService {
     private String baseWebPath;
     @Autowired
     DetectRequestService detectRequestService;
-    @Resource
+    @Autowired
     RegisterBillMapper billMapper;
     @Autowired
     UidRestfulRpcService uidRestfulRpcService;

@@ -1,0 +1,181 @@
+<#bs4Body>
+
+<div class="container-fluid pb-5" id="app">
+    <form id="saveForm" role="form" novalidate>
+        <input type="hidden" name="moduleType" value="${@com.dili.trace.enums.FieldConfigModuleTypeEnum.DETECT_REQUEST.getCode()}">
+
+        <div class="">
+            <div class="row row-cols-12">
+                <div class="form-group col-4">
+                    <label for="firmName">管理员所属市场</label>
+                    <input type="text" class="form-control" id="firmName" name="firmName" value="${currentFirm.name}" data-value-type="skip" readonly />
+                    <input type="hidden" class="form-control"  name="marketId" value="${currentFirm.id}"   />
+
+                </div>
+            </div>
+            <%if (@defaultFieldNameIdMap.containsKey('name')){%>
+                <div class="row row-cols-12">
+                    <input type="hidden" name="fieldConfigDetailList[${defaultFiledNameIndexMap['name']}][fieldName]" value="name">
+                    <input type="hidden" name="fieldConfigDetailList[${defaultFiledNameIndexMap['name']}][jsonPath]" value="$.name">
+                    <input type="hidden" name="fieldConfigDetailList[${defaultFiledNameIndexMap['name']}][defaultId]" value="${defaultFieldNameIdMap['name']}">
+                    <div class="form-group col-2">
+                        <input type="checkbox" name="fieldConfigDetailList[${defaultFiledNameIndexMap['name']}][displayed]" value="1" <%if(filedNameRetMap['name'].displayed!1==1){%>checked<%}%> >
+                        <label for="">业户名称</label>
+                    </div>
+                    <div class="form-group col-1">
+                        <input type="radio"  name="fieldConfigDetailList[${defaultFiledNameIndexMap['name']}][required]" value="1" checked>
+                        <label for="">必填</label>
+                    </div>
+                    <div class="form-group col-1">
+                        <input type="radio"  name="fieldConfigDetailList[${defaultFiledNameIndexMap['name']}][required]" value="0">
+                        <label for="">非必填</label>
+                    </div>
+                </div>
+            <%}%>
+
+            <%if (@defaultFieldNameIdMap.containsKey('corporateName')){%>
+                <div class="row row-cols-12" >
+                    <input type="hidden" name="fieldConfigDetailList[${defaultFiledNameIndexMap['corporateName']}][fieldName]" value="corporateName">
+                    <input type="hidden" name="fieldConfigDetailList[${defaultFiledNameIndexMap['corporateName']}][jsonPath]" value="$.corporateName">
+                    <input type="hidden" name="fieldConfigDetailList[${defaultFiledNameIndexMap['corporateName']}][defaultId]" value="${defaultFieldNameIdMap['corporateName']}">
+                    <div class="form-group col-2">
+                        <input type="hidden" name="fieldConfigDetailList[${defaultFiledNameIndexMap['corporateName']}][displayed]" value="0">
+                        <input type="checkbox" name="fieldConfigDetailList[${defaultFiledNameIndexMap['corporateName']}][displayed]" value="1" <%if(filedNameRetMap['corporateName'].displayed!1==1){%>checked<%}%> >
+                        <label for="">企业名称</label>
+                    </div>
+                    <div class="form-group col-1">
+                        <input type="radio"  name="fieldConfigDetailList[${defaultFiledNameIndexMap['corporateName']}][required]" value="1" checked>
+                        <label for="">必填</label>
+                    </div>
+                    <div class="form-group col-1">
+                        <input type="radio"  name="fieldConfigDetailList[${defaultFiledNameIndexMap['corporateName']}][required]" value="0">
+                        <label for="">非必填</label>
+                    </div>
+                </div>
+            <%}%>
+
+            <%if (@defaultFieldNameIdMap.containsKey('productAliasName')){%>
+            <div class="row row-cols-12" >
+                <input type="hidden" name="fieldConfigDetailList[${defaultFiledNameIndexMap['productAliasName']}][fieldName]" value="productAliasName">
+                <input type="hidden" name="fieldConfigDetailList[${defaultFiledNameIndexMap['productAliasName']}][jsonPath]" value="$.productAliasName">
+                <input type="hidden" name="fieldConfigDetailList[${defaultFiledNameIndexMap['productAliasName']}][defaultId]" value="${defaultFieldNameIdMap['productAliasName']}">
+                <div class="form-group col-2">
+                    <input type="hidden" name="fieldConfigDetailList[${defaultFiledNameIndexMap['productAliasName']}][displayed]" value="0">
+                    <input type="checkbox" name="fieldConfigDetailList[${defaultFiledNameIndexMap['productAliasName']}][displayed]" value="1" <%if(filedNameRetMap['productAliasName'].displayed!1==1){%>checked<%}%> >
+                    <label for="">商品别名</label>
+                </div>
+                <div class="form-group col-1">
+                    <input type="radio"  name="fieldConfigDetailList[${defaultFiledNameIndexMap['productAliasName']}][required]" value="1" checked>
+                    <label for="">必填</label>
+                </div>
+                <div class="form-group col-1">
+                    <input type="radio"  name="fieldConfigDetailList[${defaultFiledNameIndexMap['productAliasName']}][required]" value="0">
+                    <label for="">非必填</label>
+                </div>
+            </div>
+            <%}%>
+
+            <%if (@defaultFieldNameIdMap.containsKey('productAliasName')){%>
+                <div class="row row-cols-12">
+                    <input type="hidden" name="fieldConfigDetailList[${defaultFiledNameIndexMap['productAliasName']}][fieldName]" value="productAliasName">
+                    <input type="hidden" name="fieldConfigDetailList[${defaultFiledNameIndexMap['productAliasName']}][jsonPath]" value="$.productAliasName">
+                    <input type="hidden" name="fieldConfigDetailList[${defaultFiledNameIndexMap['productAliasName']}][defaultId]" value="${defaultFieldNameIdMap['productAliasName']}">
+                    <div class="form-group col-2">
+                        <input type="checkbox" name="fieldConfigDetailList[${defaultFiledNameIndexMap['productAliasName']}][displayed]" value="1" <%if(filedNameRetMap['productAliasName'].displayed!1==1){%>checked<%}%> >
+                        <label for="">自定义商品别名</label>
+                    </div>
+                    <div class="form-group col-1">
+                        <input type="radio"  name="fieldConfigDetailList[${defaultFiledNameIndexMap['productAliasName']}][required]" value="1" checked>
+                        <label for="">必填</label>
+                    </div>
+                    <div class="form-group col-1">
+                        <input type="radio"  name="fieldConfigDetailList[${defaultFiledNameIndexMap['productAliasName']}][required]" value="0">
+                        <label for="">非必填</label>
+                    </div>
+                </div>
+            <%}%>
+
+            <%if (@defaultFieldNameIdMap.containsKey('weight')){%>
+                <div class="row row-cols-12">
+                    <input type="hidden" name="fieldConfigDetailList[${defaultFiledNameIndexMap['weight']}][fieldName]" value="weight">
+                    <input type="hidden" name="fieldConfigDetailList[${defaultFiledNameIndexMap['weight']}][jsonPath]" value="$.weight">
+                    <input type="hidden" name="fieldConfigDetailList[${defaultFiledNameIndexMap['weight']}][defaultId]" value="${defaultFieldNameIdMap['weight']}">
+                    <div class="form-group col-2">
+                        <input type="checkbox" name="fieldConfigDetailList[${defaultFiledNameIndexMap['weight']}][displayed]" value="1" <%if(filedNameRetMap['weight'].displayed!1==1){%>checked<%}%> >
+                        <label for="">商品重量</label>
+                    </div>
+                    <div class="form-group col-1">
+                        <input type="radio"  name="fieldConfigDetailList[${defaultFiledNameIndexMap['weight']}][required]" value="1" checked>
+                        <label for="">必填</label>
+                    </div>
+                    <div class="form-group col-1">
+                        <input type="radio"  name="fieldConfigDetailList[${defaultFiledNameIndexMap['weight']}][required]" value="0">
+                        <label for="">非必填</label>
+                    </div>
+                </div>
+            <%}%>
+
+
+            <%if (@defaultFieldNameIdMap.containsKey('originId')){%>
+                <div class="row row-cols-12">
+                    <input type="hidden" name="fieldConfigDetailList[${defaultFiledNameIndexMap['originId']}][fieldName]" value="originId">
+                    <input type="hidden" name="fieldConfigDetailList[${defaultFiledNameIndexMap['originId']}][jsonPath]" value="$.originId">
+                    <input type="hidden" name="fieldConfigDetailList[${defaultFiledNameIndexMap['originId']}][defaultId]" value="${defaultFieldNameIdMap['originId']}">
+                    <div class="form-group col-2">
+                        <input type="checkbox" name="fieldConfigDetailList[${defaultFiledNameIndexMap['originId']}][displayed]" value="1" <%if(filedNameRetMap['originId'].displayed!1==1){%>checked<%}%> >
+                        <label for="">产地</label>
+                    </div>
+                    <div class="form-group col-1">
+                        <input type="radio"  name="fieldConfigDetailList[${defaultFiledNameIndexMap['originId']}][required]" value="1" checked>
+                        <label for="">必填</label>
+                    </div>
+                    <div class="form-group col-1">
+                        <input type="radio"  name="fieldConfigDetailList[${defaultFiledNameIndexMap['originId']}][required]" value="0">
+                        <label for="">非必填</label>
+                    </div>
+                </div>
+            <%}%>
+
+
+            <%if (@defaultFieldNameIdMap.containsKey('isPrintCheckReport')){%>
+            <div class="row row-cols-12" id="imageCertListDiv">
+                <input type="hidden" name="fieldConfigDetailList[${defaultFiledNameIndexMap['isPrintCheckReport']}][fieldName]" value="isPrintCheckReport">
+                <input type="hidden" name="fieldConfigDetailList[${defaultFiledNameIndexMap['isPrintCheckReport']}][jsonPath]" value="$.isPrintCheckReport">
+                <input type="hidden" name="fieldConfigDetailList[${defaultFiledNameIndexMap['isPrintCheckReport']}][defaultId]" value="${defaultFieldNameIdMap['isPrintCheckReport']}">
+                <div class="form-group col-2">
+                    <input type="checkbox" name="fieldConfigDetailList[${defaultFiledNameIndexMap['isPrintCheckReport']}][displayed]" value="1" <%if(filedNameRetMap['isPrintCheckReport'].displayed!1==1){%>checked<%}%> >
+                    <label for="">是否打印检测报告</label>
+                </div>
+                <div class="form-group col-1">
+                    <input type="radio"  name="fieldConfigDetailList[${defaultFiledNameIndexMap['isPrintCheckReport']}][required]" value="1" checked>
+                    <label for="">必填</label>
+                </div>
+                <div class="form-group col-1">
+                    <input type="radio"  name="fieldConfigDetailList[${defaultFiledNameIndexMap['isPrintCheckReport']}][required]" value="0">
+                    <label for="">非必填</label>
+                </div>
+            </div>
+            <%}%>
+
+        </div>
+    </form>
+</div>
+<div class="text-center">
+    <button class="btn-main2 btn-sm" id="saveBtn">保存</button>&nbsp;&nbsp;
+</div>
+<#webGlobalConfig/>
+<script src="${contextPath!}/resources/assets/dep/underscore/underscore-min.js"></script>
+<script src="${contextPath!}/resources/js/jquery.serializejson.js"></script>
+<script src="${contextPath!}/resources/assets/dep/readonly/readonly.js"></script>
+<script src="${contextPath!}/resources/js/Utils.js"></script>
+<script src="${contextPath!}/resources/js/WebConfig.js"></script>
+<script src="${contextPath!}/resources/js/FieldConfig-DetectRequest.js?v=${v}"></script>
+<script>
+
+
+    $(function () {
+        new FieldConfigDetectRequest($('#saveForm'),$('#saveBtn'));
+    });
+
+</script>
+</#bs4Body>

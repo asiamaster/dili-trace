@@ -48,6 +48,16 @@ public class UpStreamDto extends UpStream {
     private List<Long> userIds;
     @Transient
     private Long userId;
+    @Transient
+    private String keyword;
+
+    public String getKeyword() {
+        return keyword;
+    }
+
+    public void setKeyword(String keyword) {
+        this.keyword = keyword;
+    }
 
     public Long getUserId() {
         return userId;

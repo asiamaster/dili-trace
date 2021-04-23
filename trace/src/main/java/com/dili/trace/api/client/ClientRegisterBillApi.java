@@ -16,10 +16,7 @@ import com.dili.ss.domain.BasePage;
 import com.dili.trace.api.input.CreateRegisterBillInputDto;
 import com.dili.trace.api.input.RegisterBillApiInputDto;
 import com.dili.trace.api.output.TradeDetailBillOutput;
-import com.dili.trace.domain.ImageCert;
-import com.dili.trace.domain.RegisterBill;
-import com.dili.trace.domain.RegisterHead;
-import com.dili.trace.domain.UpStream;
+import com.dili.trace.domain.*;
 import com.dili.trace.dto.CreateListBillParam;
 import com.dili.trace.dto.RegisterBillDto;
 import com.dili.trace.dto.RegisterBillOutputDto;
@@ -74,6 +71,9 @@ public class ClientRegisterBillApi {
     CustomerRpcService customerRpcService;
     @Autowired
     RegisterHeadService registerHeadService;
+    @Autowired
+    RegisterTallyAreaNoService registerTallyAreaNoService;
+
     /**
      * 保存多个登记单
      *
@@ -90,16 +90,8 @@ public class ClientRegisterBillApi {
         try {
             SessionData sessionData = this.sessionContext.getSessionData();
 
-            List<CreateRegisterBillInputDto> registerBills = StreamEx.of(createListBillParam.getRegisterBills())
-                    .nonNull().map(dto->{
-                        dto.setMarketId(sessionData.getMarketId());
-                        return dto;
-                    }).toList();
-            if (registerBills == null) {
-                return BaseOutput.failure("没有登记单");
-            }
             logger.info("保存多个登记单操作用户:{}，{}", sessionData.getUserId(), sessionData.getUserName());
-            List<Long> idList = this.registerBillService.createBillList(registerBills,
+            List<Long> idList = this.registerBillService.createRegisterBillList(sessionData.getMarketId(), createListBillParam.getRegisterBills(),
                     sessionData.getUserId(), sessionData.getOptUser(), CreatorRoleEnum.CUSTOMER);
             return BaseOutput.success().setData(idList);
         } catch (TraceBizException e) {
@@ -130,7 +122,7 @@ public class ClientRegisterBillApi {
                             , sessionContext.getSessionData().getMarketId());
 
 
-            RegisterBill registerBill = dto.build(customer,sessionData.getMarketId());
+            RegisterBill registerBill = dto.build(customer, sessionData.getMarketId());
             logger.info("保存登记单:{}", JSON.toJSONString(registerBill));
             this.registerBillService.doEdit(registerBill, dto.getImageCertList(), Optional.empty());
         } catch (TraceBizException e) {
@@ -199,8 +191,10 @@ public class ClientRegisterBillApi {
         }
 
     }
+
     /**
      * 查看进门登记单
+     *
      * @param query
      * @RETURN
      */
@@ -209,18 +203,18 @@ public class ClientRegisterBillApi {
     @RequestMapping(value = "/viewRegisterBill.api", method = {RequestMethod.POST})
     public BaseOutput<RegisterBill> viewRegisterBill(@RequestBody RegisterBill query) {
         try {
-        query.setIsDeleted(YesOrNoEnum.NO.getCode());
-        query.setMarketId(this.sessionContext.getSessionData().getMarketId());
-        query.setUserId(this.sessionContext.getSessionData().getUserId());
-        RegisterBillOutputDto registerBill =    StreamEx.of(this.registerBillService.listByExample(query)).findFirst().map(b-> RegisterBillOutputDto.build(b, Lists.newArrayList())).orElseThrow(()->{
-            return new TraceBizException("数据不存在");
-        });
+            query.setIsDeleted(YesOrNoEnum.NO.getCode());
+            query.setMarketId(this.sessionContext.getSessionData().getMarketId());
+            query.setUserId(this.sessionContext.getSessionData().getUserId());
+            RegisterBillOutputDto registerBill = StreamEx.of(this.registerBillService.listByExample(query)).findFirst().map(b -> RegisterBillOutputDto.build(b, Lists.newArrayList())).orElseThrow(() -> {
+                return new TraceBizException("数据不存在");
+            });
 
             List<ImageCert> imageCertList = imageCertService.findImageCertListByBillId(query.getId(), BillTypeEnum.fromCode(registerBill.getBillType()).orElse(null));
             registerBill.setImageCertList(imageCertList);
 
             UpStream upStream = upStreamService.get(registerBill.getUpStreamId());
-            if(upStream!=null){
+            if (upStream != null) {
                 registerBill.setUpStreamName(upStream.getName());
             }
 
@@ -228,8 +222,8 @@ public class ClientRegisterBillApi {
             if (RegistTypeEnum.PARTIAL.getCode().equals(registerBill.getRegistType())) {
                 RegisterHead registerHead = new RegisterHead();
                 registerHead.setCode(registerBill.getRegisterHeadCode());
-                List<RegisterHead> registerHeadList =  registerHeadService.listByExample(registerHead);
-                if(CollectionUtils.isNotEmpty(registerHeadList)){
+                List<RegisterHead> registerHeadList = registerHeadService.listByExample(registerHead);
+                if (CollectionUtils.isNotEmpty(registerHeadList)) {
                     registerHead = registerHeadList.get(0);
                 } else {
                     return BaseOutput.failure("未找到主台账单");
@@ -248,6 +242,7 @@ public class ClientRegisterBillApi {
 
     /**
      * 通过登记单ID获取登记单详细信息
+     *
      * @param inputDto
      * @return
      */
@@ -258,7 +253,7 @@ public class ClientRegisterBillApi {
             return BaseOutput.failure("参数错误");
         }
 
-        logger.info("获取登记单详细信息->marketId:{},billId:{},tradeDetailId:{}", inputDto.getMarketId(),inputDto.getBillId(), inputDto.getTradeDetailId());
+        logger.info("获取登记单详细信息->marketId:{},billId:{},tradeDetailId:{}", inputDto.getMarketId(), inputDto.getBillId(), inputDto.getTradeDetailId());
         try {
             RegisterBillOutputDto registerBill = this.registerBillService.viewTradeDetailBill(inputDto);
 
@@ -267,16 +262,18 @@ public class ClientRegisterBillApi {
             registerBill.setImageCertList(imageCertList);
 
             UpStream upStream = upStreamService.get(registerBill.getUpStreamId());
-            if(upStream!=null){
+            if (upStream != null) {
                 registerBill.setUpStreamName(upStream.getName());
             }
+            List<RegisterTallyAreaNo> arrivalTallynos = this.registerTallyAreaNoService.findTallyAreaNoByBillIdAndType(registerBill.getBillId(), BillTypeEnum.REGISTER_BILL);
+            registerBill.setArrivalTallynos(StreamEx.of(arrivalTallynos).map(RegisterTallyAreaNo::getTallyareaNo).toList());
 
             //获取主台账单的总重量与剩余总重量
             if (RegistTypeEnum.PARTIAL.getCode().equals(registerBill.getRegistType())) {
                 RegisterHead registerHead = new RegisterHead();
                 registerHead.setCode(registerBill.getRegisterHeadCode());
-                List<RegisterHead> registerHeadList =  registerHeadService.listByExample(registerHead);
-                if(CollectionUtils.isNotEmpty(registerHeadList)){
+                List<RegisterHead> registerHeadList = registerHeadService.listByExample(registerHead);
+                if (CollectionUtils.isNotEmpty(registerHeadList)) {
                     registerHead = registerHeadList.get(0);
                 } else {
                     return BaseOutput.failure("未找到主台账单");
@@ -285,7 +282,7 @@ public class ClientRegisterBillApi {
                 registerBill.setRemainWeight(registerHead.getRemainWeight());
             }
 
-            String data=JSON.toJSONString(registerBill, SerializerFeature.DisableCircularReferenceDetect);
+            String data = JSON.toJSONString(registerBill, SerializerFeature.DisableCircularReferenceDetect);
             return BaseOutput.success().setData(JSON.parse(data));
 
         } catch (TraceBizException e) {

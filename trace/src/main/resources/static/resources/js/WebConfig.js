@@ -37,34 +37,56 @@ class WebConfig {
             idField.val(suggestion.id);
         }
         $(self).val(suggestion.value.trim());
-        $(self).data('oldvalue', suggestion.value);
+        $(self).data('input-text', $(self).val());
         var v = $(self).valid();
     }
-    initAutoComplete(selector, lookupFun, onSelect = this.onselectFun) {
+    initTraceAutoComplete(selector, lookupFun, onSelect = this.onselectFun) {
         $(selector).keydown(function (e) {
             if (e.keyCode == 13) {
             }
         });
-        $(selector).data('oldvalue', '');
+        $(selector).data('input-text', '');
         $(selector).on('change', function () {
-            var oldvalue = $(selector).data('oldvalue');
+            var selectText = $(selector).data('select-text');
+            var inputValue = $(selector).data('input-value');
             var val = $(this).val();
-            if (oldvalue != val) {
+            if (selectText != val) {
                 $(this).siblings('input').val('');
+            }
+            $(this).data('input-value', $(this).val());
+        });
+        $(selector).on('focus', function () {
+            var selectText = $(selector).data('select-text');
+            var inputValue = $(selector).data('input-value');
+            if (_.isUndefined(inputValue)) {
+                $(this).val('');
+            }
+            else {
+                $(this).val(inputValue);
             }
         });
         $(selector).devbridgeAutocomplete({
-            noCache: 1,
+            noCache: false,
             lookup: lookupFun,
             dataType: 'json',
             onSearchComplete: function (query, suggestions) {
             },
+            deferRequestBy: 200,
+            triggerSelectOnValidInput: false,
             showNoSuggestionNotice: true,
             noSuggestionNotice: "不存在，请重输！",
             autoSelectFirst: true,
-            autoFocus: true,
+            autoFocus: false,
             onSelect: onSelect
         });
+    }
+    serializeJSON(form, serializeOpts = null) {
+        var opts = { useIntKeysAsArrayIndex: true };
+        if (serializeOpts != null) {
+            _.extend(opts, serializeOpts);
+        }
+        let data = form.serializeJSON(opts);
+        return data;
     }
 }
 class ListPage extends WebConfig {

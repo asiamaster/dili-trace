@@ -12,7 +12,6 @@
     <result column="card_no" jdbcType="VARCHAR" property="cardNo" />
     <result column="addr" jdbcType="VARCHAR" property="addr" />
     <result column="card_no_url" jdbcType="VARCHAR" property="cardNoUrl" />
-    <result column="business_license_url" jdbcType="VARCHAR" property="businessLicenseUrl" />
     <result column="sales_city_id" jdbcType="BIGINT" property="salesCityId" />
     <result column="sales_city_name" jdbcType="VARCHAR" property="salesCityName" />
     <result column="state" jdbcType="BIT" property="state" />
@@ -26,7 +25,7 @@
     <!--
       WARNING - @mbg.generated
     -->
-    id,user_id,user_name, phone, card_no, addr, card_no_url, tally_area_no, business_license_url,
+    id,user_id,user_name, phone, card_no, addr, card_no_url, tally_area_no,
     sales_city_id, sales_city_name, state, pwd, created, modified,user_plates,plate_amount
   </sql>
   <select id="queryUserHistory" resultMap="BaseResultMap">
@@ -88,9 +87,6 @@
 	      <if test="likeTallyAreaNos != null">
 	        AND  tally_area_nos like '%${likeTallyAreaNos}%'  
 	      </if>
-	      <if test="businessLicenseUrl != null">
-	       AND   business_license_url = #{businessLicenseUrl,jdbcType=VARCHAR}
-	      </if>
 	      <if test="salesCityId != null">
 	        AND   sales_city_id = #{salesCityId,jdbcType=BIGINT}
 	      </if>
@@ -121,14 +117,6 @@
 			<if test="likeUserPlates != null">
 	        AND  user_plates like '%${likeUserPlates}%'  
 			</if>
-	      <if test="hasBusinessLicense!=null">
-		      <if test="hasBusinessLicense==true">
-		        AND (business_license_url is not null and business_license_url &lt;&gt;'')
-				</if>
-				<if test="hasBusinessLicense==false">
-		        AND  (business_license_url is null or business_license_url='')
-				</if>
-	      </if>
   </sql>
 
   
@@ -152,9 +140,6 @@
       </if>
       <if test="likeTallyAreaNos != null">
         AND  tally_area_nos like '%${likeTallyAreaNos}%'  
-      </if>
-      <if test="businessLicenseUrl != null">
-       AND   business_license_url = #{businessLicenseUrl,jdbcType=VARCHAR}
       </if>
       <if test="salesCityId != null">
         AND   sales_city_id = #{salesCityId,jdbcType=BIGINT}
@@ -186,14 +171,6 @@
 		<if test="likeUserPlates != null">
         AND  user_plates like '%${likeUserPlates}%'  
 		</if>
-      <if test="hasBusinessLicense!=null">
-	      <if test="hasBusinessLicense==true">
-	        AND (business_license_url is not null and business_license_url &lt;&gt;'')
-			</if>
-			<if test="hasBusinessLicense==false">
-	        AND  (business_license_url is null or business_license_url='')
-			</if>
-      </if>
   </sql>
   <select id="queryUserHistoryStatics" parameterType="com.dili.trace.dto.UserHistoryListDto" resultType="com.dili.trace.dto.UserHistoryStaticsDto">
   SELECT  sum(plate_amount) as plate_amount  FROM (<include refid="allValidUserHistory" />)	temp

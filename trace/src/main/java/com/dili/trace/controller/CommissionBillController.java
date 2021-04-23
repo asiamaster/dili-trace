@@ -56,8 +56,6 @@ public class CommissionBillController {
     @Autowired
     TradeTypeService tradeTypeService;
     @Autowired
-    UserService userService;
-    @Autowired
     UserPlateService userPlateService;
     @Autowired
     QualityTraceTradeBillService qualityTraceTradeBillService;
@@ -248,7 +246,7 @@ public class CommissionBillController {
      * @return
      */
     @RequestMapping(value = "/view.html", method = RequestMethod.GET)
-    public String view(ModelMap modelMap, Long id) {
+    public String view(ModelMap modelMap,  Long id) {
         RegisterBill bill = this.billService.get(id);
         if (bill == null) {
             return "";
@@ -268,16 +266,16 @@ public class CommissionBillController {
      * @param id
      * @return
      */
-    @RequestMapping(value = "/autoCheck.action", method = RequestMethod.GET)
+    /*@RequestMapping(value = "/autoCheck/{id}", method = RequestMethod.GET)
     public @ResponseBody
-    BaseOutput autoCheck(Long id) {
+    BaseOutput autoCheck(@PathVariable Long id) {
         try {
-            this.registerBillService.autoCheckRegisterBill(id,this.uapRpcService.getCurrentOperator().get());
+            this.registerBillService.autoCheckRegisterBill(id,this.uapRpcService.getCurrentOperatorOrEx());
         } catch (TraceBizException e) {
             return BaseOutput.failure(e.getMessage());
         }
         return BaseOutput.success("操作成功");
-    }
+    }*/
 
     /**
      * 采样检测
@@ -285,16 +283,16 @@ public class CommissionBillController {
      * @param id
      * @return
      */
-    @RequestMapping(value = "/samplingCheck.action", method = RequestMethod.GET)
+    /*@RequestMapping(value = "/samplingCheck/{id}", method = RequestMethod.GET)
     public @ResponseBody
-    BaseOutput samplingCheck(Long id) {
+    BaseOutput samplingCheck(@PathVariable Long id) {
         try {
-            this.registerBillService.samplingCheckRegisterBill(id,this.uapRpcService.getCurrentOperator().get());
+            this.registerBillService.samplingCheckRegisterBill(id,this.uapRpcService.getCurrentOperatorOrEx());
         } catch (TraceBizException e) {
             return BaseOutput.failure(e.getMessage());
         }
         return BaseOutput.success("操作成功");
-    }
+    }*/
 
 
     /**

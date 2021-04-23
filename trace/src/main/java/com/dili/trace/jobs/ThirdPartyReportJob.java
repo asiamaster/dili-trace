@@ -54,7 +54,7 @@ public class ThirdPartyReportJob implements CommandLineRunner {
     UserMapper userMapper;
 
     @Autowired
-    AssetsRpcService categoryService;
+    CategoryService categoryService;
 
     @Autowired
     RegisterBillMapper registerBillMapper;
@@ -130,10 +130,9 @@ public class ThirdPartyReportJob implements CommandLineRunner {
         Integer userCount = this.userService.countUser(query);
 
         CusCategoryQuery category = new CusCategoryQuery();
-        //TODO
-/*        category.setMarketId(marketId);
-        Integer categoryCount = this.categoryService.count(category);*/
-        Integer categoryCount=null;
+        category.setMarketId(marketId);
+        Integer categoryCount = this.categoryService.count(category);
+
         MarketCountDto marketCountDto = new MarketCountDto();
         marketCountDto.setPdtCount(userCount == null ? 0 : userCount);
         marketCountDto.setSubjectCount(categoryCount == null ? 0 : categoryCount);

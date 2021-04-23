@@ -23,6 +23,7 @@ import com.dili.trace.enums.RegisgterHeadStatusEnum;
 import com.dili.trace.enums.WeightUnitEnum;
 import com.dili.trace.rpc.service.CustomerRpcService;
 import com.dili.trace.service.*;
+import com.google.common.collect.Lists;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
@@ -34,9 +35,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 /**
  * 进门主台账单相关接口
@@ -68,6 +67,11 @@ public class ClientRegisterHeadApi {
     @Autowired
     UpStreamService upStreamService;
 
+    @Autowired
+    RegisterHeadPlateService registerHeadPlateService;
+    @Autowired
+    RegisterTallyAreaNoService registerTallyAreaNoService;
+
     /**
      * 获取进门主台账单列表
      *
@@ -80,13 +84,19 @@ public class ClientRegisterHeadApi {
     public BaseOutput<BasePage<CheckinOutRecord>> listPage(@RequestBody RegisterHeadDto input) {
         logger.info("获取进门主台账单列表:{}", JSON.toJSONString(input));
         try {
-            Long userId = this.sessionContext.getSessionData().getUserId();
+            SessionData sessionData=this.sessionContext.getSessionData();
+            Long userId = sessionData.getUserId();
             logger.info("获取进门主台账单列表 操作用户:{}", userId);
             input.setSort("created");
             input.setOrder("desc");
             input.setUserId(userId);
+            input.setMarketId(sessionData.getMarketId());
 //            input.setMinRemainWeight(BigDecimal.ZERO);
             BasePage<RegisterHead> registerHeadBasePage = registerHeadService.listPageApi(input);
+
+            List<Long> registerHeadIdList = StreamEx.of(registerHeadBasePage.getDatas()).map(RegisterHead::getId).toList();
+            Map<Long, List<String>> plateListMap=   this.registerHeadPlateService.findPlateByRegisterHeadIdList(registerHeadIdList);
+            Map<Long, List<String>>tallyAreaNoListMap=this.registerTallyAreaNoService. findTallyAreaNoByRegisterHeadIdList(registerHeadIdList);
 
             if (null != registerHeadBasePage && CollectionUtils.isNotEmpty(registerHeadBasePage.getDatas())) {
                 registerHeadBasePage.getDatas().forEach(e -> {
@@ -97,6 +107,8 @@ public class ClientRegisterHeadApi {
                         e.setUpStreamName(upStream.getName());
                     }
                     e.setImageCertList(imageCertService.findImageCertListByBillId(e.getId(), BillTypeEnum.MASTER_BILL));
+                    e.setPlateList(plateListMap.getOrDefault(e.getId(), Lists.newArrayList()));
+                    e.setArrivalTallynos( tallyAreaNoListMap.getOrDefault(e.getId(),Lists.newArrayList()));
                 });
             }
 
@@ -119,6 +131,8 @@ public class ClientRegisterHeadApi {
     @RequestMapping(value = "/countByStatus.api", method = {RequestMethod.POST})
     public BaseOutput<List<VerifyStatusCountOutputDto>> countByStatus(@RequestBody RegisterHeadDto query) {
         try {
+            SessionData sessionData=this.sessionContext.getSessionData();
+            query.setMarketId(sessionData.getMarketId());
             // 10: 已启用 20：已关闭 30：废弃
             List<VerifyStatusCountOutputDto> list = new ArrayList<>(3);
             List<RegisterHead> registerHeads = registerHeadService.listByExample(query);
@@ -296,6 +310,13 @@ public class ClientRegisterHeadApi {
             registerBill.setRegisterHeadCode(registerHead.getCode());
             List<RegisterBill> registerBills = registerBillService.listByExample(registerBill);
             registerHead.setRegisterBills(registerBills);
+
+            List<String>plateList=   this.registerHeadPlateService.findPlateByRegisterHeadIdList(Arrays.asList(registerHead.getId())).getOrDefault(registerHead.getId(), Lists.newArrayList());
+            registerHead.setPlateList(plateList);
+
+            List<String> registerTallyAreaNoList = this.registerTallyAreaNoService.findTallyAreaNoByRegisterHeadIdList(Arrays.asList(registerHead.getId())).getOrDefault(registerHead.getId(), Lists.newArrayList());
+            registerHead.setArrivalTallynos(registerTallyAreaNoList);
+
             return BaseOutput.success().setData(registerHead);
         } catch (TraceBizException e) {
             return BaseOutput.failure(e.getMessage());
@@ -347,6 +368,12 @@ public class ClientRegisterHeadApi {
                 });
             }
             registerHead.setRegisterBills(registerBills);
+            List<String>plateList=   this.registerHeadPlateService.findPlateByRegisterHeadIdList(Arrays.asList(registerHead.getId())).getOrDefault(registerHead.getId(), Lists.newArrayList());
+            registerHead.setPlateList(plateList);
+
+            List<String> registerTallyAreaNoList = this.registerTallyAreaNoService.findTallyAreaNoByRegisterHeadIdList(Arrays.asList(registerHead.getId())).getOrDefault(registerHead.getId(), Lists.newArrayList());
+            registerHead.setArrivalTallynos(registerTallyAreaNoList);
+
             return BaseOutput.success().setData(registerHead);
         } catch (TraceBizException e) {
             return BaseOutput.failure(e.getMessage());

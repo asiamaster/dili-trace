@@ -68,7 +68,7 @@ public class OrderService {
      * @return
      */
     private QualityTraceTradeBill build(WeighingBillClientListDto dto) {
-        QualityTraceTradeBill bill = DTOUtils.newDTO(QualityTraceTradeBill.class);
+        QualityTraceTradeBill bill = new QualityTraceTradeBill();
         bill.setBillId(dto.getId());
         bill.setOrderId(dto.getSerialNo());
         bill.setBuyerAccount(String.valueOf(dto.getBuyerAccount()));

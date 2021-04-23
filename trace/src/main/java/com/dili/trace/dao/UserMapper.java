@@ -4,12 +4,15 @@ import com.dili.ss.base.MyMapper;
 import com.dili.trace.api.input.UserInput;
 import com.dili.trace.api.output.UserOutput;
 import com.dili.trace.domain.UserInfo;
+import com.dili.trace.dto.query.UserQrHistoryQueryDto;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 import java.util.Map;
 
 public interface UserMapper extends MyMapper<UserInfo> {
+    public List<UserInfo> selectUserInfoByQrHistory(UserQrHistoryQueryDto historyQueryDto);
+
     public List<UserOutput> countGroupByValidateState(UserInfo user);
 
     public List<UserOutput> listUserByQuery(UserInput user);
@@ -96,4 +99,13 @@ public interface UserMapper extends MyMapper<UserInfo> {
      * @return
      */
     List<UserInfo> getUserListByUserIds(@Param("idList") List<Long> idList);
+
+    /**
+     * 插入或者忽略用户信息
+     *
+     * @param userInfo
+     * @return
+     */
+
+    public int insertIgnoreUserInfo(UserInfo userInfo);
 }
