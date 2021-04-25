@@ -75,17 +75,17 @@ CREATE TABLE `register_head_plate` (
 
 
 CREATE TABLE `default_field_detail` (
-    `id` bigint NOT NULL AUTO_INCREMENT,
-    `module_type` int NOT NULL COMMENT '模块',
-    `field_id` varchar(50)  NULL COMMENT '字段ID',
-    `field_label` varchar(50) NOT  NULL COMMENT '字段Label',
-    `field_name` varchar(50) NOT  NULL COMMENT '字段名称',
-    `displayed_condition_values`  varchar(50) NULL DEFAULT '' COMMENT '显示field条件值',
-    `json_path` varchar(50) NOT NULL  COMMENT 'jsonpath',
-    `json_path_type` int NOT NULL  COMMENT 'jsonpath类型',
-    `created` datetime NOT NULL DEFAULT now(),
-    `modified` datetime NOT NULL DEFAULT now(),
-    PRIMARY KEY (`id`)
+        `id` bigint NOT NULL AUTO_INCREMENT,
+        `module_type` int NOT NULL COMMENT '模块',
+        `field_id` varchar(50)  NULL COMMENT '字段ID',
+        `field_label` varchar(50) NOT  NULL COMMENT '字段Label',
+        `field_name` varchar(50) NOT  NULL COMMENT '字段名称',
+        `default_value`	varchar(50)	   NULL COMMENT '默认值',
+        `json_path` varchar(50) NOT NULL  COMMENT 'jsonpath',
+        `json_path_type` int NOT NULL  COMMENT 'jsonpath类型',
+        `created` datetime NOT NULL DEFAULT now(),
+        `modified` datetime NOT NULL DEFAULT now(),
+        PRIMARY KEY (`id`)
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8mb4;
 
 
