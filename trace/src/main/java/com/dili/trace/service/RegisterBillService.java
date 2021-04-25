@@ -301,7 +301,7 @@ public class RegisterBillService extends BaseServiceImpl<RegisterBill, Long> {
 //        registerBill.setOrderType(OrderTypeEnum.REGISTER_BILL.getCode());
         registerBill.setRegisterSource(RegisterSourceEnum.TALLY_AREA.getCode());
         registerBill.setCheckinStatus(CheckinStatusEnum.NONE.getCode());
-
+        registerBill.setBillType(BillTypeEnum.REGISTER_BILL.getCode());
         // 保存车牌
 //        this.userPlateService.checkAndInsertUserPlate(registerBill.getUserId(), plate);
 
