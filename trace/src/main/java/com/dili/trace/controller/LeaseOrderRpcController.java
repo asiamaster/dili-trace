@@ -43,8 +43,8 @@ public class LeaseOrderRpcController {
         try {
             List<AssetsResultDto> assetsResultDtoList = this.leaseOrderRpcService.findLease(assetsParamsDto);
             List<String> dataList = StreamEx.of(assetsResultDtoList).map(AssetsResultDto::getAssetsName).toList();
-            dataList.add("sss");
-            dataList.add("bbb");
+//            dataList.add("sss");
+//            dataList.add("bbb");
             return BaseOutput.successData(dataList);
         } catch (Exception e) {
             return BaseOutput.failure("后端出错");
