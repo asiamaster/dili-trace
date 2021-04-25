@@ -49,7 +49,16 @@ public class CustomerMqConsumer {
         //  2. 处理成功之后 获取deliveryTag 并进行手工的ACK操作, 因为我们配置文件里配置的是 手工签收
         //	spring.rabbitmq.listener.simple.acknowledge-mode=manual
         Long deliveryTag = (Long) message.getHeaders().get(AmqpHeaders.DELIVERY_TAG);
-        channel.basicAck(deliveryTag, false);
+
+        try{
+            channel.basicAck(deliveryTag, false);
+            this.convertJson(message).ifPresent(extendDto -> {
+                this.userInfoService.updateUserInfoByCustomerExtendDto(extendDto);
+            });
+        }catch (Exception e){
+            logger.error(e.getMessage(),e);
+            channel.basicNack(deliveryTag, false,true);
+        }
     }
 
     /**

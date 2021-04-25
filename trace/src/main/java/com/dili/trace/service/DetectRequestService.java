@@ -174,7 +174,7 @@ public class DetectRequestService extends TraceBaseService<DetectRequest, Long> 
      * @param creatorDto
      * @return
      */
-    public Long createOtherPassedRequest(@NotNull Long billId, @NotNull IdNameDto creatorDto) {
+    public Long createOtherPassedRequest(@NotNull Long billId, @NotNull OperatorUser creatorDto) {
 
         DetectRequest item = this.createByBillId(billId, DetectTypeEnum.NEW, creatorDto, Optional.empty());
 
@@ -216,7 +216,7 @@ public class DetectRequestService extends TraceBaseService<DetectRequest, Long> 
      * @param billId
      * @return
      */
-    public DetectRequest createByBillId(@NotNull Long billId, DetectTypeEnum detectTypeEnum, @NotNull IdNameDto creatorDto, @NotNull Optional<IdNameDto> designatedDto) {
+    public DetectRequest createByBillId(@NotNull Long billId, DetectTypeEnum detectTypeEnum, @NotNull OperatorUser creatorDto, @NotNull Optional<OperatorUser> designatedDto) {
         RegisterBill billItem = this.billService.get(billId);
         if (billItem == null) {
             throw new TraceBizException("报备单不存在");
@@ -737,7 +737,7 @@ public class DetectRequestService extends TraceBaseService<DetectRequest, Long> 
      */
     public void bookingRequest(Long billId, UserTicket userTicket) {
 
-        this.createByBillId(billId, DetectTypeEnum.NEW, new IdNameDto(userTicket.getId(), userTicket.getUserName()), Optional.empty());
+        this.createByBillId(billId, DetectTypeEnum.NEW, new OperatorUser(userTicket.getId(), userTicket.getUserName()), Optional.empty());
 
         RegisterBill registerBill = this.billService.getAvaiableBill(billId).orElseThrow(() -> {
             throw new TraceBizException("操作失败，登记单已撤销！");

@@ -1131,7 +1131,7 @@ public class SgRegisterBillServiceImpl implements SgRegisterBillService {
         return StreamEx.ofNullable(registerBillList).flatCollection(Function.identity()).nonNull().map(rb -> {
             Long registerBillId = this.createRegisterBill(rb,operatorUser);
             // 寿光管理端，新增完报备单的同时新增检测请求
-            DetectRequest item = this.detectRequestService.createByBillId(registerBillId, DetectTypeEnum.NEW, new IdNameDto(operatorUser.getId(), operatorUser.getName()), Optional.empty());
+            DetectRequest item = this.detectRequestService.createByBillId(registerBillId, DetectTypeEnum.NEW, operatorUser, Optional.empty());
 
             DetectRequest updatable = new DetectRequest();
             updatable.setId(item.getId());

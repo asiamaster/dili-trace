@@ -1,17 +1,5 @@
 package com.dili.trace.service;
 
-import java.math.BigDecimal;
-import java.util.Date;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import com.dili.common.exception.TraceBizException;
 import com.dili.commons.glossary.YesOrNoEnum;
 import com.dili.ss.base.BaseServiceImpl;
@@ -19,22 +7,27 @@ import com.dili.ss.domain.BaseOutput;
 import com.dili.trace.dao.RegisterBillMapper;
 import com.dili.trace.domain.DetectRequest;
 import com.dili.trace.domain.RegisterBill;
-import com.dili.trace.dto.IdNameDto;
 import com.dili.trace.dto.OperatorUser;
 import com.dili.trace.dto.RegisterBillDto;
-import com.dili.trace.enums.BillTypeEnum;
-import com.dili.trace.enums.BillVerifyStatusEnum;
-import com.dili.trace.enums.DetectResultEnum;
-import com.dili.trace.enums.DetectStatusEnum;
-import com.dili.trace.enums.DetectTypeEnum;
+import com.dili.trace.enums.*;
 import com.dili.trace.glossary.BizNumberType;
 import com.dili.trace.glossary.RegisterBilCreationSourceEnum;
 import com.dili.trace.glossary.RegisterSourceEnum;
 import com.dili.trace.glossary.SampleSourceEnum;
 import com.dili.trace.rpc.service.UidRestfulRpcService;
 import com.dili.trace.util.RegUtils;
-
 import one.util.streamex.StreamEx;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.math.BigDecimal;
+import java.util.Date;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 
 /**
  * 委托单
@@ -181,7 +174,7 @@ public class CommissionBillService extends BaseServiceImpl<RegisterBill, Long> {
                     bill.setOperatorId(operatorUser.getId());
 //            item.setSampleSource(SampleSourceEnum.SAMPLE_CHECK.getCode().intValue());
 //            item.setState(RegisterBillStateEnum.WAIT_CHECK.getCode().intValue());
-                    DetectRequest item = this.detectRequestService.createByBillId(bill.getBillId(), DetectTypeEnum.NEW, new IdNameDto(operatorUser.getId(), operatorUser.getName()), Optional.empty());
+                    DetectRequest item = this.detectRequestService.createByBillId(bill.getBillId(), DetectTypeEnum.NEW, operatorUser, Optional.empty());
 
                     DetectRequest updatable = new DetectRequest();
                     updatable.setId(item.getId());
