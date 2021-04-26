@@ -22,9 +22,8 @@ public class ProcessConfig extends BaseDomain {
     /**
      * 是否登记审核
      */
-
-    @Column(name = "`is_autoverify_passed`")//is_audit_after_regist
-    private Integer isAutoVerifyPassed;
+    @Column(name = "`is_need_verify`")//is_audit_after_regist
+    private Integer isNeedVerify;
 
     /**
      * 称重后自动进门
@@ -58,12 +57,12 @@ public class ProcessConfig extends BaseDomain {
         this.marketId = marketId;
     }
 
-    public Integer getIsAutoVerifyPassed() {
-        return isAutoVerifyPassed;
+    public Integer getIsNeedVerify() {
+        return isNeedVerify;
     }
 
-    public void setIsAutoVerifyPassed(Integer isAutoVerifyPassed) {
-        this.isAutoVerifyPassed = isAutoVerifyPassed;
+    public void setIsNeedVerify(Integer isNeedVerify) {
+        this.isNeedVerify = isNeedVerify;
     }
 
     public Integer getCanDoCheckInWithoutWeight() {

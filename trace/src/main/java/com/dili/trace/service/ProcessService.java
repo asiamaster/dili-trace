@@ -74,7 +74,7 @@ public class ProcessService {
         }
         this.billService.updateSelective(updatableBill);
 
-        if (YesOrNoEnum.YES.getCode().equals(processConfig.getIsAutoVerifyPassed())) {
+        if (YesOrNoEnum.NO.getCode().equals(processConfig.getIsNeedVerify())) {
             this.updateVerifyStatus(billId, BillVerifyStatusEnum.PASSED, Optional.empty(), operatorUser);
         }
 

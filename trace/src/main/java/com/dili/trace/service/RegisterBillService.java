@@ -244,7 +244,7 @@ public class RegisterBillService extends BaseServiceImpl<RegisterBill, Long> {
         Map<String, FieldConfigDetailRetDto> fieldConfigDetailRetDtoMap = StreamEx.of(fieldConfigDetailRetDtoList).nonNull().toMap(item -> item.getDefaultFieldDetail().getFieldName(), Function.identity());
 
         ProcessConfig processConfig = this.processConfigService.findByMarketId(marketId);
-        processConfig.setIsAutoVerifyPassed(YesOrNoEnum.YES.getCode());
+        processConfig.setIsNeedVerify(YesOrNoEnum.NO.getCode());
         Long billId = this.createRegisterBill(registerBill, fieldConfigDetailRetDtoMap, processConfig, operatorUser);
 
         return billId;

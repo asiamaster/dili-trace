@@ -21,7 +21,7 @@ public class ProcessConfigService extends BaseServiceImpl<ProcessConfig, Long> {
     public ProcessConfig findByMarketId(Long marketId) {
 
         ProcessConfig processConfig = new ProcessConfig();
-        processConfig.setIsAutoVerifyPassed(YesOrNoEnum.NO.getCode());
+        processConfig.setIsNeedVerify(YesOrNoEnum.NO.getCode());
         processConfig.setCanDoCheckInWithoutWeight(YesOrNoEnum.YES.getCode());
         processConfig.setIsManullyCheckIn(YesOrNoEnum.YES.getCode());
         processConfig.setMarketId(marketId);
