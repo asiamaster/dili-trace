@@ -27,7 +27,7 @@ public class ProcessServiceTest extends AutoWiredBaseTest {
     public void afterCreateBill() {
 
         ProcessConfig processConfig = new ProcessConfig();
-        processConfig.setIsAutoVerifyPassed(YesOrNoEnum.NO.getCode());
+        processConfig.setIsNeedVerify(YesOrNoEnum.YES.getCode());
         processConfig.setIsManullyCheckIn(YesOrNoEnum.YES.getCode());
 
         processConfig.setCanDoCheckInWithoutWeight(YesOrNoEnum.NO.getCode());

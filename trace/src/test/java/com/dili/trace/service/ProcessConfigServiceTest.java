@@ -20,7 +20,7 @@ public class ProcessConfigServiceTest extends AutoWiredBaseTest {
         ProcessConfig processConfig = new ProcessConfig();
         processConfig.setCanDoCheckInWithoutWeight(YesOrNoEnum.NO.getCode());
         processConfig.setIsManullyCheckIn(YesOrNoEnum.NO.getCode());
-        processConfig.setIsAutoVerifyPassed(YesOrNoEnum.NO.getCode());
+        processConfig.setIsNeedVerify(YesOrNoEnum.YES.getCode());
         processConfig.setMarketId(8L);
         Mockito.doReturn(processConfig).when(this.processConfigService).findByMarketId(Mockito.anyLong());
 
