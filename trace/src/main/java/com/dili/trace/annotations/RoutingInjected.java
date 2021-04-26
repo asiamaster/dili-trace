@@ -1,6 +1,5 @@
 package com.dili.trace.annotations;
 
-
 import org.springframework.stereotype.Component;
 
 import java.lang.annotation.*;
@@ -8,12 +7,11 @@ import java.lang.annotation.*;
 /**
  * description
  *
- * @author jinliang 2019/01/11 11:30
+ * @author wangguofeng
  */
-@Target({ElementType.TYPE})
+@Target({ElementType.FIELD})
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 @Component
-public @interface TenantService {
-    String value();
+public @interface RoutingInjected {
 }

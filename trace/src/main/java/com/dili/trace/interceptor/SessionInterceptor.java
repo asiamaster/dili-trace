@@ -59,18 +59,22 @@ public class SessionInterceptor extends HandlerInterceptorAdapter {
     private ObjectMapper mapper = new ObjectMapper();
 
     /**
+     * 同步时间
+     */
+    private String syncUserTimeKey = "syncUserTime_";
+    /**
      * 用户过期时间-分钟
      */
     private Integer userEffectMin = 10;
 
     @Override
-    public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler,
+    public void afterCompletion(HttpServletRequest req, HttpServletResponse resp, Object handler,
                                 @Nullable Exception ex) throws Exception {
         WebContent.resetLocal();
     }
 
     @Override
-    public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)
+    public boolean preHandle(HttpServletRequest req, HttpServletResponse resp, Object handler)
             throws Exception {
         if (!(handler instanceof HandlerMethod)) {
             return true;
@@ -80,33 +84,36 @@ public class SessionInterceptor extends HandlerInterceptorAdapter {
 
         try {
             if (access == null) {
-                return this.write401(response, "没有权限访问");
+                return this.write401(resp, "没有权限访问");
             }
-            WebContent.put(request);
-            WebContent.put(response);
+            if(WebContent.getRequest()==null){
+                WebContent.resetLocal();
+                WebContent.put(req);
+                WebContent.put(resp);
+            }
             Optional<SessionData> currentSessionData = Optional.empty();
             if (access.role() == Role.ANY) {
-                currentSessionData = this.loginAsAny(request);
+                currentSessionData = this.loginAsAny(req);
             } else if (access.role() == Role.Client) {
-                currentSessionData = this.loginAsClient(request);
+                currentSessionData = this.loginAsClient(req);
             } else if (access.role() == Role.Manager) {
-                currentSessionData = this.loginAsManager(request);
+                currentSessionData = this.loginAsManager(req);
             } else if (access.role() == Role.NONE) {
                 logger.info("无需权限即可访问。比如检测机器");
                 return true;
             } else {
-                return this.writeError(response, "权限配置错误");
+                return this.writeError(resp, "权限配置错误");
             }
             if (!currentSessionData.isPresent()) {
-                return this.write401(response, "没有权限访问");
+                return this.write401(resp, "没有权限访问");
             }
             this.sessionContext.setSessionData(currentSessionData.get(), access);
 
         } catch (TraceBizException e) {
-            return this.writeError(response, e.getMessage());
+            return this.writeError(resp, e.getMessage());
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
-            return this.writeError(response, "服务端出错");
+            return this.writeError(resp, "服务端出错");
         }
 
         this.sessionContext.getSessionData().setRole(access.role());
@@ -157,6 +164,7 @@ public class SessionInterceptor extends HandlerInterceptorAdapter {
 
     private Optional<SessionData> loginAsClient(HttpServletRequest req) {
         Optional<SessionData> data = this.customerRpcService.getCurrentCustomer();
+        //asyncRpcUser(data);
         this.sync(data);
         return data;
     }
@@ -174,6 +182,58 @@ public class SessionInterceptor extends HandlerInterceptorAdapter {
         }
     }
 
+    /**
+     * 新增用戶对应redis同步时间
+     *
+     * @param userId
+     * @param key_user
+     */
+    private void syncUserInfoAdd(Long userId, String key_user) {
+        doSyncUserRpc(userId);
+        Date newMinutes = DateUtils.addMinutes(DateUtils.getCurrentDate(), userEffectMin);
+        redisUtil.set(key_user, newMinutes);
+    }
+
+    /**
+     * 更新用戶对应redis同步时间
+     *
+     * @param userId
+     * @param key_user
+     */
+    private void syncUserInfoUpdate(Long userId, String key_user) {
+        //redis中同步过期时间
+        Date syncUserTime = (Date) redisUtil.get(key_user);
+        //当前时间
+        Date currentDate = DateUtils.getCurrentDate();
+        //redis中没有过期时间,重新设置
+        if (null == syncUserTime) {
+            syncUserInfoAdd(userId, key_user);
+        } else {
+            //当前时间在同步过期时间之后，则调用同步方法同步用户
+            if (currentDate.after(syncUserTime)) {
+                doSyncUserRpc(userId);
+                //秒转分
+                Date newSyncDate = DateUtils.addMinutes(syncUserTime, userEffectMin);
+                //同步过期时间+10分钟仍然在当前时间之前，则取当前时间+10分钟作新的同步过期时间
+                if (currentDate.after(newSyncDate)) {
+                    newSyncDate = DateUtils.addMinutes(DateUtils.getCurrentDate(), userEffectMin);
+                }
+                redisUtil.set(key_user, newSyncDate);
+            }
+        }
+
+    }
+
+    /**
+     * 同步用户
+     */
+    public void doSyncUserRpc(Long userId) {
+//        try {
+//            syncRpcService.syncRpcUserByUserId(userId);
+//        } catch (Exception e) {
+//            logger.error(e.getMessage());
+//        }
+    }
 
     private void sync(Optional<SessionData> sessionData) {
         sessionData.ifPresent(sd -> {
