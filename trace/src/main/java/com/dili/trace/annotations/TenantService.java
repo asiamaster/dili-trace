@@ -1,6 +1,7 @@
 package com.dili.trace.annotations;
 
 
+import com.dili.trace.dynamic.TenantType;
 import org.springframework.stereotype.Component;
 
 import java.lang.annotation.*;
@@ -8,12 +9,15 @@ import java.lang.annotation.*;
 /**
  * description
  *
- * @author jinliang 2019/01/11 11:30
+ * @author wangguofeng
  */
 @Target({ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 @Component
 public @interface TenantService {
-    String value();
+    Class<? extends TenantType> clz();
+
+    String tanent();
 }
+

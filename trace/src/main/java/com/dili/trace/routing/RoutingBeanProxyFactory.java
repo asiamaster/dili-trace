@@ -37,7 +37,7 @@ public class RoutingBeanProxyFactory {
                 Object obj = entry.getValue();
                 String tenantCode = null;
                 if (obj.getClass().isAnnotationPresent(TenantService.class)) {
-                    tenantCode = obj.getClass().getAnnotation(TenantService.class).value();
+                    tenantCode = obj.getClass().getAnnotation(TenantService.class).tanent();
                 }
                 if (tenantBeans.get(tenantCode) != null) {
                     throw new BeanCreationException("有相同Tanent的Bean存在");
