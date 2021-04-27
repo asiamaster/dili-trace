@@ -16,8 +16,6 @@ import java.lang.annotation.*;
 @Documented
 @Component
 public @interface TenantService {
-    Class<? extends TenantType> clz();
-
     String tanent();
 }
 

@@ -13,6 +13,5 @@ public class RoutingContextHolder {
 
     public static void remove() {
         tanentLocal.remove();
-        ;
     }
 }

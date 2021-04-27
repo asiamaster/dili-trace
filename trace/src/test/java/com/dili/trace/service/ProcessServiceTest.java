@@ -9,6 +9,7 @@ import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 

@@ -2,6 +2,8 @@ package com.dili;
 
 import com.dili.common.config.BuildConfiguration;
 import com.dili.ss.metadata.provider.DatetimeProvider;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.ApplicationPidFileWriter;
@@ -51,6 +53,7 @@ import tk.mybatis.spring.annotation.MapperScan;
  * 继承SpringBootServletInitializer
  */
 public class TraceWebApplication extends SpringBootServletInitializer {
+    private static final Logger logger= LoggerFactory.getLogger(TraceWebApplication.class);
     @LoadBalanced
     @Bean
     public RestTemplate restTemplate() {
@@ -64,6 +67,7 @@ public class TraceWebApplication extends SpringBootServletInitializer {
         ConfigurableApplicationContext ctx = sa.run(args);
 //        BuildConfiguration dtp = ctx.getBean(BuildConfiguration.class);
 //        System.out.println(dtp);
+        logger.info("====================溯源成功启动====================");
     }
 
 

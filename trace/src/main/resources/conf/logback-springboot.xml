@@ -95,7 +95,7 @@
     </springProfile>
 
     <logger name="com.netflix.loadbalancer.DynamicServerListLoadBalancer" level="warn"></logger>
-    <logger name="com.alibaba.nacos.naming.push.receiver" level="warn"></logger>
+    <logger name="com.alibaba.nacos.client.naming" level="warn"></logger>
     <logger name="tk.mybatis.mapper.autoconfigure.MapperCacheDisabler" level="warn"></logger>
     <logger name="springfox.documentation.spring.web.readers.operation.CachingOperationNameGenerator" level="warn"></logger>
     <logger name="org.springframework.context.support.PostProcessorRegistrationDelegate$BeanPostProcessorChecker" level="warn"></logger>

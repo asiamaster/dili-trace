@@ -10,7 +10,7 @@ import org.springframework.stereotype.Service;
  * DEMO
  */
 @Service
-@TenantService(clz = DemoTanent.class, tanent = "b")
+@TenantService(tanent = "b")
 public class TanentServiceDemoB extends TanentServiceDemo implements TanentInterfaceDemo {
     /**
      * DEMO

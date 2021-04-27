@@ -47,6 +47,12 @@ public class RegisterTallyAreaNoService extends TraceBaseService<RegisterTallyAr
         if (noList.isEmpty()) {
             return 0;
         }
+
+        Integer maxLength=StreamEx.of(noList).map(RegisterTallyAreaNo::getTallyareaNo).mapToInt(tallyAreaNo->tallyAreaNo.length()).max().orElse(0);
+        if(maxLength>50){
+            throw new TraceBizException("摊位号超长(50字符)");
+        }
+
         RegisterTallyAreaNo dq = new RegisterTallyAreaNo();
         dq.setBillType(billTypeEnum.getCode());
         dq.setBillId(billId);
