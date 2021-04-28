@@ -116,6 +116,48 @@ public class ProductStockService extends BaseServiceImpl<ProductStock, Long> {
         return batchStockItem;
     }
 
+    /**
+     * 返还重量(上架,退货,交易取消)
+     *
+     * @param tradeDetailId
+     * @param returnedWeight
+     * @return
+     */
+    @Transactional
+    public int returnWeight(Long tradeDetailId, BigDecimal returnedWeight) {
+        if (Objects.isNull(tradeDetailId)) {
+            throw new TraceBizException("参数错误");
+        }
+        TradeDetail tradeDetailItem = this.tradeDetailService.get(tradeDetailId);
+        if (Objects.isNull(tradeDetailItem)) {
+            throw new TraceBizException("批次库存数据不存在");
+        }
+
+        Long productStockId = tradeDetailItem.getProductStockId();
+
+        ProductStock productStockItem = this.selectByIdForUpdate(productStockId).orElseThrow(() -> {
+            throw new TraceBizException("库存数据不存在");
+        });
+
+
+        DetectResultEnum detectResultEnum = StreamEx.of(this.detectRequestService.findDetectRequestByBillId(tradeDetailItem.getBillId())).map(detectRequest -> {
+            return detectRequest.getDetectResult();
+        }).map(DetectResultEnum::fromCode).filter(Optional::isPresent).map(Optional::get).findFirst().orElse(DetectResultEnum.NONE);
+
+        ProductStock psUpdatable = new ProductStock();
+        psUpdatable.setId(productStockItem.getId());
+
+        if (DetectResultEnum.PASSED == detectResultEnum) {
+            psUpdatable.setStockWeight(productStockItem.getStockWeight().add(returnedWeight));
+        } else if (DetectResultEnum.FAILED == detectResultEnum) {
+            psUpdatable.setDetectFailedWeight(productStockItem.getDetectFailedWeight().add(returnedWeight));
+        } else if (DetectResultEnum.NONE == detectResultEnum) {
+            psUpdatable.setStockWeight(productStockItem.getStockWeight().add(returnedWeight));
+        } else {
+            throw new TraceBizException("检测结果错误");
+        }
+        return this.updateSelective(psUpdatable);
+    }
 
     /**
      * 检测之后,根据billId更新检测失败重量
@@ -134,8 +176,8 @@ public class ProductStockService extends BaseServiceImpl<ProductStock, Long> {
         }).map(DetectResultEnum::fromCode).filter(Optional::isPresent).map(Optional::get).findFirst().orElse(DetectResultEnum.NONE);
 
 
-        return EntryStream.of(this.findGroupedTradeDetailsByBillId(billId)).mapKeys(productStockid -> {
-            ProductStock productStockItem = this.selectByIdForUpdate(productStockid).orElseThrow(() -> {
+        return EntryStream.of(this.findGroupedTradeDetailsByBillId(billId)).mapKeys(productStockId -> {
+            ProductStock productStockItem = this.selectByIdForUpdate(productStockId).orElseThrow(() -> {
                 throw new TraceBizException("库存数据不存在");
             });
             return productStockItem;

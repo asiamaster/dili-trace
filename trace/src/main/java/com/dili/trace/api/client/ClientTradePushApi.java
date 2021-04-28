@@ -13,6 +13,7 @@ import com.dili.ss.dto.IDTO;
 import com.dili.trace.api.output.ProductStockExtendDataDto;
 import com.dili.trace.domain.*;
 import com.dili.trace.enums.BillTypeEnum;
+import com.dili.trace.enums.DetectResultEnum;
 import com.dili.trace.enums.PushTypeEnum;
 import com.dili.trace.service.*;
 import io.swagger.annotations.Api;
@@ -25,6 +26,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * 客户商品上下架接口
@@ -58,10 +60,14 @@ public class ClientTradePushApi {
     @Autowired
     private LoginSessionContext sessionContext;
 
+    @Autowired
+    DetectRequestService detectRequestService;
+
     /**
      * 查询库存详情
+     *
      * @param tradeDetailId 交易明细ID
-     * @param pushType 上下架类型 {@link com.dili.trace.enums.PushTypeEnum}
+     * @param pushType      上下架类型 {@link com.dili.trace.enums.PushTypeEnum}
      * @return 库存明细
      */
     @SuppressWarnings("unchecked")
@@ -93,13 +99,23 @@ public class ClientTradePushApi {
             List<TradePushLog> tradePushLogs = tradePushService.listByExample(pushLog);
             registerBill.setTradePushLogs(tradePushLogs);
 
-            ProductStockExtendDataDto productStockExtendDataDto=new ProductStockExtendDataDto();
+            DetectResultEnum detectResultEnum = StreamEx.of(this.detectRequestService.findDetectRequestByBillId(tradeDetail.getBillId())).map(detectRequest -> {
+                return detectRequest.getDetectResult();
+            }).map(DetectResultEnum::fromCode).filter(Optional::isPresent).map(Optional::get).findFirst().orElse(DetectResultEnum.NONE);
 
 
-            productStockExtendDataDto.setDetectFailedWeight(BigDecimal.ZERO);
+            ProductStockExtendDataDto productStockExtendDataDto = new ProductStockExtendDataDto();
+
+
+            if (DetectResultEnum.FAILED == detectResultEnum) {
+                productStockExtendDataDto.setDetectFailedWeight(tradeDetail.getStockWeight().add(tradeDetail.getPushawayWeight()).add(tradeDetail.getSoftWeight()));
+            } else {
+                productStockExtendDataDto.setDetectFailedWeight(BigDecimal.ZERO);
+            }
+
             registerBill.setProductStockExtendDataDto(productStockExtendDataDto);
             if (pushType.equals(PushTypeEnum.DOWN.getCode())) {
-                BigDecimal pushDownWeight= this.tradePushService.findTradePushByTradeDetailId(tradeDetailId,PushTypeEnum.DOWN)
+                BigDecimal pushDownWeight = this.tradePushService.findTradePushByTradeDetailId(tradeDetailId, PushTypeEnum.DOWN)
                         .map(TradePushLog::getOperationWeight).orElse(BigDecimal.ZERO);
                 productStockExtendDataDto.setPushDownWeight(pushDownWeight);
             }
@@ -118,6 +134,7 @@ public class ClientTradePushApi {
 
     /**
      * 上架/下架
+     *
      * @param pushLog 上下架参数
      * @return 上下架结果
      */
@@ -143,6 +160,7 @@ public class ClientTradePushApi {
 
     /**
      * 查询上架商品列表
+     *
      * @param tradeDetail 查询条件
      * @return 上架商品列表
      */
@@ -168,6 +186,7 @@ public class ClientTradePushApi {
 
     /**
      * 查询下架商品列表
+     *
      * @param tradeDetail
      * @return 下架商品列表
      */
