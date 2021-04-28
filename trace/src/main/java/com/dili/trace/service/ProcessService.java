@@ -214,8 +214,6 @@ public class ProcessService {
         CheckinStatusEnum checkinStatusEnum = CheckinStatusEnum.fromCode(billItem.getCheckinStatus());
         if (BillVerifyStatusEnum.PASSED == toVerifyStatusEnum) {
             if (CheckinStatusEnum.ALLOWED == checkinStatusEnum) {
-                updatableBill.setVerifyType(VerifyTypeEnum.PASSED_AFTER_CHECKIN.getCode());
-            } else {
                 updatableBill.setVerifyType(VerifyTypeEnum.PASSED_BEFORE_CHECKIN.getCode());
             }
         }

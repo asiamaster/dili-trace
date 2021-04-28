@@ -9,7 +9,7 @@ public enum VerifyTypeEnum {
      */
     PASSED_BEFORE_CHECKIN(10, "预审通过"),
     /**
-     * 场内通过8
+     * 场内通过
      */
     PASSED_AFTER_CHECKIN(20, "场内通过"),;
 

@@ -149,8 +149,14 @@
                     <input type="checkbox" name="fieldConfigDetailList[${defaultFiledNameIndexMap['imageCertList']}][displayed]" value="1" <%if(filedNameRetMap['imageCertList'].displayed!1==1){%>checked<%}%> >
                     <label>上传证明</label>
                 </div>
-                <input type="hidden"  name="fieldConfigDetailList[${defaultFiledNameIndexMap['imageCertList']}][required]" value="1" >
-
+                <div class="form-group col-1">
+                    <input type="radio"  name="fieldConfigDetailList[${defaultFiledNameIndexMap['imageCertList']}][required]" value="1" checked>
+                    <label for="">必填</label>
+                </div>
+                <div class="form-group col-1">
+                    <input type="radio"  name="fieldConfigDetailList[${defaultFiledNameIndexMap['imageCertList']}][required]" value="0">
+                    <label for="">非必填</label>
+                </div>
                 <div class="form-group col-6">
                     <select class="form-control" <%if(filedNameRetMap['imageCertList'].displayed!1==1){%>required<%}%> multiple="multiple"  name="fieldConfigDetailList[${defaultFiledNameIndexMap['imageCertList']}][availableValues][]">
                         <%for(certType in imageCertTypeList){%>
