@@ -36,6 +36,7 @@
             <% if( isNotEmpty(_provider) ) {%>
             type: "post",
             url: '/provider/getLookupList.action',
+            contentType:'application/json',
             data: {
                 provider: '${_provider}',
                 <% if( isNotEmpty(_queryParams) ) {%>
