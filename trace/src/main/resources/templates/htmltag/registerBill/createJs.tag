@@ -45,6 +45,10 @@
                 weightUnit: "",
                 pieceweightUnit: "",
                 productOptionsTemp: [],
+                rules: {
+                    plate: {required: true, type: 'string', message: '必须填写车牌'},
+                    plateList: {required: true, type: 'string', message: '必须填写车牌'},
+                },
                 formData: {
                     total: 0,
                     pieceNum: 0,
@@ -216,19 +220,24 @@
                                     value: 10
                                 }
                             ],
-                            required: filedNameRetMap.unitPrice.required === 1,
+                            required: filedNameRetMap.truckType.required === 1,
                             type: "radio",
                             label: "是否拼车",
                             vif: function () {
-                                return filedNameRetMap.unitPrice.displayed === 1;
+                                return filedNameRetMap.truckType.displayed === 1;
+                            },
+                            on: {
+                                change: function (val) {
+                                    app.rules['plate'].required = val === 20;
+                                    app.rules['plateList'].required = val === 20;
+                                }
                             }
                         },
                         plate: {
                             type: "input",
                             label: "车牌号",
-                            required: filedNameRetMap.plate.required === 1,
                             vif: function (form) {
-                                if (filedNameRetMap.plate.displayed === 0) {
+                                if (filedNameRetMap.truckType.displayed === 0) {
                                     return false;
                                 }
                                 return form.registType !== 30;
@@ -238,7 +247,7 @@
                             type: "select",
                             label: "车牌号",
                             prop: {text: 'text', value: 'text'},
-                            required: filedNameRetMap.plate.required === 1,
+                            required: true,
                             optionsLinkageFields: ['registerHeadCode'],
                             options: data => {
                                 let registerHeadCodeTemp = this.registerHeadCodeTemp;
@@ -253,7 +262,7 @@
                                 return [];
                             },
                             vif: function (form) {
-                                if (filedNameRetMap.plate.displayed === 0) {
+                                if (filedNameRetMap.truckType.displayed === 0) {
                                     return false;
                                 }
                                 return form.registType === 30;

@@ -1,560 +1,566 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-		 
-	<modelVersion>4.0.0</modelVersion>
-	<artifactId>trace</artifactId>
-	<description>trace</description>
-	<packaging>jar</packaging>
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
-	<properties>
-		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<java.version>13</java.version>
-		<timestamp>${maven.build.timestamp}</timestamp>
-		<maven.build.timestamp.format>yyyy-MM-dd HH:mm:ss</maven.build.timestamp.format>
-		<!-- MyBatis Generator -->
-		<!-- Java接口和实体类 -->
-		<targetJavaProject>${basedir}/src/main/java</targetJavaProject>
-		<targetMapperPackage>com.dili.trace.dao</targetMapperPackage>
-		<targetModelPackage>com.dili.trace.domain</targetModelPackage>
-		<targetServicePackage>com.dili.trace.service</targetServicePackage>
-		<targetControllerPackage>com.dili.trace.controller</targetControllerPackage>
-		<templateRootDir>${basedir}/mbg-templates</templateRootDir>
-		<!-- XML生成路径 -->
-		<targetResourcesProject>${basedir}/src/main/resources</targetResourcesProject>
-		<targetXMLPackage>mapper</targetXMLPackage>
+    <modelVersion>4.0.0</modelVersion>
+    <artifactId>trace</artifactId>
+    <description>trace</description>
+    <packaging>jar</packaging>
 
-		<jmockit.version>1.41</jmockit.version>
-		<junit-jupiter.version>5.5.0</junit-jupiter.version>
-		<junit-platform.version>1.5.0</junit-platform.version>
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <java.version>13</java.version>
+        <timestamp>${maven.build.timestamp}</timestamp>
+        <maven.build.timestamp.format>yyyy-MM-dd HH:mm:ss</maven.build.timestamp.format>
+        <!-- MyBatis Generator -->
+        <!-- Java接口和实体类 -->
+        <targetJavaProject>${basedir}/src/main/java</targetJavaProject>
+        <targetMapperPackage>com.dili.trace.dao</targetMapperPackage>
+        <targetModelPackage>com.dili.trace.domain</targetModelPackage>
+        <targetServicePackage>com.dili.trace.service</targetServicePackage>
+        <targetControllerPackage>com.dili.trace.controller</targetControllerPackage>
+        <templateRootDir>${basedir}/mbg-templates</templateRootDir>
+        <!-- XML生成路径 -->
+        <targetResourcesProject>${basedir}/src/main/resources</targetResourcesProject>
+        <targetXMLPackage>mapper</targetXMLPackage>
 
-		<start-class>com.dili.TraceWebApplication</start-class>
-		<springfox-swagger.version>2.7.0</springfox-swagger.version>
-	</properties>
+        <jmockit.version>1.41</jmockit.version>
+        <junit-jupiter.version>5.5.0</junit-jupiter.version>
+        <junit-platform.version>1.5.0</junit-platform.version>
 
-	<!-- 父工程定义 -->
-	<parent>
-		<artifactId>dili-trace</artifactId>
-		<groupId>com.dili</groupId>
-		<version>1.0.0-SNAPSHOT</version>
-	</parent>
-	<!--地利 -->
-	<distributionManagement>
-		<!--<repository> <id>central</id> <name>Artifactory Release Repository</name> 
-			<url>http://mvn2.diligrp.com/artifactory/libs-release-local</url> </repository> 
-			<snapshotRepository> <id>central</id> <name>Artifactory Snapshot Repository</name> 
-			<url> http://mvn2.diligrp.com/artifactory/libs-snapshot-local </url> </snapshotRepository> -->
-	</distributionManagement>
-	<pluginRepositories>
-		<pluginRepository>
-			<id>repo1-maven2</id>
-			<name>repo1-maven2</name>
-			<url>https://repo1.maven.org/maven2/</url>
-		</pluginRepository>
-	</pluginRepositories>
+        <start-class>com.dili.TraceWebApplication</start-class>
+        <springfox-swagger.version>2.7.0</springfox-swagger.version>
+    </properties>
 
-	<dependencies>
+    <!-- 父工程定义 -->
+    <parent>
+        <artifactId>dili-trace</artifactId>
+        <groupId>com.dili</groupId>
+        <version>1.0.0-SNAPSHOT</version>
+    </parent>
+    <!--地利 -->
+    <distributionManagement>
+        <!--<repository> <id>central</id> <name>Artifactory Release Repository</name>
+            <url>http://mvn2.diligrp.com/artifactory/libs-release-local</url> </repository>
+            <snapshotRepository> <id>central</id> <name>Artifactory Snapshot Repository</name>
+            <url> http://mvn2.diligrp.com/artifactory/libs-snapshot-local </url> </snapshotRepository> -->
+    </distributionManagement>
+    <pluginRepositories>
+        <pluginRepository>
+            <id>repo1-maven2</id>
+            <name>repo1-maven2</name>
+            <url>https://repo1.maven.org/maven2/</url>
+        </pluginRepository>
+    </pluginRepositories>
 
-		<dependency>
-			<groupId>de.cronn</groupId>
-			<artifactId>reflection-util</artifactId>
-			<version>2.10.0</version>
-		</dependency>
+    <dependencies>
 
-		<dependency>
-			<groupId>com.jayway.jsonpath</groupId>
-			<artifactId>json-path</artifactId>
-			<version>2.5.0</version>
-		</dependency>
+        <dependency>
+            <groupId>uk.org.lidalia</groupId>
+            <artifactId>sysout-over-slf4j</artifactId>
+            <version>1.0.2</version>
+        </dependency>
+        <dependency>
+            <groupId>de.cronn</groupId>
+            <artifactId>reflection-util</artifactId>
+            <version>2.10.0</version>
+        </dependency>
 
-		<dependency>
-			<groupId>com.alibaba.cloud</groupId>
-			<artifactId>spring-cloud-starter-alibaba-sentinel</artifactId>
-			<version>2.2.3.RELEASE</version>
-		</dependency>
-		<dependency>
-			<groupId>com.alibaba.csp</groupId>
-			<artifactId>sentinel-datasource-nacos</artifactId>
-			<version>1.8.0</version>
-		</dependency>
+        <dependency>
+            <groupId>com.jayway.jsonpath</groupId>
+            <artifactId>json-path</artifactId>
+            <version>2.5.0</version>
+        </dependency>
 
-		<dependency>
-			<groupId>org.springframework.cloud</groupId>
-			<artifactId>spring-cloud-starter-openfeign</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>com.alibaba.cloud</groupId>
-			<artifactId>spring-cloud-starter-alibaba-nacos-config</artifactId>
-			<version>2.2.0.RELEASE</version>
-			<exclusions>
-				<exclusion>
-					<groupId>com.alibaba</groupId>
-					<artifactId>fastjson</artifactId>
-				</exclusion>
-			</exclusions>
-		</dependency>
-		<dependency>
-			<groupId>com.alibaba.cloud</groupId>
-			<artifactId>spring-cloud-starter-alibaba-nacos-discovery</artifactId>
-			<version>2.2.0.RELEASE</version>
-		</dependency>
+        <dependency>
+            <groupId>com.alibaba.cloud</groupId>
+            <artifactId>spring-cloud-starter-alibaba-sentinel</artifactId>
+            <version>2.2.3.RELEASE</version>
+        </dependency>
+        <dependency>
+            <groupId>com.alibaba.csp</groupId>
+            <artifactId>sentinel-datasource-nacos</artifactId>
+            <version>1.8.0</version>
+        </dependency>
 
-		<dependency>
-			<groupId>org.springframework.cloud</groupId>
-			<artifactId>spring-cloud-commons</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>com.dili</groupId>
-			<artifactId>logger-sdk</artifactId>
-			<version>${logger.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>com.dili</groupId>
-			<artifactId>bpmc-sdk</artifactId>
-			<version>1.4.1-SNAPSHOT</version>
-		</dependency>
-		<dependency>
-			<groupId>com.dili</groupId>
-			<artifactId>order-service-sdk</artifactId>
-			<version>2.1.0-SNAPSHOT</version>
-			<exclusions>
-				<exclusion>
-					<groupId>com.alibaba.cloud</groupId>
-					<artifactId>*</artifactId>
-				</exclusion>
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-openfeign</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.alibaba.cloud</groupId>
+            <artifactId>spring-cloud-starter-alibaba-nacos-config</artifactId>
+            <version>2.2.0.RELEASE</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>com.alibaba</groupId>
+                    <artifactId>fastjson</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>com.alibaba.cloud</groupId>
+            <artifactId>spring-cloud-starter-alibaba-nacos-discovery</artifactId>
+            <version>2.2.0.RELEASE</version>
+        </dependency>
 
-			</exclusions>
-		</dependency>
-		<dependency>
-			<groupId>com.dili</groupId>
-			<artifactId>assets-sdk</artifactId>
-	        <version>2.0.1-SNAPSHOT</version>
-		</dependency>
-		<dependency>
-			<groupId>com.dili</groupId>
-			<artifactId>customer-sdk</artifactId>
-			<version>1.3.5-SNAPSHOT</version>
-		</dependency>
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-commons</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.dili</groupId>
+            <artifactId>logger-sdk</artifactId>
+            <version>${logger.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.dili</groupId>
+            <artifactId>bpmc-sdk</artifactId>
+            <version>1.4.1-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>com.dili</groupId>
+            <artifactId>order-service-sdk</artifactId>
+            <version>2.1.0-SNAPSHOT</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>com.alibaba.cloud</groupId>
+                    <artifactId>*</artifactId>
+                </exclusion>
 
-		<dependency>
-			<groupId>com.github.binarywang</groupId>
-			<artifactId>weixin-java-miniapp</artifactId>
-			<version>3.8.0</version>
-		</dependency>
-		<dependency>
-			<groupId>com.alibaba</groupId>
-			<artifactId>easyexcel</artifactId>
-			<version>2.2.6</version>
-			<exclusions>
-				<exclusion>
-					<artifactId>cglib</artifactId>
-					<groupId>cglib</groupId>
-				</exclusion>
-			</exclusions>
-		</dependency>
-		<dependency>
-			<groupId>org.mybatis</groupId>
-			<artifactId>mybatis</artifactId>
-			<version>3.5.0</version>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-amqp</artifactId>
-		</dependency>
-		<!--dependency> <groupId>org.springframework.boot</groupId> <artifactId>spring-boot-starter-jooq</artifactId> 
-			</dependency> <<dependency> <groupId>org.jooq</groupId> <artifactId>jooq</artifactId> 
-			</dependency> <dependency> <groupId>org.jooq</groupId> <artifactId>jooq-codegen</artifactId> 
-			</dependency> <dependency> <groupId>org.jooq</groupId> <artifactId>jooq-meta</artifactId> 
-			</dependency> <dependency> <groupId>org.jooq</groupId> <artifactId>jooq-meta-extensions</artifactId> 
-			<version>3.13.2</version> </dependency> -->
-		<dependency>
-			<groupId>org.zalando</groupId>
-			<artifactId>logbook-spring-boot-starter</artifactId>
-			<version>2.1.0</version>
-		</dependency>
-		<!-- <dependency> <groupId>org.zalando</groupId> <artifactId>logbook-json</artifactId> 
-			<version>2.1.0</version> </dependency> -->
-		<dependency>
-			<groupId>com.jayway.jsonpath</groupId>
-			<artifactId>json-path</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>one.util</groupId>
-			<artifactId>streamex</artifactId>
-			<version>0.7.2</version>
-		</dependency>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>com.dili</groupId>
+            <artifactId>assets-sdk</artifactId>
+            <version>2.0.1-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>com.dili</groupId>
+            <artifactId>customer-sdk</artifactId>
+            <version>1.3.5-SNAPSHOT</version>
+        </dependency>
 
-
-		<dependency>
-			<groupId>org.jmockit</groupId>
-			<artifactId>jmockit</artifactId>
-			<version>${jmockit.version}</version>
-			<scope>test</scope>
-		</dependency>
-		<!-- spring boot 基类 -->
-		<dependency>
-			<groupId>com.dili</groupId>
-			<artifactId>ss-beetl</artifactId>
-			<version>${sharp-sword.version}</version>
-			<exclusions>
-				<exclusion>
-					<artifactId>springfox-swagger2</artifactId>
-					<groupId>io.springfox</groupId>
-				</exclusion>
-				<exclusion>
-					<artifactId>swagger-annotations</artifactId>
-					<groupId>io.swagger</groupId>
-				</exclusion>
-			</exclusions>
-		</dependency>
-
-		<!-- if you enable json support in spring mvc. -->
-		<dependency>
-			<groupId>org.codehaus.jackson</groupId>
-			<artifactId>jackson-mapper-asl</artifactId>
-			<version>1.9.13</version>
-		</dependency>
-
-		<!-- =============== spring boot starters =============== -->
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-test</artifactId>
-			<scope>test</scope>
-			<exclusions>
-				<exclusion>
-					<groupId>junit</groupId>
-					<artifactId>junit</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>org.junit.vintage</groupId>
-					<artifactId>junit-vintage-engine</artifactId>
-				</exclusion>
-			</exclusions>
-		</dependency>
-
-		<dependency>
-			<groupId>org.junit.jupiter</groupId>
-			<artifactId>junit-jupiter-api</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.junit.jupiter</groupId>
-			<artifactId>junit-jupiter-engine</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.junit.jupiter</groupId>
-			<artifactId>junit-jupiter-params</artifactId>
-			<scope>test</scope>
-		</dependency>
-
-		<dependency>
-			<groupId>org.junit.platform</groupId>
-			<artifactId>junit-platform-commons</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.junit.platform</groupId>
-			<artifactId>junit-platform-engine</artifactId>
-			<scope>test</scope>
-		</dependency>
-
-		<!-- <dependency> <groupId>org.springframework</groupId> <artifactId>springloaded</artifactId> 
-			<version>${springloaded.version}</version> </dependency> -->
-		<!-- 内部包 -->
-		<dependency>
-			<groupId>com.dili</groupId>
-			<artifactId>commons-server</artifactId>
-			<version>1.3.4-SNAPSHOT</version>
-		</dependency>
-		<dependency>
-			<groupId>com.dili</groupId>
-			<artifactId>commons-web</artifactId>
-			<version>1.3.4-SNAPSHOT</version>
-		</dependency>
-		<dependency>
-			<groupId>com.dili</groupId>
-			<artifactId>ss-uid</artifactId>
-			<version>${sharp-sword.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>com.dili</groupId>
-			<artifactId>ss-redis</artifactId>
-			<version>${sharp-sword.version}</version>
-		</dependency>
-		<!-- jedis -->
-		<dependency>
-			<groupId>redis.clients</groupId>
-			<artifactId>jedis</artifactId>
-			<version>2.9.0</version>
-		</dependency>
-		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>log4j-over-slf4j</artifactId>
-		</dependency>
-		<!-- <dependency> -->
-		<!-- <groupId>com.dili.manage</groupId> -->
-		<!-- <artifactId>diligrp-manage-sdk</artifactId> -->
-		<!-- <version>0.0.1-SNAPSHOT</version> -->
-		<!-- <exclusions> -->
-		<!-- <exclusion> -->
-		<!-- <groupId>com.alibaba</groupId> -->
-		<!-- <artifactId>fastjson</artifactId> -->
-		<!-- </exclusion> -->
-
-		<!-- <exclusion> -->
-		<!-- <groupId>log4j</groupId> -->
-		<!-- <artifactId>log4j</artifactId> -->
-		<!-- </exclusion> -->
-		<!-- </exclusions> -->
-		<!-- </dependency> -->
-		<!--============================================================================ -->
-		<dependency>
-			<groupId>org.nutz</groupId>
-			<artifactId>nutz</artifactId>
-			<version>1.r.68.v20190220</version>
-		</dependency>
-		<dependency>
-			<groupId>com.dili</groupId>
-			<artifactId>uap-sdk</artifactId>
-			<version>3.1.0-SNAPSHOT</version>
-			<exclusions>
-				<exclusion>
-					<groupId>tk.mybatis</groupId>
-					<artifactId>mapper-spring-boot-starter</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>com.github.pagehelper</groupId>
-					<artifactId>pagehelper-spring-boot-starter</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>com.alibaba</groupId>
-					<artifactId>druid-spring-boot-starter</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>mysql</groupId>
-					<artifactId>mysql-connector-java</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>com.alibaba</groupId>
-					<artifactId>druid</artifactId>
-				</exclusion>
-			</exclusions>
-		</dependency>
-		<!--============================================================================ -->
-
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-data-redis</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-aop</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>cn.hutool</groupId>
-			<artifactId>hutool-all</artifactId>
-			<version>5.4.0</version>
-		</dependency>
-		<dependency>
-			<groupId>io.springfox</groupId>
-			<artifactId>springfox-swagger2</artifactId>
-			<version>${springfox-swagger.version}</version>
-			<exclusions>
-				<exclusion>
-					<groupId>com.google.guava</groupId>
-					<artifactId>guava</artifactId>
-				</exclusion>
-			</exclusions>
-		</dependency>
-
-		<dependency>
-			<groupId>io.springfox</groupId>
-			<artifactId>springfox-swagger-ui</artifactId>
-			<version>${springfox-swagger.version}</version>
-			<exclusions>
-				<exclusion>
-					<groupId>com.google.guava</groupId>
-					<artifactId>guava</artifactId>
-				</exclusion>
-			</exclusions>
-		</dependency>
+        <dependency>
+            <groupId>com.github.binarywang</groupId>
+            <artifactId>weixin-java-miniapp</artifactId>
+            <version>3.8.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.alibaba</groupId>
+            <artifactId>easyexcel</artifactId>
+            <version>2.2.6</version>
+            <exclusions>
+                <exclusion>
+                    <artifactId>cglib</artifactId>
+                    <groupId>cglib</groupId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.mybatis</groupId>
+            <artifactId>mybatis</artifactId>
+            <version>3.5.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-amqp</artifactId>
+        </dependency>
+        <!--dependency> <groupId>org.springframework.boot</groupId> <artifactId>spring-boot-starter-jooq</artifactId>
+            </dependency> <<dependency> <groupId>org.jooq</groupId> <artifactId>jooq</artifactId>
+            </dependency> <dependency> <groupId>org.jooq</groupId> <artifactId>jooq-codegen</artifactId>
+            </dependency> <dependency> <groupId>org.jooq</groupId> <artifactId>jooq-meta</artifactId>
+            </dependency> <dependency> <groupId>org.jooq</groupId> <artifactId>jooq-meta-extensions</artifactId>
+            <version>3.13.2</version> </dependency> -->
+        <dependency>
+            <groupId>org.zalando</groupId>
+            <artifactId>logbook-spring-boot-starter</artifactId>
+            <version>2.1.0</version>
+        </dependency>
+        <!-- <dependency> <groupId>org.zalando</groupId> <artifactId>logbook-json</artifactId>
+            <version>2.1.0</version> </dependency> -->
+        <dependency>
+            <groupId>com.jayway.jsonpath</groupId>
+            <artifactId>json-path</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>one.util</groupId>
+            <artifactId>streamex</artifactId>
+            <version>0.7.2</version>
+        </dependency>
 
 
-		<dependency>
-			<groupId>com.microsoft.sqlserver</groupId>
-			<artifactId>mssql-jdbc</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>net.coobird</groupId>
-			<artifactId>thumbnailator</artifactId>
-			<version>0.4.8</version>
-		</dependency>
-		<dependency>
-			<groupId>com.google.zxing</groupId>
-			<artifactId>core</artifactId>
-			<version>3.3.3</version>
-		</dependency>
-		<dependency>
-			<groupId>com.google.zxing</groupId>
-			<artifactId>javase</artifactId>
-			<version>3.3.3</version>
-			<exclusions>
-				<exclusion>
-					<groupId>com.beust</groupId>
-					<artifactId>jcommander</artifactId>
-				</exclusion>
-			</exclusions>
-		</dependency>
-		<!--dependency> <groupId>org.jetbrains</groupId> <artifactId>annotations</artifactId> 
-			<version>RELEASE</version> <scope>compile</scope> </dependency -->
+        <dependency>
+            <groupId>org.jmockit</groupId>
+            <artifactId>jmockit</artifactId>
+            <version>${jmockit.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <!-- spring boot 基类 -->
+        <dependency>
+            <groupId>com.dili</groupId>
+            <artifactId>ss-beetl</artifactId>
+            <version>${sharp-sword.version}</version>
+            <exclusions>
+                <exclusion>
+                    <artifactId>springfox-swagger2</artifactId>
+                    <groupId>io.springfox</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>swagger-annotations</artifactId>
+                    <groupId>io.swagger</groupId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
+        <!-- if you enable json support in spring mvc. -->
+        <dependency>
+            <groupId>org.codehaus.jackson</groupId>
+            <artifactId>jackson-mapper-asl</artifactId>
+            <version>1.9.13</version>
+        </dependency>
+
+        <!-- =============== spring boot starters =============== -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>junit</groupId>
+                    <artifactId>junit</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.junit.vintage</groupId>
+                    <artifactId>junit-vintage-engine</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-api</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-engine</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-params</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.junit.platform</groupId>
+            <artifactId>junit-platform-commons</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.platform</groupId>
+            <artifactId>junit-platform-engine</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- <dependency> <groupId>org.springframework</groupId> <artifactId>springloaded</artifactId>
+            <version>${springloaded.version}</version> </dependency> -->
+        <!-- 内部包 -->
+        <dependency>
+            <groupId>com.dili</groupId>
+            <artifactId>commons-server</artifactId>
+            <version>1.3.4-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>com.dili</groupId>
+            <artifactId>commons-web</artifactId>
+            <version>1.3.4-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>com.dili</groupId>
+            <artifactId>ss-uid</artifactId>
+            <version>${sharp-sword.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.dili</groupId>
+            <artifactId>ss-redis</artifactId>
+            <version>${sharp-sword.version}</version>
+        </dependency>
+        <!-- jedis -->
+        <dependency>
+            <groupId>redis.clients</groupId>
+            <artifactId>jedis</artifactId>
+            <version>2.9.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>log4j-over-slf4j</artifactId>
+        </dependency>
+        <!-- <dependency> -->
+        <!-- <groupId>com.dili.manage</groupId> -->
+        <!-- <artifactId>diligrp-manage-sdk</artifactId> -->
+        <!-- <version>0.0.1-SNAPSHOT</version> -->
+        <!-- <exclusions> -->
+        <!-- <exclusion> -->
+        <!-- <groupId>com.alibaba</groupId> -->
+        <!-- <artifactId>fastjson</artifactId> -->
+        <!-- </exclusion> -->
+
+        <!-- <exclusion> -->
+        <!-- <groupId>log4j</groupId> -->
+        <!-- <artifactId>log4j</artifactId> -->
+        <!-- </exclusion> -->
+        <!-- </exclusions> -->
+        <!-- </dependency> -->
+        <!--============================================================================ -->
+        <dependency>
+            <groupId>org.nutz</groupId>
+            <artifactId>nutz</artifactId>
+            <version>1.r.68.v20190220</version>
+        </dependency>
+        <dependency>
+            <groupId>com.dili</groupId>
+            <artifactId>uap-sdk</artifactId>
+            <version>3.1.0-SNAPSHOT</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>tk.mybatis</groupId>
+                    <artifactId>mapper-spring-boot-starter</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>com.github.pagehelper</groupId>
+                    <artifactId>pagehelper-spring-boot-starter</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>com.alibaba</groupId>
+                    <artifactId>druid-spring-boot-starter</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>mysql</groupId>
+                    <artifactId>mysql-connector-java</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>com.alibaba</groupId>
+                    <artifactId>druid</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <!--============================================================================ -->
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-redis</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-aop</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>cn.hutool</groupId>
+            <artifactId>hutool-all</artifactId>
+            <version>5.4.0</version>
+        </dependency>
+        <dependency>
+            <groupId>io.springfox</groupId>
+            <artifactId>springfox-swagger2</artifactId>
+            <version>${springfox-swagger.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>com.google.guava</groupId>
+                    <artifactId>guava</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
+        <dependency>
+            <groupId>io.springfox</groupId>
+            <artifactId>springfox-swagger-ui</artifactId>
+            <version>${springfox-swagger.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>com.google.guava</groupId>
+                    <artifactId>guava</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
 
 
-		<dependency>
-			<groupId>com.github.gavlyukovskiy</groupId>
-			<artifactId>flexy-pool-spring-boot-starter</artifactId>
-			<version>1.6.1</version>
-		</dependency>
-
-		<dependency>
-			<groupId>com.github.gavlyukovskiy</groupId>
-			<artifactId>datasource-proxy-spring-boot-starter</artifactId>
-			<version>1.6.1</version>
-		</dependency>
-		<dependency>
-			<groupId>com.github.gavlyukovskiy</groupId>
-			<artifactId>p6spy-spring-boot-starter</artifactId>
-			<version>1.6.1</version>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework.retry</groupId>
-			<artifactId>spring-retry</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>com.belerweb</groupId>
-			<artifactId>pinyin4j</artifactId>
-			<version>2.5.1</version>
-		</dependency>
-
-	</dependencies>
-	<build>
-		<!-- 资源文件过滤 -->
-		<resources>
-			<resource>
-				<directory>src/main/resources</directory>
-				<filtering>true</filtering>
-			</resource>
-		</resources>
-		<testResources>
-			<testResource>
-				<directory>src/main/resources</directory>
-				<excludes>
-					<exclude>**/mapper/*.xml</exclude>
-				</excludes>
-			</testResource>
-		</testResources>
-		<plugins>
-
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-compiler-plugin</artifactId>
-				<version>3.7.0</version>
-				<!-- 编译JDK版本 -->
-				<configuration>
-					<source>13</source>
-					<target>13</target>
-					<encoding>UTF-8</encoding>
-				</configuration>
-			</plugin>
+        <dependency>
+            <groupId>com.microsoft.sqlserver</groupId>
+            <artifactId>mssql-jdbc</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>net.coobird</groupId>
+            <artifactId>thumbnailator</artifactId>
+            <version>0.4.8</version>
+        </dependency>
+        <dependency>
+            <groupId>com.google.zxing</groupId>
+            <artifactId>core</artifactId>
+            <version>3.3.3</version>
+        </dependency>
+        <dependency>
+            <groupId>com.google.zxing</groupId>
+            <artifactId>javase</artifactId>
+            <version>3.3.3</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>com.beust</groupId>
+                    <artifactId>jcommander</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <!--dependency> <groupId>org.jetbrains</groupId> <artifactId>annotations</artifactId>
+            <version>RELEASE</version> <scope>compile</scope> </dependency -->
 
 
-			<plugin>
+        <dependency>
+            <groupId>com.github.gavlyukovskiy</groupId>
+            <artifactId>flexy-pool-spring-boot-starter</artifactId>
+            <version>1.6.1</version>
+        </dependency>
 
-				<groupId>cz.habarta.typescript-generator</groupId>
-				<artifactId>typescript-generator-maven-plugin</artifactId>
-				<version>2.27.744</version>
-				<executions>
-					<execution>
-						<id>generate</id>
-						<goals>
-							<goal>generate</goal>
-						</goals>
-						<phase>process-classes</phase>
-					</execution>
-				</executions>
-				<configuration>
-					<jsonLibrary>jackson2</jsonLibrary>
-					<mapEnum>asEnum</mapEnum>
-					<loggingLevel>Debug</loggingLevel>
-					<noFileComment>false</noFileComment>
-					<classes>
-						<class>com.dili.trace.domain.Market</class>
-						<class>com.dili.trace.glossary.RegisterSourceEnum</class>
-						<class>com.dili.trace.enums.BillVerifyStatusEnum</class>
-						<class>com.dili.trace.enums.DetectStatusEnum</class>
-						<class>com.dili.trace.enums.DetectResultEnum</class>
-						<class>com.dili.trace.enums.DetectTypeEnum</class>
-						<class>com.dili.trace.enums.RegistTypeEnum</class>
-					</classes>
-					<outputKind>global</outputKind>
-					<outputFile>src/main/resources/static/tsc/trace.d.ts</outputFile>
-				</configuration>
-			</plugin>
-			<plugin>
-				<groupId>org.springframework.boot</groupId>
-				<artifactId>spring-boot-maven-plugin</artifactId>
-				<version>2.2.4.RELEASE</version>
-				<configuration>
-					<mainClass>${start-class}</mainClass>
-				</configuration>
-				<executions>
-					<execution>
-						<goals>
-							<goal>repackage</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
+        <dependency>
+            <groupId>com.github.gavlyukovskiy</groupId>
+            <artifactId>datasource-proxy-spring-boot-starter</artifactId>
+            <version>1.6.1</version>
+        </dependency>
+        <dependency>
+            <groupId>com.github.gavlyukovskiy</groupId>
+            <artifactId>p6spy-spring-boot-starter</artifactId>
+            <version>1.6.1</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.retry</groupId>
+            <artifactId>spring-retry</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.belerweb</groupId>
+            <artifactId>pinyin4j</artifactId>
+            <version>2.5.1</version>
+        </dependency>
 
-			<plugin>
-				<artifactId>maven-surefire-plugin</artifactId>
-				<version>2.22.2</version>
-				<configuration>
-					<argLine>-Djdk.attach.allowAttachSelf</argLine>
-					<skipTests>true</skipTests>
-				</configuration>
-			</plugin>
-			<plugin>
-				<groupId>pl.project13.maven</groupId>
-				<artifactId>git-commit-id-plugin</artifactId>
-				<version>4.0.0</version>
-				<executions>
-					<execution>
-						<phase>compile</phase>
-						<id>get-the-git-infos</id>
-						<goals>
-							<goal>revision</goal>
-						</goals>
-					</execution>
-					<execution>
-						<phase>compile</phase>
-						<id>validate-the-git-infos</id>
-						<goals>
-							<goal>validateRevision</goal>
-						</goals>
-					</execution>
-				</executions>
+    </dependencies>
+    <build>
+        <!-- 资源文件过滤 -->
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>true</filtering>
+            </resource>
+        </resources>
+        <testResources>
+            <testResource>
+                <directory>src/main/resources</directory>
+                <excludes>
+                    <exclude>**/mapper/*.xml</exclude>
+                </excludes>
+            </testResource>
+        </testResources>
+        <plugins>
 
-				<configuration>
-					<dotGitDirectory>${project.parent.basedir}/.git</dotGitDirectory>
-					<generateGitPropertiesFilename>${project.build.outputDirectory}\git.properties</generateGitPropertiesFilename>
-					<failOnNoGitDirectory>true</failOnNoGitDirectory>
-					<generateGitPropertiesFile>true</generateGitPropertiesFile>
-					<offline>true</offline>
-					<dateFormat>yyyy-MM-dd HH:mm:ssZ</dateFormat>
-				</configuration>
-			</plugin>
-		</plugins>
-	</build>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.7.0</version>
+                <!-- 编译JDK版本 -->
+                <configuration>
+                    <source>13</source>
+                    <target>13</target>
+                    <encoding>UTF-8</encoding>
+                </configuration>
+            </plugin>
+
+
+            <plugin>
+
+                <groupId>cz.habarta.typescript-generator</groupId>
+                <artifactId>typescript-generator-maven-plugin</artifactId>
+                <version>2.27.744</version>
+                <executions>
+                    <execution>
+                        <id>generate</id>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                        <phase>process-classes</phase>
+                    </execution>
+                </executions>
+                <configuration>
+                    <jsonLibrary>jackson2</jsonLibrary>
+                    <mapEnum>asEnum</mapEnum>
+                    <loggingLevel>Debug</loggingLevel>
+                    <noFileComment>false</noFileComment>
+                    <classes>
+                        <class>com.dili.trace.domain.Market</class>
+                        <class>com.dili.trace.glossary.RegisterSourceEnum</class>
+                        <class>com.dili.trace.enums.BillVerifyStatusEnum</class>
+                        <class>com.dili.trace.enums.DetectStatusEnum</class>
+                        <class>com.dili.trace.enums.DetectResultEnum</class>
+                        <class>com.dili.trace.enums.DetectTypeEnum</class>
+                        <class>com.dili.trace.enums.RegistTypeEnum</class>
+                    </classes>
+                    <outputKind>global</outputKind>
+                    <outputFile>src/main/resources/static/tsc/trace.d.ts</outputFile>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                <version>2.2.4.RELEASE</version>
+                <configuration>
+                    <mainClass>${start-class}</mainClass>
+                </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>repackage</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>2.22.2</version>
+                <configuration>
+                    <argLine>-Djdk.attach.allowAttachSelf</argLine>
+                    <skipTests>true</skipTests>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>pl.project13.maven</groupId>
+                <artifactId>git-commit-id-plugin</artifactId>
+                <version>4.0.0</version>
+                <executions>
+                    <execution>
+                        <phase>compile</phase>
+                        <id>get-the-git-infos</id>
+                        <goals>
+                            <goal>revision</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <phase>compile</phase>
+                        <id>validate-the-git-infos</id>
+                        <goals>
+                            <goal>validateRevision</goal>
+                        </goals>
+                    </execution>
+                </executions>
+
+                <configuration>
+                    <dotGitDirectory>${project.parent.basedir}/.git</dotGitDirectory>
+                    <generateGitPropertiesFilename>${project.build.outputDirectory}\git.properties
+                    </generateGitPropertiesFilename>
+                    <failOnNoGitDirectory>true</failOnNoGitDirectory>
+                    <generateGitPropertiesFile>true</generateGitPropertiesFile>
+                    <offline>true</offline>
+                    <dateFormat>yyyy-MM-dd HH:mm:ssZ</dateFormat>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
 
 </project>

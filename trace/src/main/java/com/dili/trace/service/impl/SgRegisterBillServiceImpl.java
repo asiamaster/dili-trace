@@ -1270,8 +1270,10 @@ public class SgRegisterBillServiceImpl implements SgRegisterBillService {
 
     @Override
     public void doUpdateImage(RegisterBill registerBill) {
-        List<ImageCert> imageCertList = registerBill.getImageCertList();
-        imageCertList = StreamEx.ofNullable(imageCertList).nonNull().flatCollection(Function.identity()).nonNull().toList();
+        List<ImageCert> imageCertList =  StreamEx.ofNullable(registerBill.getImageCertList()).nonNull().flatCollection(Function.identity()).nonNull().toList();
+        if(imageCertList.size()>10){
+            throw new TraceBizException("所有凭证不能超过10张");
+        }
         this.billService.updateHasImage(registerBill.getId(), imageCertList);
     }
 

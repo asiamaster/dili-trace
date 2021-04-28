@@ -24,7 +24,11 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 import com.dili.ss.retrofitful.annotation.RestfulScan;
 
 import org.springframework.web.client.RestTemplate;
+import sun.misc.Unsafe;
 import tk.mybatis.spring.annotation.MapperScan;
+import uk.org.lidalia.sysoutslf4j.context.SysOutOverSLF4J;
+
+import java.lang.reflect.Field;
 
 /**
  * 由MyBatis Generator工具自动生成
@@ -32,15 +36,15 @@ import tk.mybatis.spring.annotation.MapperScan;
 @SpringBootApplication
 //处理事务支持
 @EnableAspectJAutoProxy(proxyTargetClass = true)
-@MapperScan(basePackages = {"com.dili.ss.uid.mapper","com.dili.trace.dao", "com.dili.ss.dao"})
-@ComponentScan(basePackages = {"com.dili.ss.uid","com.dili.ss", "com.dili.trace", "com.dili.common", "com.dili.commons", "com.dili.uap.sdk"})
-@RestfulScan({"com.dili.orders.rpc","com.dili.ss.uid","com.dili.trace.rpc", "com.dili.uap.sdk.rpc", "com.dili.bpmc.sdk.rpc"})
+@MapperScan(basePackages = {"com.dili.ss.uid.mapper", "com.dili.trace.dao", "com.dili.ss.dao"})
+@ComponentScan(basePackages = {"com.dili.ss.uid", "com.dili.ss", "com.dili.trace", "com.dili.common", "com.dili.commons", "com.dili.uap.sdk"})
+@RestfulScan({"com.dili.orders.rpc", "com.dili.ss.uid", "com.dili.trace.rpc", "com.dili.uap.sdk.rpc", "com.dili.bpmc.sdk.rpc"})
 //@DTOScan({"com.dili.trace","com.dili.ss"})
 //@Import(DynamicRoutingDataSourceRegister.class)
 @EnableScheduling
 
 @EnableAsync
-@EnableFeignClients(basePackages = {"com.dili.orders.rpc","com.dili.ss.uid","com.dili.assets.sdk.rpc"
+@EnableFeignClients(basePackages = {"com.dili.orders.rpc", "com.dili.ss.uid", "com.dili.assets.sdk.rpc"
         , "com.dili.customer.sdk.rpc"
         , "com.dili.trace.rpc"
         , "com.dili.bpmc.sdk.rpc"})
@@ -53,7 +57,8 @@ import tk.mybatis.spring.annotation.MapperScan;
  * 继承SpringBootServletInitializer
  */
 public class TraceWebApplication extends SpringBootServletInitializer {
-    private static final Logger logger= LoggerFactory.getLogger(TraceWebApplication.class);
+    private static final Logger logger = LoggerFactory.getLogger(TraceWebApplication.class);
+
     @LoadBalanced
     @Bean
     public RestTemplate restTemplate() {
@@ -61,13 +66,29 @@ public class TraceWebApplication extends SpringBootServletInitializer {
     }
 
     public static void main(String[] args) {
-        System.setProperty("druid.mysql.usePingMethod","false");
+        System.setProperty("druid.mysql.usePingMethod", "false");
+        SysOutOverSLF4J.sendSystemOutAndErrToSLF4J();
+        disableWarning();
         SpringApplication sa = new SpringApplication(TraceWebApplication.class);
         sa.addListeners(new ApplicationPidFileWriter());
         ConfigurableApplicationContext ctx = sa.run(args);
 //        BuildConfiguration dtp = ctx.getBean(BuildConfiguration.class);
 //        System.out.println(dtp);
         logger.info("====================溯源成功启动====================");
+    }
+
+    private static void disableWarning() {
+        try {
+            Field theUnsafe = Unsafe.class.getDeclaredField("theUnsafe");
+            theUnsafe.setAccessible(true);
+            Unsafe u = (Unsafe) theUnsafe.get(null);
+
+            Class cls = Class.forName("jdk.internal.module.IllegalAccessLogger");
+            Field logger = cls.getDeclaredField("logger");
+            u.putObjectVolatile(cls, u.staticFieldOffset(logger), null);
+        } catch (Exception e) {
+            // ignore
+        }
     }
 
 

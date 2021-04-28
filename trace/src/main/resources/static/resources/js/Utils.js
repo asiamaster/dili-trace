@@ -1,7 +1,14 @@
 class jq {
     static syncPostJson(url, data, settings = {}) {
         let jsonData = jq.removeEmptyProperty(data);
-        _.extend(settings, { method: 'post', dataType: 'json', async: false, contentType: 'application/json', data: JSON.stringify(jsonData), url: url });
+        _.extend(settings, {
+            method: 'post',
+            dataType: 'json',
+            async: false,
+            contentType: 'application/json',
+            data: JSON.stringify(jsonData),
+            url: url
+        });
         var ret = null;
         var ex = null;
         $.ajax({
@@ -22,29 +29,35 @@ class jq {
         }
         return ret;
     }
-    static async ajax(settings, beforeStartFun = function () { }, alwaysFun = function () { }) {
-        beforeStartFun();
+    static async ajax(settings, beforeStartFun = async () => { }, alwaysFun = async () => { }) {
+        (async () => {
+            await beforeStartFun();
+        })();
         let p = new Promise((resolve, reject) => {
             $.ajax(settings).done((result) => {
                 resolve(result);
             }).fail((e) => {
                 reject(e);
             }).always(() => {
-                alwaysFun();
+                (async () => {
+                    await alwaysFun();
+                })();
             });
         });
         let resp = await p;
         return resp;
     }
     static defaultBeforeStart() {
-        return () => {
+        return new Promise((resolve, reject) => {
             bui.loading.show('努力提交中，请稍候。。。');
-        };
+            resolve(true);
+        });
     }
     static defaultAlwaysFun() {
-        return () => {
-            bui.loading.show('努力提交中，请稍候。。。');
-        };
+        return new Promise((resolve, reject) => {
+            bui.loading.hide();
+            resolve(true);
+        });
     }
     static async ajaxWithProcessing(settings) {
         let resp = await jq.ajax(settings, jq.defaultBeforeStart, jq.defaultAlwaysFun);
@@ -52,7 +65,13 @@ class jq {
     }
     static async postJson(url, data, settings = {}) {
         let jsonData = this.removeEmptyProperty(data);
-        _.extend(settings, { method: 'post', dataType: 'json', contentType: 'application/json', data: JSON.stringify(jsonData), url: url });
+        _.extend(settings, {
+            method: 'post',
+            dataType: 'json',
+            contentType: 'application/json',
+            data: JSON.stringify(jsonData),
+            url: url
+        });
         let resp = await jq.ajax(settings);
         return resp;
     }
@@ -62,7 +81,13 @@ class jq {
     }
     static async postJsonWithProcessing(url, data, settings = {}) {
         let jsonData = this.removeEmptyProperty(data);
-        _.extend(settings, { method: 'post', dataType: 'json', contentType: 'application/json', data: JSON.stringify(jsonData), url: url });
+        _.extend(settings, {
+            method: 'post',
+            dataType: 'json',
+            contentType: 'application/json',
+            data: JSON.stringify(jsonData),
+            url: url
+        });
         return await this.ajaxWithProcessing(settings);
     }
     static removeEmptyProperty(data) {

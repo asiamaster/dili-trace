@@ -14,7 +14,7 @@ import java.util.Date;
 /**
  * TEST job
  */
-@Component
+//@Component
 public class TestJob {
     //交易数据当前时间往前推1小时
     private Integer tradeInterval = -1;
@@ -26,7 +26,7 @@ public class TestJob {
     @Scheduled(cron = "0 10 */1 * * ?")
     public void getTradeData() {
         LocalDateTime now = LocalDateTime.now();
-        System.out.println(now.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
+//        System.out.println(now.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
 
         Date endTime = Date.from(now.atZone(ZoneId.systemDefault()).toInstant());
 
