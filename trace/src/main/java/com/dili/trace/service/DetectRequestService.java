@@ -68,6 +68,8 @@ public class DetectRequestService extends TraceBaseService<DetectRequest, Long> 
     com.dili.trace.rpc.service.UidRestfulRpcService uidRestfulRpcService;
     @Autowired
     CodeGenerateService codeGenerateService;
+    @Autowired
+    ProductStockService productStockService;
 
     /**
      * 创建检测请求
@@ -160,55 +162,15 @@ public class DetectRequestService extends TraceBaseService<DetectRequest, Long> 
         }
 
         RegisterBill registerBill = this.billService.get(billId);
-        if (registerBill == null) {
+
+        if (Objects.isNull(registerBill)||Objects.isNull(registerBill.getDetectRequestId())) {
             return Optional.empty();
         }
         Long detectRequestId = registerBill.getDetectRequestId();
         return Optional.ofNullable(this.get(detectRequestId));
     }
 
-    /**
-     * 创建检测请求
-     *
-     * @param billId
-     * @param creatorDto
-     * @return
-     */
-    public Long createOtherPassedRequest(@NotNull Long billId, @NotNull OperatorUser creatorDto) {
 
-        DetectRequest item = this.createByBillId(billId, DetectTypeEnum.NEW, creatorDto, Optional.empty());
-
-        DetectRequest detectRequest = new DetectRequest();
-        detectRequest.setId(item.getId());
-        detectRequest.setDetectType(DetectTypeEnum.OTHERS.getCode());
-        detectRequest.setDetectSource(SampleSourceEnum.OTHERS.getCode());
-        detectRequest.setDetectResult(DetectResultEnum.PASSED.getCode());
-
-        this.updateSelective(detectRequest);
-        return item.getId();
-    }
-
-    /**
-     * 更新检测结果
-     *
-     * @param detectRequestId
-     * @param resultEnum
-     * @return
-     */
-    public Long updateRequest(Long detectRequestId, DetectResultEnum resultEnum) {
-        DetectRequest item = this.get(detectRequestId);
-        if (item == null) {
-            throw new TraceBizException("数据不存在");
-        }
-        if (DetectResultEnum.NONE == resultEnum) {
-            throw new TraceBizException("检测值错误");
-        }
-        DetectRequest detectRequest = new DetectRequest();
-        detectRequest.setId(detectRequestId);
-        detectRequest.setDetectResult(resultEnum.getCode());
-        this.updateSelective(detectRequest);
-        return detectRequestId;
-    }
 
     /**
      * 根据报备单创建检测请求数据
@@ -862,8 +824,10 @@ public class DetectRequestService extends TraceBaseService<DetectRequest, Long> 
         if (!Objects.nonNull(detectRecord)) {
             throw new TraceBizException("操作失败，检测记录不存在，请联系管理员！");
         }
+        DetectRequest drItem=this.get(detectRequestId);
+
         DetectRequest updateRequest = new DetectRequest();
-        updateRequest.setId(detectRequestId);
+        updateRequest.setId(drItem.getId());
         // 采样来源
         updateRequest.setDetectSource(SampleSourceEnum.MANUALLY.getCode());
         // 采样时间
@@ -877,6 +841,8 @@ public class DetectRequestService extends TraceBaseService<DetectRequest, Long> 
         updateRequest.setModified(new Date());
         updateRequest.setDetectorName(detectRecord.getDetectOperator());
         this.updateSelective(updateRequest);
+
+        this.productStockService.updateDetectFailedWeightByBillIdAfterDetect(drItem.getBillId());
     }
 
     /**
@@ -969,13 +935,18 @@ public class DetectRequestService extends TraceBaseService<DetectRequest, Long> 
         //更新报备单检测状态
         RegisterBill registerBill = updateBillDetectStatus(DetectStatusEnum.FINISH_DETECT.getCode(), registerBillItem, userTicket);
         billService.updateSelective(registerBill);
+
+
+        DetectResultEnum detectResultEnum=DetectResultEnum.fromCode(record.getDetectState()).orElseThrow(()->{
+            return new TraceBizException("检测结果参数错误");
+        });
         // 更新检测请求
         DetectRequest updateParam = new DetectRequest();
         updateParam.setId(registerBillItem.getDetectRequestId());
         updateParam.setDetectSource(SampleSourceEnum.SPOT_CHECK.getCode());
         updateParam.setDetectorId(record.getDetectOperatorId());
         updateParam.setDetectorName(record.getDetectOperator());
-        updateParam.setDetectResult(record.getDetectState());
+        updateParam.setDetectResult(detectResultEnum.getCode());
         updateParam.setDetectTime(DateUtils.getCurrentDate());
         updateParam.setDetectFee(record.getDetectFee());
         updateParam.setSampleTime(DateUtils.getCurrentDate());
@@ -985,7 +956,10 @@ public class DetectRequestService extends TraceBaseService<DetectRequest, Long> 
         DetectRecord newRecord = new DetectRecord();
         BeanUtils.copyProperties(record, newRecord);
         newRecord.setDetectRequestId(registerBillItem.getDetectRequestId());
-        detectRecordService.insertSelective(newRecord);
+        this.detectRecordService.insertSelective(newRecord);
+
+
+        this.productStockService.updateDetectFailedWeightByBillIdAfterDetect(registerBill.getBillId());
     }
 
     /**

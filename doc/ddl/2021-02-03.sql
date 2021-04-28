@@ -62,7 +62,7 @@ ALTER TABLE dili_trace.`register_head` ADD arrival_datetime datetime NULL COMMEN
 ALTER TABLE dili_trace.`register_head` ADD truck_tare_weight decimal(11, 3) NULL COMMENT '车辆皮重';
 ALTER TABLE dili_trace.register_head DROP COLUMN plate;
 
-
+ALTER TABLE dili_trace.`product_stock` ADD detect_failed_weight decimal(17, 3) NOT NULL DEFAULT 0.000 COMMENT '检测失败重量';
 
 CREATE TABLE `register_head_plate` (
             `id` bigint NOT NULL AUTO_INCREMENT,

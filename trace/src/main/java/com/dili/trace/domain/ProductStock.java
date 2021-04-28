@@ -84,6 +84,13 @@ public class ProductStock extends BaseDomain {
     private BigDecimal stockWeight;
 
     /**
+     * 检测失败重量
+     */
+    @ApiModelProperty(value = "检测失败重量")
+    @Column(name = "`detect_failed_weight`")
+    private BigDecimal detectFailedWeight;
+
+    /**
      * 累计总重量
      */
     @ApiModelProperty(value = "累计总重量")
@@ -373,5 +380,13 @@ public class ProductStock extends BaseDomain {
 
     public void setMarketId(Long marketId) {
         this.marketId = marketId;
+    }
+
+    public BigDecimal getDetectFailedWeight() {
+        return detectFailedWeight;
+    }
+
+    public void setDetectFailedWeight(BigDecimal detectFailedWeight) {
+        this.detectFailedWeight = detectFailedWeight;
     }
 }
