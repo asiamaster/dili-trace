@@ -1,17 +1,14 @@
 package com.dili.trace.service;
 
-import com.dili.common.entity.LoginSessionContext;
 import com.dili.common.exception.TraceBizException;
 import com.dili.commons.glossary.YesOrNoEnum;
 import com.dili.trace.domain.CheckinOutRecord;
 import com.dili.trace.domain.ProcessConfig;
 import com.dili.trace.domain.RegisterBill;
-import com.dili.trace.domain.TradeDetail;
 import com.dili.trace.dto.OperatorUser;
 import com.dili.trace.enums.*;
 import com.dili.trace.rpc.service.ProductRpcService;
 import com.dili.uap.sdk.domain.Firm;
-import com.google.common.collect.Lists;
 import one.util.streamex.StreamEx;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -19,7 +16,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.Resource;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;

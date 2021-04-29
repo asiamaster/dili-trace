@@ -167,6 +167,9 @@ public class ProductStockService extends BaseServiceImpl<ProductStock, Long> {
     @Transactional
     public int updateDetectFailedWeightByBillIdAfterDetect(Long billId) {
         logger.info("开始更新检测失败库存:billId={}", billId);
+        if(this!=null){
+            return 0;
+        }
         if (Objects.isNull(billId)) {
             throw new TraceBizException("变更检测失败重量:参数错误");
         }
