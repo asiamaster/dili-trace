@@ -212,18 +212,21 @@ public class ProcessService {
         });
         RegisterBill billItem = this.billService.get(billId);
         CheckinStatusEnum checkinStatusEnum = CheckinStatusEnum.fromCode(billItem.getCheckinStatus());
-        if (BillVerifyStatusEnum.PASSED == toVerifyStatusEnum) {
-            if (CheckinStatusEnum.ALLOWED == checkinStatusEnum) {
+
+
+        RegistTypeEnum registTypeEnum = RegistTypeEnum.fromCode(billItem.getRegistType()).orElse(null);
+        if (RegistTypeEnum.SUPPLEMENT == registTypeEnum) {
+            if (BillVerifyStatusEnum.PASSED == toVerifyStatusEnum) {
                 updatableBill.setVerifyType(VerifyTypeEnum.PASSED_BEFORE_CHECKIN.getCode());
             }
         }
+
         updatableBill.setModified(new Date());
         this.billService.updateSelective(updatableBill);
 
         if (BillVerifyStatusEnum.PASSED == toVerifyStatusEnum) {
             this.createCheckInRecord(billId, checkinStatusEnum, operatorUser);
         }
-
 
         this.billVerifyHistoryService.createVerifyHistory(Optional.of(toVerifyStatusEnum), billId, operatorUser);
 
