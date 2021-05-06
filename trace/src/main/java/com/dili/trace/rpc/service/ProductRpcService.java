@@ -488,7 +488,7 @@ public class ProductRpcService {
      * @return
      */
     private void lockOrRelease(LockReleaseRequestDto lockReleaseRequestDto) {
-        logger.debug("lockOrRelease={}",JSON.toJSONString(lockReleaseRequestDto));
+        logger.debug("lockOrRelease={}", JSON.toJSONString(lockReleaseRequestDto));
         BaseOutput<?> baseOutput = productRpc.lockOrRelease(lockReleaseRequestDto);
         if (!baseOutput.isSuccess()) {
             throw new TraceBizException("锁定or释放库存接口失败：" + baseOutput.getMessage());
@@ -503,7 +503,9 @@ public class ProductRpcService {
      * @param tradeWeight
      */
     public void lock(Long thirdPartyStockId, Long marketId, BigDecimal tradeWeight) {
-
+        if (thirdPartyStockId == null) {
+            return;
+        }
         LockReleaseItem item = new LockReleaseItem(tradeWeight.floatValue(), thirdPartyStockId, 1);
         List<LockReleaseItem> items = new ArrayList<>();
         items.add(item);
@@ -519,6 +521,9 @@ public class ProductRpcService {
      * @param tradeWeight
      */
     public void release(Long thirdPartyStockId, Long marketId, BigDecimal tradeWeight) {
+        if (thirdPartyStockId == null) {
+            return;
+        }
         LockReleaseItem item = new LockReleaseItem(tradeWeight.floatValue(), thirdPartyStockId, 0);
         List<LockReleaseItem> items = new ArrayList<>();
         items.add(item);
