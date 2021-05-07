@@ -64,6 +64,10 @@ ALTER TABLE dili_trace.register_head DROP COLUMN plate;
 
 ALTER TABLE dili_trace.`product_stock` ADD detect_failed_weight decimal(17, 3) NOT NULL DEFAULT 0.000 COMMENT '检测失败重量';
 
+
+ALTER TABLE dili_trace.register_head MODIFY COLUMN upstream_id bigint(20) NULL COMMENT '上游id';
+
+
 CREATE TABLE `register_head_plate` (
             `id` bigint NOT NULL AUTO_INCREMENT,
             `register_head_id` bigint NOT NULL COMMENT '台账ID',

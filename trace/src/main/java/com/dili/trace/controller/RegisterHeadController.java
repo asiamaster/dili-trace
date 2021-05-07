@@ -1,6 +1,7 @@
 package com.dili.trace.controller;
 
 import com.dili.common.exception.TraceBizException;
+import com.dili.commons.glossary.YesOrNoEnum;
 import com.dili.ss.domain.BaseOutput;
 import com.dili.ss.util.DateUtils;
 import com.dili.trace.domain.*;
@@ -166,6 +167,8 @@ public class RegisterHeadController {
             return BaseOutput.successData(Lists.newArrayList());
         }
         queryInput.setMarketId(this.uapRpcService.getCurrentFirm().get().getId());
+        queryInput.setIsDeleted(YesOrNoEnum.NO.getCode());
+        queryInput.setActive(YesOrNoEnum.YES.getCode());
         List<RegisterHead> list = this.registerHeadService.listByExample(queryInput);
 
         List<Long> registerHeadIdList = StreamEx.of(list).map(RegisterHead::getId).toList();
