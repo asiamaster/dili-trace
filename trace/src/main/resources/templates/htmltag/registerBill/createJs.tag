@@ -69,6 +69,17 @@
                 formConfig: {
                     formBtnSize: 'small',
                     formAttrs: {size: 'small'},
+                    isShowBackBtn:false,
+                    formBtns: [
+                        {
+                            text: '关闭',
+                            click: () => {
+                                if(parent&&parent.bs4pop){
+                                    parent.bs4pop.removeAll();
+                                }
+                            }
+                        }
+                    ],
                     formDesc: {
                         registType: {
                             options: loadProvider({provider: 'registTypeProvider', queryParams: {required: true}}),

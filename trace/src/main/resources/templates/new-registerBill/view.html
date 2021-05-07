@@ -77,11 +77,16 @@
                 </div>
                 <%}}%>
 
+                <%if (@filedNameRetMap.containsKey('measureType')){
+                if(filedNameRetMap['measureType'].displayed!0==1&&@filedNameRetMap['measureType'].getAvailableValueList().contains('20')&&registerBill.measureType==20){%>
+                    <div class="form-group col">
+                        <label class="label-title text-right"><span class="red">&lowast;</span>重量/${registerBill.weightUnitName!}</label>
+                        <input type="text" class="form-control input-sm"  value=" ${registerBill.weight!,'0.00'}" required readonly/>
+                    </div>
+                <%}}%>
 
-                <div class="form-group col">
-                    <label class="label-title text-right"><span class="red">&lowast;</span>重量/${registerBill.weightUnitName!}</label>
-                    <input type="text" class="form-control input-sm"  value=" ${registerBill.weight!,'0.00'}" required readonly/>
-                </div>
+
+
                 <%if (@filedNameRetMap.containsKey('originId')){
                 if(filedNameRetMap['originId'].displayed!0==1){%>
                 <div class="form-group col">
@@ -91,19 +96,22 @@
                 <%}}%>
 
 
-                
-                <div class="form-group col">
-                    <label class="label-title text-right"><span class="red">&lowast;</span>件数</label>
-                    <input type="text" class="form-control input-sm" value="<%if(null!= pieceNum!){%>${pieceNum}<%}else{%>-<%}%>" required readonly/>
-                </div>
-                <div class="form-group col">
-                    <label class="label-title text-right"><span class="red">&lowast;</span>件重</label>
-                    <input type="text" class="form-control input-sm" value="<%if(null!= pieceWeight!){%>${pieceWeight}<%}else{%>-<%}%>" required readonly/>
-                </div>
-                <div class="form-group col">
-                    <label class="label-title text-right"><span class="red">&lowast;</span>合计</label>
-                    <input type="text" class="form-control input-sm" value="<%if(null!= pieceNum! && null!= pieceWeight){%>${pieceNum*pieceWeight}<%}else{%>-<%}%>" required readonly/>
-                </div>
+                <%if (@filedNameRetMap.containsKey('measureType')){
+                if(filedNameRetMap['measureType'].displayed!0==1&&@filedNameRetMap['measureType'].getAvailableValueList().contains('10')&&registerBill.measureType==10){%>
+                    <div class="form-group col">
+                        <label class="label-title text-right"><span class="red">&lowast;</span>件数</label>
+                        <input type="text" class="form-control input-sm" value="<%if(null!= pieceNum!){%>${pieceNum}<%}else{%>-<%}%>" required readonly/>
+                    </div>
+                    <div class="form-group col">
+                        <label class="label-title text-right"><span class="red">&lowast;</span>件重</label>
+                        <input type="text" class="form-control input-sm" value="<%if(null!= pieceWeight!){%>${pieceWeight}<%}else{%>-<%}%>" required readonly/>
+                    </div>
+                    <div class="form-group col">
+                        <label class="label-title text-right"><span class="red">&lowast;</span>合计</label>
+                        <input type="text" class="form-control input-sm" value="<%if(null!= pieceNum! && null!= pieceWeight){%>${pieceNum*pieceWeight}<%}else{%>-<%}%>" required readonly/>
+                    </div>
+                <%}}%>
+
 
                 <%if (@filedNameRetMap.containsKey('arrivalDatetime')){
                 if(filedNameRetMap['arrivalDatetime'].displayed!0==1){%>
@@ -148,11 +156,13 @@
                 </div>
                 <%}}%>
 
-                <div class="form-group col">
-                    <label class="label-title text-right"><span class="red">&lowast;</span>皮重/${registerBill.weightUnitName!}</label>
-                    <input type="text" class="form-control input-sm" value="<%if(null!= truckTareWeight!){%>${truckTareWeight,'0.00'}<%}else{%>-<%}%>" required readonly/>
-                </div>
-
+                <%if (@filedNameRetMap.containsKey('truckTareWeight')){
+                if(filedNameRetMap['truckTareWeight'].displayed!0==1){%>
+                    <div class="form-group col">
+                        <label class="label-title text-right"><span class="red">&lowast;</span>皮重/${registerBill.weightUnitName!}</label>
+                        <input type="text" class="form-control input-sm" value="<%if(null!= truckTareWeight!){%>${truckTareWeight,'0.00'}<%}else{%>-<%}%>" required readonly/>
+                    </div>
+                <%}}%>
 
                 <%if (@filedNameRetMap.containsKey('specName')){
                 if(filedNameRetMap['specName'].displayed!0==1){%>
