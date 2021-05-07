@@ -524,7 +524,7 @@
                         },
                         unitPrice: {
                             type: "number",
-                            label: "单价",
+                            label: "商品单价",
                             attrs: {},
                             default: 0,
                             required: filedNameRetMap.unitPrice.required === 1,
@@ -588,6 +588,9 @@
                         }
                         bs4pop.removeAll();
                         bs4pop.alert('操作成功', {type: 'info', autoClose: 600});
+                        if(parent&&parent.window['RegisterBillGridObj']){
+                            parent.window['RegisterBillGridObj'].removeAllAndLoadData()
+                        }
                     })
                     .catch(function (error) {
                         bs4pop.alert('远程访问失败', {type: 'error'});

@@ -56,8 +56,8 @@
                     <label class="label-title text-right"><span class="red">&lowast;</span>企业名称</label>
                     <input type="text" class="form-control input-sm" value="${registerBill.corporateName!}" required readonly/>
                 </div>
-                <%if (@filedNameRetMap.containsKey('plate')){
-                if(filedNameRetMap['plate'].displayed!1==1){%>
+                <%if (@filedNameRetMap.containsKey('truckType')){
+                if(filedNameRetMap['truckType'].displayed!0==1){%>
                     <div class="form-group col">
                         <label class="label-title text-right"><span class="red">&lowast;</span>车牌号</label>
                         <input type="text" class="form-control input-sm"  value="${registerBill.plate!}" required readonly/>
@@ -70,7 +70,7 @@
                 </div>
 
                 <%if (@filedNameRetMap.containsKey('brandName')){
-                if(filedNameRetMap['brandName'].displayed!1==1){%>
+                if(filedNameRetMap['brandName'].displayed!0==1){%>
                 <div class="form-group col">
                     <label class="label-title text-right"><span class="red">&lowast;</span>品牌</label>
                     <input type="text" class="form-control input-sm" value="${registerBill.brandName!}" required readonly/>
@@ -83,7 +83,7 @@
                     <input type="text" class="form-control input-sm"  value=" ${registerBill.weight!,'0.00'}" required readonly/>
                 </div>
                 <%if (@filedNameRetMap.containsKey('originId')){
-                if(filedNameRetMap['originId'].displayed!1==1){%>
+                if(filedNameRetMap['originId'].displayed!0==1){%>
                 <div class="form-group col">
                     <label class="label-title text-right"><span class="red">&lowast;</span>产地</label>
                     <input type="text" class="form-control input-sm" value="${registerBill.originName!}" required readonly/>
@@ -106,9 +106,9 @@
                 </div>
 
                 <%if (@filedNameRetMap.containsKey('arrivalDatetime')){
-                if(filedNameRetMap['arrivalDatetime'].displayed!1==1){%>
+                if(filedNameRetMap['arrivalDatetime'].displayed!0==1){%>
                 <div class="form-group col">
-                    <label class="label-title text-right"><span class="red">&lowast;</span>到货时间</label>
+                    <label class="label-title text-right"><span class="red">&lowast;</span>预计到场时间</label>
                     <input type="text" class="form-control input-sm" value="${registerBill.arrivalDatetime,'yyyyMMdd HH:mm:ss'} " required readonly/>
                 </div>
                 <%}}%>
@@ -141,7 +141,7 @@
                     <input type="text" class="form-control input-sm"value="<%if(null!= registerBill.isPrintCheckSheetName!){%>${registerBill.isPrintCheckSheetName}<%}else{%>-<%}%>" required readonly/>
                 </div>
                 <%if (@filedNameRetMap.containsKey('truckType')){
-                if(filedNameRetMap['truckType'].displayed!1==1){%>
+                if(filedNameRetMap['truckType'].displayed!0==1){%>
                 <div class="form-group col">
                     <label class="label-title text-right"><span class="red">&lowast;</span>是否拼车</label>
                     <input type="text" class="form-control input-sm" value="${registerBill.truckTypeShow!}" required readonly/>
@@ -155,7 +155,7 @@
 
 
                 <%if (@filedNameRetMap.containsKey('specName')){
-                if(filedNameRetMap['specName'].displayed!1==1){%>
+                if(filedNameRetMap['specName'].displayed!0==1){%>
 
                 <div class="form-group col">
                     <label class="label-title text-right"><span class="red">&lowast;</span>商品规格</label>
@@ -166,7 +166,7 @@
 
 
                 <%if (@filedNameRetMap.containsKey('unitPrice')){
-                if(filedNameRetMap['unitPrice'].displayed!1==1){%>
+                if(filedNameRetMap['unitPrice'].displayed!0==1){%>
                 <div class="form-group col">
                     <label class="label-title text-right"><span class="red">&lowast;</span>商品单价</label>
                     <input type="text" class="form-control input-sm" value="${registerBill.unitPrice!,'0.00'}" required readonly/>
@@ -175,7 +175,7 @@
 
 
                 <%if (@filedNameRetMap.containsKey('upStreamId')){
-                if(filedNameRetMap['upStreamId'].displayed!1==1){%>
+                if(filedNameRetMap['upStreamId'].displayed!0==1){%>
                 <div class="form-group col">
                     <label class="label-title text-right"><span class="red">&lowast;</span>上游企业</label>
                     <input type="text" class="form-control input-sm" value="<%if(null!= upStreamName!){%>${upStreamName}<%}else{%><%}%>" required readonly/>
@@ -188,6 +188,21 @@
                     <label class="label-title text-right"><span class="red">&lowast;</span>是否进门</label>
                     <input type="text" class="form-control input-sm"value="${registerBill.checkInStatusName!}" required readonly/>
                 </div>
+
+                <%if (@filedNameRetMap.containsKey('arrivalTallynos')){
+                if(filedNameRetMap['arrivalTallynos'].displayed!0==1){%>
+                <div class="form-group col">
+                    <label class="label-title text-right"><span class="red">&lowast;</span>到货摊位</label>
+                    <input type="text" class="form-control input-sm" value="${registerBill.arrivalTallynos}" required readonly/>
+                </div>
+                <%}}%>
+                <%if (@filedNameRetMap.containsKey('remark')){
+                if(filedNameRetMap['remark'].displayed!0==1){%>
+                    <div class="form-group col">
+                        <label class="label-title text-right"><span class="red">&lowast;</span>备注</label>
+                        <input type="text" class="form-control input-sm" value="${registerBill.remark}" required readonly/>
+                    </div>
+                <%}}%>
             </div>
 
             <div class="form-item-group">
