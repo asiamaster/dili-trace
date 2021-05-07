@@ -240,7 +240,7 @@
                 <div class="fileimg-box"  style="display:inline-block;margin: 5px;padding: 10px;">
                     <span class="fileimg-plus-icon">+</span>
                     <span class="fileimg-des">点击上传</span>
-                    <input type="file" name="file" data-url="${contextPath!}/action/imageApi/upload" multiple="multipart/form-data"/>
+                    <input type="file" name="file" data-url="${contextPath!}/imageController/upload.action" multiple="multipart/form-data"/>
                     <input type="hidden" name="originCertifiy" id="originCertifiy">
                     <img class="magnifying" >
                     <div class="fileimg-cover" style="display: none;"></div>
@@ -256,7 +256,7 @@
                 <div class="fileimg-box"   style="display:inline-block;margin: 5px;padding: 10px;">
                     <span class="fileimg-plus-icon">+</span>
                     <span class="fileimg-des">点击上传</span>
-                    <input type="file" name="file" data-url="${contextPath!}/action/imageApi/upload" multiple="multipart/form-data"/>
+                    <input type="file" name="file" data-url="${contextPath!}/imageController/upload.action" multiple="multipart/form-data"/>
                     <input type="hidden" name="detectReport" id="detectReport">
                     <img class="magnifying" >
                     <div class="fileimg-cover" style="display: none;"></div>
@@ -438,7 +438,7 @@ var currentUser={"depId":"${user.depId!}"
         debugger
         if(parent.find('.fileimg-box').length<10){
         	newImgBox.find('input[type="file"]').remove();
-        	$('<input type="file" name="file"  data-url="${contextPath!}/action/imageApi/upload" multiple="multipart/form-data" />').insertAfter(newImgBox.find('.fileimg-des'))
+        	$('<input type="file" name="file"  data-url="${contextPath!}/imageController/upload.action" multiple="multipart/form-data" />').insertAfter(newImgBox.find('.fileimg-des'))
         	newImgBox.appendTo(parent);
         	initFileInput(newImgBox.find('input[type="file"]'))
         }

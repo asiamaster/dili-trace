@@ -677,7 +677,7 @@ var currentUser={"depId":"${user.departmentId!}"
         //debugger
         if(td.find('.fileimg-box').length<10){
         	newImgBox.find('input[type="file"]').remove();
-        	$('<input type="file" name="file"  data-url="${contextPath!}/action/imageApi/upload" multiple="multipart/form-data" />').insertAfter(newImgBox.find('.fileimg-des'))
+        	$('<input type="file" name="file"  data-url="${contextPath!}/imageController/upload.action" multiple="multipart/form-data" />').insertAfter(newImgBox.find('.fileimg-des'))
         	newImgBox.appendTo(td);
         	initFileInput(newImgBox.find('input[type="file"]'))
         }
@@ -702,7 +702,7 @@ var currentUser={"depId":"${user.departmentId!}"
                     
                     if(td.find('.fileimg-box').length<10){
                     	newImgBox.find('input[type="file"]').remove();
-                    	$('<input type="file" name="file"  data-url="${contextPath!}/action/imageApi/upload" multiple="multipart/form-data" />').insertAfter(newImgBox.find('.fileimg-des'))
+                    	$('<input type="file" name="file"  data-url="${contextPath!}/imageController/upload.action" multiple="multipart/form-data" />').insertAfter(newImgBox.find('.fileimg-des'))
                     	newImgBox.appendTo(td);
                     	initFileInput(newImgBox.find('input[type="file"]'))
                     }*/

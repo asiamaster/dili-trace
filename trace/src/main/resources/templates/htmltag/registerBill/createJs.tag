@@ -13,7 +13,7 @@
                     attrs: {
                         name: "file",
                         multiple: true,
-                        action: "/action/imageApi/upload",
+                        action: "/imageController/upload.action",
                         responseFn(response, file) {
                             vm.imageCertList.push({certType: it.certType, uid: response.data})
                             return prefix + response.data;

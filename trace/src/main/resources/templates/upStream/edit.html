@@ -80,7 +80,7 @@
                         <div class="fileimg-box" style="margin: 0 auto;">
                             <span class="fileimg-plus-icon">+</span>
                             <span class="fileimg-des">上传身份证正面照</span>
-                            <input type="file" name="file" id="cardNoFrontUrl" data-url="${contextPath!}/action/imageApi/upload" multiple="multipart/form-data" />
+                            <input type="file" name="file" id="cardNoFrontUrl" data-url="${contextPath!}/imageController/upload.action" multiple="multipart/form-data" />
                             <img class="magnifying" src="${imageViewPathPrefix}/${upstream.cardNoFrontUrl!}">
                             <input type="hidden" name="cardNoFrontUrl" value="${upstream.cardNoFrontUrl!}">
                             <div class="fileimg-cover" style="${isEmpty(upstream.cardNoFrontUrl)?'display: none;':''}"></div>
@@ -93,7 +93,7 @@
                         <div class="fileimg-box" style="margin: 0 auto;">
                             <span class="fileimg-plus-icon">+</span>
                             <span class="fileimg-des">上传身份证反面照</span>
-                            <input type="file" name="file" id="cardNoBackUrl" data-url="${contextPath!}/action/imageApi/upload" multiple="multipart/form-data" />
+                            <input type="file" name="file" id="cardNoBackUrl" data-url="${contextPath!}/imageController/upload.action" multiple="multipart/form-data" />
                             <img class="magnifying" src="${imageViewPathPrefix}/${upstream.cardNoBackUrl!}">
                             <input type="hidden" name="cardNoBackUrl" value="${upstream.cardNoBackUrl!}">
                             <div class="fileimg-cover" style="${isEmpty(upstream.cardNoBackUrl)?'display: none;':''}"></div>
@@ -107,7 +107,7 @@
                         <div class="fileimg-box" style="margin: 0 auto;">
                             <span class="fileimg-plus-icon">+</span>
                             <span class="fileimg-des">上传营业执照</span>
-                            <input type="file" name="file" id="businessLicenseUrl" data-url="${contextPath!}/action/imageApi/upload" multiple="multipart/form-data"/>
+                            <input type="file" name="file" id="businessLicenseUrl" data-url="${contextPath!}/imageController/upload.action" multiple="multipart/form-data"/>
                             <img class="magnifying" src="${imageViewPathPrefix}/${upstream.businessLicenseUrl!}">
                             <input type="hidden" name="businessLicenseUrl" value="${upstream.businessLicenseUrl!}">
                             <div class="fileimg-cover" style="${isEmpty(upstream.businessLicenseUrl)?'display: none;':''}"></div>
@@ -120,7 +120,7 @@
                         <div class="fileimg-box" style="margin: 0 auto;">
                             <span class="fileimg-plus-icon">+</span>
                             <span class="fileimg-des">上传经营许可证</span>
-                            <input type="file" name="file" id="operationLicenseUrl" data-url="${contextPath!}/action/imageApi/upload" multiple="multipart/form-data"/>
+                            <input type="file" name="file" id="operationLicenseUrl" data-url="${contextPath!}/imageController/upload.action" multiple="multipart/form-data"/>
                             <img class="magnifying" src="${imageViewPathPrefix}/${upstream.operationLicenseUrl!}">
                             <input type="hidden" name="operationLicenseUrl" value="${upstream.operationLicenseUrl!}">
                             <div class="fileimg-cover" style="${isEmpty(upstream.operationLicenseUrl)?'display: none;':''}"></div>
@@ -133,7 +133,7 @@
                         <div class="fileimg-box" style="margin: 0 auto;">
                             <span class="fileimg-plus-icon">+</span>
                             <span class="fileimg-des">上传生产许可证</span>
-                            <input type="file" name="file" id="manufacturingLicenseUrl" data-url="${contextPath!}/action/imageApi/upload" multiple="multipart/form-data"/>
+                            <input type="file" name="file" id="manufacturingLicenseUrl" data-url="${contextPath!}/imageController/upload.action" multiple="multipart/form-data"/>
                             <img class="magnifying" src="${imageViewPathPrefix}/${upstream.manufacturingLicenseUrl!}">
                             <input type="hidden" name="manufacturingLicenseUrl" value="${upstream.manufacturingLicenseUrl!}">
                             <div class="fileimg-cover" style="${isEmpty(upstream.manufacturingLicenseUrl)?'display: none;':''}"></div>

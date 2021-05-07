@@ -19,7 +19,7 @@ import java.util.Map;
  * 图片上传
  */
 @RestController
-@RequestMapping(value = "/action/imageApi")
+@RequestMapping(value = "/imageController")
 public class ImageController {
     private static final Logger LOGGER = LoggerFactory.getLogger(ImageController.class);
 
@@ -35,7 +35,7 @@ public class ImageController {
      * @param compress
      * @return
      */
-    @RequestMapping(value = "/upload", method = RequestMethod.POST)
+    @RequestMapping(value = "/upload.action", method = RequestMethod.POST)
     public BaseOutput<String> upload(@RequestParam MultipartFile file, @RequestParam(required = false) Integer type, @RequestParam(required = false) Boolean compress) {
         try {
             return BaseOutput.successData(this.dfsRpcService.uploadImage(file));

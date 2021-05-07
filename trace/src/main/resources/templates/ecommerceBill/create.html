@@ -108,7 +108,7 @@
 							        <td>
 							            <div class="upload-div">
 							                <a href="javascript:;" class="a-upload" tabindex="-1">
-							                    <input type="file" id="originCertifiyUrl" type="file" name="file" data-url="${contextPath!}/action/imageApi/upload" multiple="multipart/form-data">
+							                    <input type="file" id="originCertifiyUrl" type="file" name="file" data-url="${contextPath!}/imageController/upload.action" multiple="multipart/form-data">
 							                    <span>上传</span>
 							                    <input type="hidden" name="bill[imageCertList][0][uid]">
                                                 <input type="hidden" name="bill[imageCertList][0][certType]" value="${@com.dili.trace.enums.ImageCertTypeEnum.ORIGIN_CERTIFIY.getCode()}">
@@ -125,7 +125,7 @@
 							        <td>
 							            <div class="upload-div">
 							                <a href="javascript:;" class="a-upload" tabindex="-1">
-							                    <input type="file" id="detectReportUrl" type="file" name="file" data-url="${contextPath!}/action/imageApi/upload" multiple="multipart/form-data">
+							                    <input type="file" id="detectReportUrl" type="file" name="file" data-url="${contextPath!}/imageController/upload.action" multiple="multipart/form-data">
 							                    <span>上传</span>
                                                 <input type="hidden" name="bill[imageCertList][1][uid]">
                                                 <input type="hidden" name="bill[imageCertList][1][certType]" value="${@com.dili.trace.enums.ImageCertTypeEnum.DETECT_REPORT.getCode()}">
