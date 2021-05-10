@@ -324,12 +324,12 @@ public class RegisterHeadServiceImpl extends BaseServiceImpl<RegisterHead, Long>
             }
         }
 
-        //到场时间
+        //预计到场时间
         if (registerHead.getArrivalDatetime() == null) {
             String propName = PropertyUtils.getPropertyDescriptor(registerHead, RegisterHead::getArrivalDatetime).getName();
             FieldConfigDetailRetDto retDto = fieldConfigDetailRetDtoMap.getOrDefault(propName, null);
             if (retDto != null && YesOrNoEnum.YES.getCode().equals(retDto.getDisplayed()) && YesOrNoEnum.YES.getCode().equals(retDto.getRequired())) {
-                throw new TraceBizException("到场时间不能为空");
+                throw new TraceBizException("预计到场时间不能为空");
             }
         }
 

@@ -527,7 +527,7 @@
                         },
                         arrivalDatetime: {
                             type: "datetime",
-                            label: "到场时间",
+                            label: "预计到场时间",
                             required: filedNameRetMap.arrivalDatetime.required === 1,
                             vif: function () {
                                 return filedNameRetMap.arrivalDatetime.displayed === 1;

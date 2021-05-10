@@ -324,7 +324,7 @@ public class RegisterHead extends BaseDomain {
     private String billTypeName;
 
     /**
-     * 到场时间
+     * 预计到场时间
      */
     @Column(name = "`arrival_datetime`")
     @JSONField(format = "yyyy-MM-dd HH:mm")

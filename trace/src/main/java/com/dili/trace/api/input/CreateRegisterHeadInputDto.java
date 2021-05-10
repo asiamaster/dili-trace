@@ -160,7 +160,7 @@ public class CreateRegisterHeadInputDto {
      */
     private List<ImageCert> imageCertList;
     /**
-     * 到场时间
+     * 预计到场时间
      */
 
     private LocalDateTime arrivalDatetime;

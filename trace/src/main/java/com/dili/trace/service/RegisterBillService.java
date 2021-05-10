@@ -570,12 +570,12 @@ public class RegisterBillService extends BaseServiceImpl<RegisterBill, Long> {
             }
         }
 
-        //到场时间
+        //预计到场时间
         if (registerBill.getArrivalDatetime() == null) {
             String propName = PropertyUtils.getPropertyDescriptor(registerBill, RegisterBill::getArrivalDatetime).getName();
             FieldConfigDetailRetDto retDto = fieldConfigDetailRetDtoMap.getOrDefault(propName, null);
             if (retDto != null && YesOrNoEnum.YES.getCode().equals(retDto.getDisplayed()) && YesOrNoEnum.YES.getCode().equals(retDto.getRequired())) {
-                throw new TraceBizException("到场时间不能为空");
+                throw new TraceBizException("预计到场时间不能为空");
             }
         }
 

@@ -221,7 +221,7 @@ public class CreateRegisterBillInputDto {
 
 
     /**
-     * 到场时间
+     * 预计到场时间
      */
     private Date arrivalDatetime;
 

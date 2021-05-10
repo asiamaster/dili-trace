@@ -55,10 +55,10 @@ ALTER TABLE dili_trace.`user_history` DROP COLUMN `card_no_front_url`;
 ALTER TABLE dili_trace.`user_history` DROP COLUMN `card_no_back_url`;
 ALTER TABLE dili_trace.`user_history` DROP COLUMN `business_license_url`;
 
-ALTER TABLE dili_trace.`register_bill` ADD arrival_datetime datetime NULL COMMENT '到场时间';
+ALTER TABLE dili_trace.`register_bill` ADD arrival_datetime datetime NULL COMMENT '预计到场时间';
 ALTER TABLE dili_trace.`register_bill` ADD weighting_bill_id bigint NULL COMMENT '称重单ID';
 
-ALTER TABLE dili_trace.`register_head` ADD arrival_datetime datetime NULL COMMENT '到场时间';
+ALTER TABLE dili_trace.`register_head` ADD arrival_datetime datetime NULL COMMENT '预计到场时间';
 ALTER TABLE dili_trace.`register_head` ADD truck_tare_weight decimal(11, 3) NULL COMMENT '车辆皮重';
 ALTER TABLE dili_trace.register_head DROP COLUMN plate;
 
@@ -154,7 +154,7 @@ INSERT INTO dili_trace.default_field_detail (module_type,field_id,field_label,fi
 (1,NULL,'上游企业','upStreamId',NULL,'$.upStreamId',1,'2021-02-25 17:12:11.0','2021-02-25 17:12:11.0'),
 (1,NULL,'产地','originId',NULL,'$.originId',1,'2021-02-25 17:12:11.0','2021-02-25 17:12:11.0'),
 (1,NULL,'备注','remark',NULL,'$.remark',1,'2021-02-25 17:12:11.0','2021-02-25 17:12:11.0'),
-(1,NULL,'到场时间','arrivalDatetime',NULL,'$.arrivalDatetime',1,'2021-02-25 17:12:11.0','2021-02-25 17:12:11.0'),
+(1,NULL,'预计到场时间','arrivalDatetime',NULL,'$.arrivalDatetime',1,'2021-02-25 17:12:11.0','2021-02-25 17:12:11.0'),
 (1,NULL,'到货摊位','arrivalTallynos',NULL,'$.arrivalTallynos',1,'2021-02-25 17:12:11.0','2021-02-25 17:12:11.0');
 INSERT INTO dili_trace.default_field_detail (module_type,field_id,field_label,field_name,default_value,json_path,json_path_type,created,modified) VALUES
 (1,NULL,'上传证明','imageCertList',NULL,'$.imageCertList[*].certType',1,'2021-03-12 12:23:27.0','2021-03-12 12:23:27.0'),

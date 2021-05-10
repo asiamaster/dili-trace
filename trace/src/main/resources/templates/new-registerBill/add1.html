@@ -218,7 +218,7 @@
 
             <% if (@filedNameRetMap.containsKey('arrivalDatetime') && @filedNameRetMap.get('arrivalDatetime').getDisplayed() == @com.dili.commons.glossary.YesOrNoEnum.YES.getCode()) { %>
             <div class="form-group col" id="arrivalDatetimeDiv">
-                <label for="">到场时间</label>
+                <label for="">预计到场时间</label>
                 <% if (@filedNameRetMap.get('arrivalDatetime').getRequired() == @com.dili.commons.glossary.YesOrNoEnum.YES.getCode()) { %>
                 <input type="text" class="form-control laydatetime"  name="arrivalDatetime:hmcustFun" required/>
                 <% } else { %>

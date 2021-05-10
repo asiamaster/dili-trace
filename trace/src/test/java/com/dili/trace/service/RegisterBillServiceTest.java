@@ -174,7 +174,7 @@ public class RegisterBillServiceTest extends AutoWiredBaseTest {
         assertThrows(TraceBizException.class,
                 () -> {
                     this.registerBillService.createRegisterBillList(marketId, inputBillDtoList, customerId, operatorUser, creatorRoleEnum);
-                }, "到场时间不能为空");
+                }, "预计到场时间不能为空");
         inputDto.setArrivalDatetime(new Date());
 
         assertThrows(TraceBizException.class,
