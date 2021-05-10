@@ -41,7 +41,7 @@
                     <div class="form-group col-2">
                         <input type="hidden" name="fieldConfigDetailList[${defaultFiledNameIndexMap['truckType']}][displayed]" value="0">
                         <input type="checkbox" name="fieldConfigDetailList[${defaultFiledNameIndexMap['truckType']}][displayed]" value="1" <%if(filedNameRetMap['truckType'].displayed!1==1){%>checked<%}%> >
-                        <label>是否拼车</label>
+                        <label>是否拼车/车牌号</label>
                     </div>
                      <input type="hidden"  name="fieldConfigDetailList[${defaultFiledNameIndexMap['truckType']}][required]" value="1" >
 
@@ -200,7 +200,7 @@
                 <input type="hidden" name="fieldConfigDetailList[${defaultFiledNameIndexMap['arrivalDatetime']}][defaultId]" value="${defaultFieldNameIdMap['arrivalDatetime']}">
                 <div class="form-group col-2">
                     <input type="checkbox" name="fieldConfigDetailList[${defaultFiledNameIndexMap['arrivalDatetime']}][displayed]" value="1" <%if(filedNameRetMap['arrivalDatetime'].displayed!1==1){%>checked<%}%> >
-                    <label>到场时间</label>
+                    <label>预计到场时间</label>
                 </div>
                 <div class="form-group col-1">
                     <input type="radio"  name="fieldConfigDetailList[${defaultFiledNameIndexMap['arrivalDatetime']}][required]" value="1" checked>
