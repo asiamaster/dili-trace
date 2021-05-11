@@ -202,7 +202,7 @@
                 if(filedNameRetMap['arrivalTallynos'].displayed!0==1){%>
                 <div class="form-group col">
                     <label class="label-title text-right"><span class="red">&lowast;</span>到货摊位</label>
-                    <input type="text" class="form-control input-sm" value="${registerBill.arrivalTallynos}" required readonly/>
+                    <input type="text" class="form-control input-sm" value='${@registerBill.getArrivalTallynos().stream().collect(@java.util.stream.Collectors.joining(","))}' required readonly/>
                 </div>
                 <%}}%>
                 <%if (@filedNameRetMap.containsKey('remark')){

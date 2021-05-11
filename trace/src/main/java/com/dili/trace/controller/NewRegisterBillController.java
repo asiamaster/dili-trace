@@ -698,6 +698,8 @@ public class NewRegisterBillController {
             modelMap.put("upStreamName", upStreamName);
         }
         RegisterBillOutputDto bill = buildRegisterBill(id);
+        List<RegisterTallyAreaNo> arrivalTallynos = this.registerTallyAreaNoService.findTallyAreaNoByBillIdAndType(bill.getBillId(), BillTypeEnum.REGISTER_BILL);
+        bill.setArrivalTallynos(StreamEx.of(arrivalTallynos).map(RegisterTallyAreaNo::getTallyareaNo).toList());
         modelMap.put("registerBill", bill);
 
         return "new-registerBill/view";

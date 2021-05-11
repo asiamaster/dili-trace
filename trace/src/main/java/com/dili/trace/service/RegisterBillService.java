@@ -427,24 +427,6 @@ public class RegisterBillService extends BaseServiceImpl<RegisterBill, Long> {
             }
         }
 
-        String specName = StringUtils.trimToNull(registerBill.getSpecName());
-        if(specName!=null){
-            if (!RegUtils.isValidInput(specName)) {
-                throw new TraceBizException("规格名称包含非法字符");
-            }
-            if(specName.length()>10){
-                throw new TraceBizException("规格名称不能超过10字符");
-            }
-        }
-        String brandName = StringUtils.trimToNull(registerBill.getBrandName());
-        if(Objects.nonNull(brandName)){
-            if (!RegUtils.isValidInput(brandName)) {
-                throw new TraceBizException("品牌包含非法字符");
-            }
-            if (brandName.length()>20) {
-                throw new TraceBizException("品牌不能超过20字符");
-            }
-        }
         // 计件类型，校验件数和件重
         if (MeasureTypeEnum.COUNT_UNIT.equalsCode(registerBill.getMeasureType())) {
             // 件数
@@ -553,7 +535,7 @@ public class RegisterBillService extends BaseServiceImpl<RegisterBill, Long> {
                 throw new TraceBizException("企业名称不能超过40字符");
             }
         }
-        
+
         if(StringUtils.trimToEmpty(registerBill.getProductAliasName()).length()>40){
             throw new TraceBizException("商品别名不能超过40字符");
         }
@@ -648,16 +630,10 @@ public class RegisterBillService extends BaseServiceImpl<RegisterBill, Long> {
                 throw new TraceBizException("商品规格不能为空");
             }
         }
-        String specName = StringUtils.trimToNull(registerBill.getSpecName());
-        if(specName!=null){
-            if (!RegUtils.isValidInput(specName)) {
-                throw new TraceBizException("规格名称包含非法字符");
-            }
-            if(specName.length()>10){
-                throw new TraceBizException("规格名称不能超过10字符");
-            }
+        String specName = registerBill.getSpecName();
+        if (StringUtils.isNotBlank(specName) && !RegUtils.isValidInput(specName)) {
+            throw new TraceBizException("规格名称包含非法字符");
         }
-
 
 
         //品牌
