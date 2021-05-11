@@ -37,10 +37,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * (管理员)进门主台账单相关接口
@@ -318,8 +315,8 @@ public class ManagerRegisterHeadApi {
             List<ImageCert> imageCerts = imageCertService.findImageCertListByBillId(baseDomain.getId(), BillTypeEnum.MASTER_BILL);
             registerHead.setImageCertList(imageCerts);
 
-            UpStream upStream = upStreamService.get(registerHead.getUpStreamId());
-            registerHead.setUpStreamName(upStream.getName());
+            String upStreamName = Optional.ofNullable(upStreamService.get(registerHead.getUpStreamId())).map(UpStream::getName).orElse(null);
+            registerHead.setUpStreamName(upStreamName);
 
             RegisterBill registerBill = new RegisterBill();
             registerBill.setRegisterHeadCode(registerHead.getCode());
