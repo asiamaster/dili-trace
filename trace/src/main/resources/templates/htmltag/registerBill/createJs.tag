@@ -436,7 +436,7 @@
                         originId: {
                             type: "select",
                             label: "产地",
-                            prop: {text: 'name', value: 'id'},
+                            prop: {text: 'mergerName', value: 'id'},
                             required: filedNameRetMap.originId.required === 1,
                             optionsLinkageFields: ['registerHeadCode'],
                             options: data => {

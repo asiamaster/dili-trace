@@ -5,6 +5,8 @@ import com.dili.assets.sdk.dto.CusCategoryQuery;
 import com.dili.ss.domain.BaseOutput;
 import com.dili.trace.service.AssetsRpcService;
 import com.dili.trace.service.UapRpcService;
+import one.util.streamex.StreamEx;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -34,19 +36,14 @@ public class CategoryController {
     @ResponseBody
     public BaseOutput listCategories(@RequestBody CusCategoryQuery query) {
         List<CusCategoryDTO> categories = this.assetsRpcService.listCusCategory(query, uapRpcService.getCurrentFirm().orElse(null).getId());
-        return BaseOutput.successData(categories);
-//        if (categorys != null && !categorys.isEmpty()) {
-//            for (Category c : categorys) {
-//                Map<String, Object> obj = Maps.newHashMap();
-//                obj.put("id", c.getId());
-//                obj.put("data", name);
-//                obj.put("value", c.getName());
-//                list.add(obj);
-//            }
-//        }
-//        Map map = Maps.newHashMap();
-//        map.put("suggestions", list);
-//        return map;
-//        return null;
+        List<CusCategoryDTO> data =StreamEx.of(categories).filter(c->{
+            String[]strs=StringUtils.split(c.getPath(),",");
+            if(strs!=null&&strs.length==3){
+                return true;
+            }
+            return false;
+        }).toList();
+
+        return BaseOutput.successData(data);
     }
 }
