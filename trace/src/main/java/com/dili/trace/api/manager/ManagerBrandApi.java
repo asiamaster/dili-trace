@@ -91,8 +91,11 @@ public class ManagerBrandApi {
     @ApiImplicitParam(paramType = "body", name = "RegisterBill", dataType = "RegisterBill", value = "获取登记单列表")
     @RequestMapping(value = "/createBrand.api", method = RequestMethod.POST)
     public BaseOutput createBrand(@RequestBody BrandInputDto inputDto) {
-        if(inputDto==null||StringUtils.isBlank(inputDto.getBrandName())){
+        if(inputDto==null){
             return BaseOutput.failure("参数错误");
+        }
+        if(StringUtils.isBlank(inputDto.getBrandName())){
+            return BaseOutput.failure("品牌名称不能为空");
         }
         try {
             SessionData sessionData=this.sessionContext.getSessionData();
