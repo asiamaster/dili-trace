@@ -51,7 +51,7 @@
                 },
                 formData: {
                     total: 0,
-                    pieceNum: 0,
+                    pieceNum: "",
                     pieceweight: "",
                     measureType: 20,
                     registType: 10,
@@ -60,7 +60,7 @@
                     arrivalTallynos: "",
                     plateList: [],
                     truckType: 20,
-                    weight: 0,
+                    weight: "",
                     weightUnit: 1,
                     productName: "",
                     originName: "",
@@ -347,17 +347,20 @@
                         weight: {
                             type: "input",
                             label: "商品重量",
+                            rules: [{
+                                pattern:/^([1-9][0-9]{0,7})$/,
+                                message: "请输入1-99999999之间的数字"
+                            }],
                             vif: function (form) {
                                 return form.measureType === 20;
                             },
                         },
                         pieceNum: {
-                            type: "input",
+                            type: "number",
                             label: "商品件数",
                             rules: [{
-                                pattern: new RegExp("^\\d+$", ""),
-                                type: "string",
-                                message: "格式不正确"
+                                pattern:/^([1-9][0-9]{0,7})$/,
+                                message: "请输入1-99999999之间的数字"
                             }],
                             vif: function (form) {
                                 return form.measureType !== 20;
@@ -375,8 +378,12 @@
                             }
                         },
                         pieceweight: {
-                            type: "input",
+                            type: "number",
                             label: "件重",
+                            rules: [{
+                                pattern:/^([1-9][0-9]{0,7})$/,
+                                message: "请输入1-99999999之间的数字"
+                            }],
                             vif: function (form) {
                                 return form.measureType !== 20;
 
@@ -396,6 +403,11 @@
                         specName: {
                             type: "input",
                             label: "商品规格",
+                            rules: [{
+                                pattern:/^[\u4e00-\u9fa5_a-zA-Z0-9_]{0,10}$/,
+                                message: "请输入不超过10个长度中英文以及下划线"
+                            }],
+
                             required: filedNameRetMap.specName.required === 1,
                             vif: function () {
                                 return filedNameRetMap.specName.displayed === 1;
@@ -518,8 +530,12 @@
                             }
                         },
                         truckTareWeight: {
-                            type: "input",
+                            type: "number",
                             label: "皮重",
+                            rules: [{
+                                pattern:/^(0|\+?[1-9][0-9]{0,7})$/,
+                                message: "请输入0-99999999之间的数字"
+                            }],
                             required: filedNameRetMap.truckTareWeight.required === 1,
                             vif: function () {
                                 return filedNameRetMap.truckTareWeight.displayed === 1;
@@ -527,7 +543,7 @@
                         },
                         arrivalDatetime: {
                             type: "datetime",
-                            label: "预计到场时间",
+                            label: "到场时间",
                             required: filedNameRetMap.arrivalDatetime.required === 1,
                             vif: function () {
                                 return filedNameRetMap.arrivalDatetime.displayed === 1;
@@ -536,6 +552,10 @@
                         unitPrice: {
                             type: "number",
                             label: "商品单价",
+                            rules: [{
+                                pattern:/^([1-9][0-9]{0,7})$/,
+                                message: "请输入1-99999999之间的数字"
+                            }],
                             attrs: {},
                             default: 0,
                             required: filedNameRetMap.unitPrice.required === 1,
@@ -546,6 +566,10 @@
                         remark: {
                             type: "textarea",
                             label: "备注",
+                            rules: [{
+                                pattern:/^[\u4e00-\u9fa5_a-zA-Z0-9_]{0,200}$/,
+                                message: "请输入不超过200个长度中英文以及下划线"
+                            }],
                             required: filedNameRetMap.remark.required === 1,
                             vif: function () {
                                 return filedNameRetMap.remark.displayed === 1;

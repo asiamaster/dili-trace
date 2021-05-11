@@ -503,6 +503,9 @@ public class ProductRpcService {
      * @param tradeWeight
      */
     public void lock(Long thirdPartyStockId, Long marketId, BigDecimal tradeWeight) {
+        if(this!=null){
+            return;
+        }
         if (thirdPartyStockId == null) {
             return;
         }
@@ -521,6 +524,9 @@ public class ProductRpcService {
      * @param tradeWeight
      */
     public void release(Long thirdPartyStockId, Long marketId, BigDecimal tradeWeight) {
+        if(this!=null){
+            return;
+        }
         if (thirdPartyStockId == null) {
             return;
         }
