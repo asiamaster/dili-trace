@@ -6,7 +6,6 @@ import com.dili.common.exception.TraceBizException;
 import com.dili.commons.glossary.YesOrNoEnum;
 import com.dili.customer.sdk.domain.dto.CustomerExtendDto;
 import com.dili.ss.base.BaseServiceImpl;
-import com.dili.ss.domain.BaseOutput;
 import com.dili.ss.domain.BasePage;
 import com.dili.ss.dto.IDTO;
 import com.dili.ss.util.DateUtils;
@@ -15,7 +14,10 @@ import com.dili.trace.api.input.RegisterBillApiInputDto;
 import com.dili.trace.api.output.VerifyStatusCountOutputDto;
 import com.dili.trace.dao.RegisterBillMapper;
 import com.dili.trace.domain.*;
-import com.dili.trace.dto.*;
+import com.dili.trace.dto.MessageInputDto;
+import com.dili.trace.dto.OperatorUser;
+import com.dili.trace.dto.RegisterBillDto;
+import com.dili.trace.dto.RegisterBillOutputDto;
 import com.dili.trace.dto.ret.FieldConfigDetailRetDto;
 import com.dili.trace.enums.*;
 import com.dili.trace.glossary.BizNumberType;
@@ -29,11 +31,10 @@ import com.dili.uap.sdk.domain.UserTicket;
 import com.dili.uap.sdk.session.SessionContext;
 import com.google.common.collect.Lists;
 import com.jayway.jsonpath.Configuration;
-import com.jayway.jsonpath.JsonPath;
 import com.jayway.jsonpath.Option;
+import de.cronn.reflection.util.PropertyUtils;
 import one.util.streamex.EntryStream;
 import one.util.streamex.StreamEx;
-import de.cronn.reflection.util.PropertyUtils;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -415,6 +416,55 @@ public class RegisterBillService extends BaseServiceImpl<RegisterBill, Long> {
             logger.error("商品重量不能大于" + NumUtils.MAX_WEIGHT.toString());
             throw new TraceBizException("商品重量不能大于" + NumUtils.MAX_WEIGHT.toString());
         }
+
+        String remark = StringUtils.trimToNull(registerBill.getRemark());
+        if(Objects.nonNull(remark)){
+            if (!RegUtils.isValidInput(remark)) {
+                throw new TraceBizException("备注包含非法字符");
+            }
+            if (remark.length()>200) {
+                throw new TraceBizException("备注不能超过200字符");
+            }
+        }
+
+        // 计件类型，校验件数和件重
+        if (MeasureTypeEnum.COUNT_UNIT.equalsCode(registerBill.getMeasureType())) {
+            // 件数
+            if (registerBill.getPieceNum() == null) {
+                logger.error("商品件数不能为空");
+                throw new TraceBizException("商品件数不能为空");
+            }
+            if (BigDecimal.ZERO.compareTo(registerBill.getPieceNum()) >= 0) {
+                logger.error("商品件数不能小于0");
+                throw new TraceBizException("商品件数不能小于0");
+            }
+            if (NumUtils.MAX_NUM.compareTo(registerBill.getPieceNum()) < 0) {
+                logger.error("商品件数不能大于{}", NumUtils.MAX_NUM.toString());
+                throw new TraceBizException("商品件数不能大于" + NumUtils.MAX_NUM.toString());
+            }
+            if (!NumUtils.isIntegerValue(registerBill.getPieceNum())) {
+                logger.error("商品件数必须为整数");
+                throw new TraceBizException("商品件数必须为整数");
+            }
+
+            // 件重
+            if (registerBill.getPieceWeight() == null) {
+                logger.error("商品件重不能为空");
+                throw new TraceBizException("商品件重不能为空");
+            }
+            if (BigDecimal.ZERO.compareTo(registerBill.getPieceWeight()) >= 0) {
+                logger.error("商品件重不能小于0");
+                throw new TraceBizException("商品件重不能小于0");
+            }
+            if (NumUtils.MAX_WEIGHT.compareTo(registerBill.getPieceWeight()) < 0) {
+                logger.error("商品件重不能大于{}", NumUtils.MAX_WEIGHT.toString());
+                throw new TraceBizException("商品件重不能大于" + NumUtils.MAX_WEIGHT.toString());
+            }
+            if (!NumUtils.isIntegerValue(registerBill.getPieceWeight())) {
+                logger.error("商品件重必须为整数");
+                throw new TraceBizException("商品件重必须为整数");
+            }
+        }
         return  registerBill;
     }
     /**
@@ -517,11 +567,15 @@ public class RegisterBillService extends BaseServiceImpl<RegisterBill, Long> {
                 throw new TraceBizException("备注不能为空");
             }
         }
-        String remark = registerBill.getRemark();
-        if (StringUtils.isNotBlank(remark) && !RegUtils.isValidInput(remark)) {
-            throw new TraceBizException("备注包含非法字符");
+        String remark = StringUtils.trimToNull(registerBill.getRemark());
+        if(Objects.nonNull(remark)){
+            if (!RegUtils.isValidInput(remark)) {
+                throw new TraceBizException("备注包含非法字符");
+            }
+            if (remark.length()>200) {
+                throw new TraceBizException("备注不能超过200字符");
+            }
         }
-
 
         //皮重字段
         if (registerBill.getTruckTareWeight() == null) {
@@ -591,6 +645,16 @@ public class RegisterBillService extends BaseServiceImpl<RegisterBill, Long> {
             }
         }
 
+        String brandName = StringUtils.trimToNull(registerBill.getBrandName());
+        if(Objects.nonNull(brandName)){
+            if (!RegUtils.isValidInput(brandName)) {
+                throw new TraceBizException("品牌包含非法字符");
+            }
+            if (brandName.length()>20) {
+                throw new TraceBizException("品牌不能超过20字符");
+            }
+        }
+
 
         //上游企业
         if (registerBill.getUpStreamId() == null) {
@@ -651,10 +715,10 @@ public class RegisterBillService extends BaseServiceImpl<RegisterBill, Long> {
 
 
         // 计重类型，把件数和件重置空
-        if (MeasureTypeEnum.COUNT_WEIGHT.equalsCode(registerBill.getMeasureType())) {
-            registerBill.setPieceNum(BigDecimal.ZERO);
-            registerBill.setPieceWeight(BigDecimal.ZERO);
-        }
+//        if (MeasureTypeEnum.COUNT_WEIGHT.equalsCode(registerBill.getMeasureType())) {
+//            registerBill.setPieceNum(BigDecimal.ZERO);
+//            registerBill.setPieceWeight(BigDecimal.ZERO);
+//        }
 
         // 计件类型，校验件数和件重
         if (MeasureTypeEnum.COUNT_UNIT.equalsCode(registerBill.getMeasureType())) {
