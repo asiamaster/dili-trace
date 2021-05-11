@@ -533,8 +533,8 @@
                             type: "number",
                             label: "皮重",
                             rules: [{
-                                pattern:/^(0|\+?[1-9][0-9]{0,7})$/,
-                                message: "请输入0-99999999之间的数字"
+                                pattern:/^([1-9][0-9]{0,6})$/,
+                                message: "请输入1-9999999之间的数字"
                             }],
                             required: filedNameRetMap.truckTareWeight.required === 1,
                             vif: function () {
