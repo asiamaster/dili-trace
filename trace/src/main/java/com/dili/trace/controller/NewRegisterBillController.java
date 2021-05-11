@@ -640,10 +640,14 @@ public class NewRegisterBillController {
                 .toMap(item -> item.getDefaultFieldDetail().getFieldName(), Function.identity());
         modelMap.put("filedNameRetMap", filedNameRetMap);
 
+
+        List<ImageCertTypeEnum> imageCertTypeEnumList = this.enumService.listImageCertType(currentFirm.getId(), moduleType);
+        modelMap.put("imageCertTypeEnumList", imageCertTypeEnumList);
+
         RegisterBill item = billService.get(id);
         if (item == null) {
 
-            modelMap.put("registerBill", item);
+            modelMap.put("registerBill", new RegisterBillOutputDto());
 
             return "new-registerBill/view";
         }

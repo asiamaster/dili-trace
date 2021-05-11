@@ -76,9 +76,8 @@
                     <input type="text" class="form-control input-sm" value="${registerBill.brandName!}" required readonly/>
                 </div>
                 <%}}%>
-
                 <%if (@filedNameRetMap.containsKey('measureType')){
-                if(filedNameRetMap['measureType'].displayed!0==1&&@filedNameRetMap['measureType'].getAvailableValueList().contains('20')&&registerBill.measureType==20){%>
+                if(filedNameRetMap['measureType'].displayed!0==1&&@filedNameRetMap.get('measureType').getAvailableValueList().contains('20')&&registerBill.measureType==20){%>
                     <div class="form-group col">
                         <label class="label-title text-right"><span class="red">&lowast;</span>重量/${registerBill.weightUnitName!}</label>
                         <input type="text" class="form-control input-sm"  value=" ${registerBill.weight!,'0.00'}" required readonly/>
@@ -97,7 +96,7 @@
 
 
                 <%if (@filedNameRetMap.containsKey('measureType')){
-                if(filedNameRetMap['measureType'].displayed!0==1&&@filedNameRetMap['measureType'].getAvailableValueList().contains('10')&&registerBill.measureType==10){%>
+                if(filedNameRetMap['measureType'].displayed!0==1&&@filedNameRetMap.get('measureType').getAvailableValueList().contains('10')&&registerBill.measureType==10){%>
                     <div class="form-group col">
                         <label class="label-title text-right"><span class="red">&lowast;</span>件数</label>
                         <input type="text" class="form-control input-sm" value="<%if(null!= pieceNum!){%>${pieceNum}<%}else{%>-<%}%>" required readonly/>
@@ -130,7 +129,7 @@
                     <label class="label-title text-right"><span class="red">&lowast;</span>产地证明</label>
                     <input type="text" class="form-control input-sm" value="${registerBill.hasOriginCertifiyName!}" required readonly/>
                 </div>
-                
+
                 <div class="form-group col">
                     <label class="label-title text-right"><span class="red">&lowast;</span>采样时间</label>
                     <input type="text" class="form-control input-sm" value="<%if(null!= detectRequest.sampleTime!){%>${detectRequest.sampleTime,dateFormat='yyyy-MM-dd HH:mm:ss'}<%}else{%>-<%}%>" required readonly/>
@@ -143,7 +142,7 @@
                     <label class="label-title text-right"><span class="red">&lowast;</span>是否删除</label>
                     <input type="text" class="form-control input-sm" value="${registerBill.isDeletedName!}" required readonly/>
                 </div>
-                
+
                 <div class="form-group col">
                     <label class="label-title text-right"><span class="red">&lowast;</span>打印报告</label>
                     <input type="text" class="form-control input-sm"value="<%if(null!= registerBill.isPrintCheckSheetName!){%>${registerBill.isPrintCheckSheetName}<%}else{%>-<%}%>" required readonly/>
@@ -193,7 +192,7 @@
                 <%}}%>
 
 
-                
+
                 <div class="form-group col">
                     <label class="label-title text-right"><span class="red">&lowast;</span>是否进门</label>
                     <input type="text" class="form-control input-sm"value="${registerBill.checkInStatusName!}" required readonly/>
@@ -272,112 +271,16 @@
                     <!-- 表格后的统计 end -->
                 </div>
             </div>
-
-            <div class="form-item-group">
-                <h4 class="form-item-title">产地证明</h4>
-                <%if((registerBill.imageCertList.~size!0)>0){
-                for(img in registerBill.imageCertList){
-                if(img.certType == @com.dili.trace.enums.ImageCertTypeEnum.ORIGIN_CERTIFIY.getCode()){
-                %>
-                <div class="fileimg-box"  >
-                    <img class="magnifying show-image"   style="width: 100%" src="${imageViewPathPrefix}/${img.uid!}" >
+           <% for(imageCertTypeEnum in imageCertTypeEnumList){%>
+                <div class="form-item-group">
+                    <h4 class="form-item-title">${imageCertTypeEnum.name}</h4>
+                    <%for(img in @registerBill.getGroupedImageCertList().get(imageCertTypeEnum)){%>
+                    <div class="fileimg-box"  >
+                        <img class="magnifying show-image"   style="width: 100%" src="${imageViewPathPrefix}/${img.uid!}" >
+                    </div>
+                    <%}%>
                 </div>
-                <%	} }
-                }%>
-            </div>
-            <div class="form-item-group">
-                <h4 class="form-item-title">检测报告</h4>
-                <%if((registerBill.imageCertList.~size!0)>0){
-                for(img in registerBill.imageCertList){
-                if(img.certType == @com.dili.trace.enums.ImageCertTypeEnum.DETECT_REPORT.getCode()){
-                %>
-                <div class="fileimg-box"  >
-                    <img class="magnifying show-image"   style="width: 100%" src="${imageViewPathPrefix}/${img.uid!}" >
-                </div>
-                <%	} }
-                }%>
-            </div>
-
-            <%if((registerBill.groupedImageCertList[@com.dili.trace.enums.ImageCertTypeEnum.QUARANTINE_CERTIFICATE].~size!0)>0){%>
-                <div class="form-item-group" id="quarantineDiv">
-                <h4 class="form-item-title">检疫合格证</h4>
-
-                <%for(img in registerBill.groupedImageCertList[@com.dili.trace.enums.ImageCertTypeEnum.QUARANTINE_CERTIFICATE]){
-                %>
-                <div class="fileimg-box" >
-                    <img class="magnifying show-image" style="display: block" src="${imageViewPathPrefix}/${img.uid!}">
-                </div>
-                <%}%>
-                </div>
-            <%}%>
-
-            <%if((registerBill.groupedImageCertList[@com.dili.trace.enums.ImageCertTypeEnum.PURCHASE_VOUCHER].~size!0)>0){%>
-                <div class="form-item-group" id="purchaseDiv">
-                <h4 class="form-item-title">购货凭证</h4>
-
-                <%for(img in registerBill.groupedImageCertList[@com.dili.trace.enums.ImageCertTypeEnum.PURCHASE_VOUCHER]){
-                %>
-                <div class="fileimg-box" >
-                    <img class="magnifying" style="display: block" src="${imageViewPathPrefix}/${img.uid!}">
-                </div>
-                <%}%>
-                </div>
-            <%}%>
-
-            <%if((registerBill.groupedImageCertList[@com.dili.trace.enums.ImageCertTypeEnum.CUSTOMS_DECLARATION].~size!0)>0){%>
-            <div class="form-item-group" id="customsDeclarationDiv">
-            <h4 class="form-item-title">报关单</h4>
-
-                <%for(img in registerBill.groupedImageCertList[@com.dili.trace.enums.ImageCertTypeEnum.CUSTOMS_DECLARATION]){
-                %>
-                <div class="fileimg-box" >
-                    <img class="magnifying" style="display: block" src="${imageViewPathPrefix}/${img.uid!}">
-                </div>
-                <%}%>
-            </div>
-            <%}%>
-
-            <%if((registerBill.groupedImageCertList[@com.dili.trace.enums.ImageCertTypeEnum.PURCHASE_AGREEMENT].~size!0)>0){%>
-                <div class="form-item-group" id="purchaseAgreementDiv">
-                <h4 class="form-item-title">采购协议</h4>
-
-                <%for(img in registerBill.groupedImageCertList[@com.dili.trace.enums.ImageCertTypeEnum.PURCHASE_AGREEMENT]){
-                %>
-                <div class="fileimg-box" >
-                    <img class="magnifying" style="display: block" src="${imageViewPathPrefix}/${img.uid!}">
-                </div>
-                <%}%>
-                </div>
-            <%}%>
-
-            <%if((registerBill.groupedImageCertList[@com.dili.trace.enums.ImageCertTypeEnum.Handle_Result].~size!0)>0){%>
-            <div class="form-item-group">
-                <h4 class="form-item-title">处理结果图片</h4>
-                <%for(img in registerBill.groupedImageCertList[@com.dili.trace.enums.ImageCertTypeEnum.Handle_Result]){
-                %>
-                <div class="fileimg-box"  >
-                    <img class="magnifying show-image"   style="width: 100%" src="${imageViewPathPrefix}/${img.uid!}" >
-                </div>
-                <%}%>
-            </div>
-            <div class="form-group col">
-                <label class="label-title text-right"><span class="red">&lowast;</span>处理结果备注</label>
-                <input type="text" class="form-control input-sm"   value="${registerBill.handleResult}" required readonly/>
-            </div>
-            <%}%>
-
-            <%if((registerBill.groupedImageCertList[@com.dili.trace.enums.ImageCertTypeEnum.OTHERS].~size!0)>0){%>
-                <div class="form-item-group" id="othersDiv">
-                <h4 class="form-item-title">其他</h4>
-
-                <%for(img in registerBill.groupedImageCertList[@com.dili.trace.enums.ImageCertTypeEnum.OTHERS]){
-                %>
-                <div class="fileimg-box"  >
-                    <img class="magnifying" style="display: block" src="${imageViewPathPrefix}/${img.uid!}">
-                </div>
-                <%}%>
-                </div>
-            <%}%>
+            <% }%>
 
         </form>
     </div>

@@ -184,7 +184,7 @@
                 <div class="form-group col-6">
                     <select class="form-control" <%if(filedNameRetMap['measureType'].displayed!1==1){%>required<%}%> multiple="multiple"  name="fieldConfigDetailList[${defaultFiledNameIndexMap['measureType']}][availableValues][]">
                     <%for(measureType in measureTypeEnumList){%>
-                    <option value="${measureType.code}" <%if(@filedNameRetMap.get('measureType').getAvailableValueList().contains(measureType.code+'')){%>selected<%}%>>${measureType.name}</option>
+                    <option value="${measureType.code}" <%if(@filedNameRetMap.get('measureType').getAvailableValueList().contains(measureType.code+'')){%>selected<%}%>>${measureType.nameExt}</option>
                     <%}%>
                     </select>
                 </div>

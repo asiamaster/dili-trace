@@ -2,60 +2,6 @@
 <div class="container-fluid">
     <form id="queryForm" role="form" >
         <div class="row row-cols-6">
-            <div class="form-group col">
-                <label for="registerSource">登记来源</label>
-                <div class="row" style="margin: 0">
-                    <select id="registerSource" name="registerSource"  class="form-control"  style="width:50%;"></select>
-                    <#bcomboProvider _id="registerSource" _provider="registerSourceProvider" _value="" _onLoadSuccess=""/>
-
-                    <select  name="tradeTypeId" id="tradeTypeId" class="form-control" disabled="disabled" style="width:50%;" ></select>
-                    <#bcomboProvider _id="tradeTypeId" _provider="tradeTypeProvider" _value="" _onLoadSuccess=""/>
-                </div>
-            </div>
-            <!--detectState-->
-            <div class="form-group col">
-                <label for="detectResult">检测结果</label>
-                <select id="detectResult" name="detectResult" class="form-control"></select>
-                <#bcomboProvider _id="detectResult" _provider="detectResultEnumProvider" _value="" _onLoadSuccess=""/>
-            </div>
-
-            <div class="form-group col">
-                <label for="detectSource">送检方式</label>
-                <select id="detectSource" name="detectSource" class="form-control"></select>
-                <#bcomboProvider _id="detectSource" _provider="sampleSourceProvider" _value="" _onLoadSuccess=""/>
-            </div>
-
-            <!-- TODO:原报表为多选 -->
-            <div class="form-group col">
-                <label for="verifyStatus">审核状态</label>
-                <select id="verifyStatus" name="verifyStatus" class="form-control"></select>
-                <#bcomboProvider _id="verifyStatus" _provider="billVerifyStatusEnumProvider" _value="" _onLoadSuccess=""/>
-            </div>
-
-            <div class="form-group col">
-                <label for="detectStatus">检测状态</label>
-                <select id="detectStatus" name="detectStatus" class="form-control"></select>
-                <#bcomboProvider _id="detectStatus" _provider="detectStatusProvider" _value="" _onLoadSuccess=""/>
-            </div>
-
-            <!-- 已打印/未打印 -->
-            <div class="form-group col">
-                <label for="hasDetectReport">检测报告</label>
-                <select id="hasDetectReport" name="hasDetectReport" class="form-control">
-                    <option value="">--请选择--</option>
-                    <option value="1">有</option>
-                    <option value="0">无</option>
-                </select>
-            </div>
-
-            <div class="form-group col">
-                <label for="hasOriginCertifiy">产地证明</label>
-                <select id="hasOriginCertifiy" name="hasOriginCertifiy" class="form-control">
-                    <option value="">--请选择--</option>
-                    <option value="1">有</option>
-                    <option value="0">无</option>
-                </select>
-            </div>
 
             <div class="form-group col-auto">
                 <label for="createdStart">登记时间</label>
@@ -93,18 +39,6 @@
                 </div>
             </div>
 
-            <div class="form-group col">
-                <label for="attr"  >关键字</label>
-                <div class="row">
-                    <select id="attr" name="attr" class="form-control" style="width:50%;">
-                        <option value="tallyAreaNo" selected="selected">理货区号</option>
-                        <option value="name">业户姓名</option>
-                        <option value="productName">商品名称</option>
-                        <option value="likeSampleCode">采样单编号</option>
-                    </select>
-                    <input class="easyui-textbox form-control" id="attrValue" name="attrValue" data-options="iconCls:'icon-search', validType:'length[0,25]'" style="width:50%;" >
-                </div>
-            </div>
 
             <div class="col-auto align-self-center mt-3">
                 <button id="query" type="button" class="btn btn-outline-primary"><i class="fa fa-search"></i> 统计</button>
@@ -144,11 +78,11 @@
                 <label>主动送检:</label>
                 <input class="easyui-textbox statics" id="autoCheckNum"  labelAlign="right" value="0" readonly="readonly" disabled="disabled" /><span>条</span>
             </div>
-            <div class="search-item" >
+            <div class="search-item" style="display: none" >
                 <label>打印报告:</label>
                 <input class="easyui-textbox statics" id="diffCheckSheetNum"  labelAlign="right"   value="0"  readonly="readonly" disabled="disabled" /><span>份</span>
             </div>
-            <div class="search-item" >
+            <div class="search-item"  style="display: none" >
                 <label>已打印登记单:</label>
                 <input class="easyui-textbox statics" id="hasCheckSheetNum"  labelAlign="right"  value="0" readonly="readonly" disabled="disabled" /><span>条</span>
             </div>
@@ -176,16 +110,13 @@
                     登记时间
                 </th>
                 <th data-field="code" data-sortable="true" data-align="center">
-                    编号
+                    登记编号
                 </th>
                 <th data-field="sampleCode"  data-sort-name="sample_code" data-sortable="true" data-align="center">
                     采样编号
                 </th>
-                <th data-field="tallyAreaNo"  data-sort-name="tally_area_no" data-sortable="true" data-align="center">
-                    理货区号
-                </th>
                 <th data-field="tradeTypeName"  data-sort-name="trade_type_name" data-sortable="true" data-align="center">
-                    交易区号
+                    区号
                 </th>
                 <th data-field="tradeAccount"  data-sort-name="trade_account" data-sortable="true" data-align="center">
                     交易账号
@@ -201,9 +132,6 @@
                 </th>
                 <th data-field="originName" data-sort-name="origin_name" data-sortable="true" data-align="center">
                     产地
-                </th>
-                <th data-field="checkSheetId" data-sortable="false" data-align="center" data-provider="hasOrNoneProvider">
-                    打印报告
                 </th>
                 <th data-field="verifyStatusName"  data-sort-name="verify_status" data-sortable="true" data-align="center" >
                     审核状态

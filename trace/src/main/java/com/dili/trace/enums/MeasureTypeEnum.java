@@ -52,4 +52,16 @@ public enum  MeasureTypeEnum {
     public String getStringCode() {
         return String.valueOf(this.code);
     }
+
+    public String getNameExt() {
+        if(this==MeasureTypeEnum.COUNT_UNIT){
+
+            return this.getName()+"-商品件数/件重/合计";
+        }else if(this==MeasureTypeEnum.COUNT_WEIGHT){
+            return this.getName()+"-商品重量";
+        }
+        else{
+            return this.getName();
+        }
+    }
 }
