@@ -33,7 +33,7 @@
                             this._data.fileList=this._data.fileList.splice(this._data.fileList.findIndex(item => item.uid === file.replace(prefix, "")), 1);
                         },
 
-                        fileType:["jpg","png","ico","bmp"],
+                        fileType:["jpg","png","bmp"],
                         limit: "10",
                     },
                     vif: function () {
