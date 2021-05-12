@@ -1,20 +1,19 @@
 package com.dili.trace.util;
 
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import org.springframework.cglib.beans.BeanMap;
+
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-
-import org.springframework.beans.BeanUtils;
-import org.springframework.cglib.beans.BeanMap;
-
 /**
  * Bean and Map convert util
  */
 public class BeanMapUtil {
+
     /**
      * 将对象装换为map
      * 

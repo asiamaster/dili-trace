@@ -18,6 +18,7 @@ import com.dili.trace.glossary.RegisterSourceEnum;
 import com.dili.trace.glossary.UsualAddressTypeEnum;
 import com.dili.trace.rpc.service.CustomerRpcService;
 import com.dili.trace.service.*;
+import com.dili.trace.util.BeanMapUtil;
 import com.dili.trace.util.MaskUserInfo;
 import com.dili.uap.sdk.domain.Firm;
 import com.dili.uap.sdk.domain.UserTicket;
@@ -190,6 +191,8 @@ public class NewRegisterBillController {
             m.put("certTypeName", e.getName());
             return m;
         }).toList()));
+        modelMap.put("measureTypeEnumList", JSON.toJSONString(StreamEx.of(MeasureTypeEnum.values()).map(BeanMapUtil::beanToMap).toList()));
+
 
         RegisterBillOutputDto item = new RegisterBillOutputDto();
         item.setMeasureType(MeasureTypeEnum.COUNT_WEIGHT.getCode());
@@ -297,6 +300,8 @@ public class NewRegisterBillController {
                 .toMap(item -> item.getDefaultFieldDetail().getFieldName(), Function.identity());
         modelMap.put("filedNameRetMap", JSON.toJSONString(filedNameRetMap));
 
+        modelMap.put("measureTypeEnumList", JSON.toJSONString(StreamEx.of(MeasureTypeEnum.values()).map(BeanMapUtil::beanToMap).toList()));
+
         List<ImageCertTypeEnum> imageCertTypeEnumList = this.enumService.listImageCertType(currentFirm.getId(), moduleType);
         modelMap.put("imageCertTypeEnumMap", JSON.toJSONString(StreamEx.of(imageCertTypeEnumList).map(e -> {
             Map<String, Object> m = new HashMap<>();
@@ -304,6 +309,7 @@ public class NewRegisterBillController {
             m.put("certTypeName", e.getName());
             return m;
         }).toList()));
+
 
         RegisterBillOutputDto registerBill = billService.getAvaiableBill(id).map(bill -> {
             return RegisterBillOutputDto.build(bill, Lists.newLinkedList());
@@ -638,6 +644,8 @@ public class NewRegisterBillController {
         Map<String, FieldConfigDetailRetDto> filedNameRetMap = StreamEx.of(this.fieldConfigDetailService.findByMarketIdAndModuleType(currentFirm.getId(), moduleType))
                 .toMap(item -> item.getDefaultFieldDetail().getFieldName(), Function.identity());
         modelMap.put("filedNameRetMap", filedNameRetMap);
+
+        modelMap.put("measureTypeEnumList", JSON.toJSONString(StreamEx.of(MeasureTypeEnum.values()).map(BeanMapUtil::beanToMap).toList()));
 
 
         List<ImageCertTypeEnum> imageCertTypeEnumList = this.enumService.listImageCertType(currentFirm.getId(), moduleType);
