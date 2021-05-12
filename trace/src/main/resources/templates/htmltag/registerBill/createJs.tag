@@ -18,10 +18,13 @@
                             vm.imageCertList.push({certType: it.certType, uid: response.data})
                             return prefix + response.data;
                         },
-                        beforeRemove: function (file, fileList) {
+                        beforeRemove: function (file, c) {
                             vm.imageCertList.splice(vm.imageCertList.findIndex(item => item.uid === file.replace(prefix, "")), 1);
+                            this._data.fileList=this._data.fileList.splice(this._data.fileList.findIndex(item => item.uid === file.replace(prefix, "")), 1);
                         },
-                        limit: "10"
+
+                        fileType:["jpg","png","ico","bmp"],
+                        limit: "10",
                     },
                     vif: function () {
                         return filedNameRetMap.imageCertList.displayed === 1;
