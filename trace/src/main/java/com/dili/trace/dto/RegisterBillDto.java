@@ -196,6 +196,9 @@ public class RegisterBillDto extends RegisterBill {
         this.likePhone = likePhone;
     }
 
+    @Transient
+    private String tallynos;
+
     /**
      * 关键字
      */
@@ -668,6 +671,14 @@ public class RegisterBillDto extends RegisterBill {
 
     public void setDetectTime(Date detectTime) {
         this.detectTime = detectTime;
+    }
+
+    public String getTallynos() {
+        return tallynos;
+    }
+
+    public void setTallynos(String tallynos) {
+        this.tallynos = tallynos;
     }
 
     @Transient

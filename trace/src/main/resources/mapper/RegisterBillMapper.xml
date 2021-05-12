@@ -1389,11 +1389,13 @@
     detect_record.`pd_result` pdResult,
     b.`is_deleted`,
     b.`source_name`,
-    b.`source_id`
+    b.`source_id`,
+    group_concat(register_tallyarea_no.tallyarea_no  order by register_tallyarea_no.id ASC separator ',') as tallynos
     FROM register_bill b
-    left join detect_request r ON (r.id = b.detect_request_id)
-    left join detect_record on detect_record.detect_request_id=r.id
+    LEFT JOIN detect_request r ON (r.id = b.detect_request_id)
+    LEFT JOIN  detect_record on detect_record.detect_request_id=r.id
     LEFT JOIN checkinout_record ON checkinout_record.bill_id =r.id and checkinout_record.`inout` =10 and checkinout_record.status =10
+    LEFT JOIN  register_tallyarea_no  on b.id= register_tallyarea_no.bill_id and register_tallyarea_no.bill_type=#{billType}
     WHERE 1 = 1
     <if test="createdStart != null">
       <![CDATA[ AND b.created >= #{createdStart} ]]>
@@ -1452,9 +1454,7 @@
     <if test="originName != null">
       AND b.origin_name like '%${originName}%'
     </if>
-    <if test="likeTallyAreaNo != null">
-      AND b.tally_area_no like '%${likeTallyAreaNo}%'
-    </if>
+
     <if test="isDeleted != null">
       AND b.is_deleted =#{isDeleted}
     </if>

@@ -1268,14 +1268,7 @@ public class SgRegisterBillServiceImpl implements SgRegisterBillService {
         return StreamEx.of(this.queryEvents(item)).filterBy(Function.identity(), messageEvent).map((v) -> item).findFirst();
     }
 
-    @Override
-    public void doUpdateImage(RegisterBill registerBill) {
-        List<ImageCert> imageCertList =  StreamEx.ofNullable(registerBill.getImageCertList()).nonNull().flatCollection(Function.identity()).nonNull().toList();
-        if(imageCertList.size()>10){
-            throw new TraceBizException("所有凭证不能超过10张");
-        }
-        this.billService.updateHasImage(registerBill.getId(), imageCertList);
-    }
+
 
     private List<RegisterBillMessageEvent> queryEvents(RegisterBill bill) {
         if (bill == null) {

@@ -273,7 +273,7 @@ public class RegisterBillService extends BaseServiceImpl<RegisterBill, Long> {
 //            logger.debug("jsonpath={},jsonvalue={}", jsonPath, jsonValue);
 //        });
         this.checkAndSetDefaultValue(registerBill, fieldConfigDetailRetDtoMap);
-
+        this.checkImageCertList(registerBill);
 
         registerBill.setCheckinStatus(CheckinStatusEnum.NONE.getCode());
         registerBill.setVerifyStatus(BillVerifyStatusEnum.WAIT_AUDIT.getCode());
@@ -349,7 +349,7 @@ public class RegisterBillService extends BaseServiceImpl<RegisterBill, Long> {
 
 
         // 保存图片
-        List<ImageCert> imageCertList = StreamEx.ofNullable(registerBill.getImageCertList()).nonNull().flatCollection(Function.identity()).nonNull().toList();
+        List<ImageCert> imageCertList = registerBill.getImageCertList();
         if (!imageCertList.isEmpty()) {
             imageCertService.insertImageCert(imageCertList, registerBill.getBillId());
             //更新报备单上图片标志位
@@ -415,6 +415,16 @@ public class RegisterBillService extends BaseServiceImpl<RegisterBill, Long> {
         if (NumUtils.MAX_WEIGHT.compareTo(weight) < 0) {
             logger.error("商品重量不能大于" + NumUtils.MAX_WEIGHT.toString());
             throw new TraceBizException("商品重量不能大于" + NumUtils.MAX_WEIGHT.toString());
+        }
+
+        String brandName = StringUtils.trimToNull(registerBill.getBrandName());
+        if(Objects.nonNull(brandName)){
+            if (!RegUtils.isValidInput(brandName)) {
+                throw new TraceBizException("品牌包含非法字符");
+            }
+            if (brandName.length()>20) {
+                throw new TraceBizException("品牌不能超过20字符");
+            }
         }
 
         String remark = StringUtils.trimToNull(registerBill.getRemark());
@@ -1564,5 +1574,27 @@ public class RegisterBillService extends BaseServiceImpl<RegisterBill, Long> {
         dto.setSort("code");
         dto.setOrder("desc");
         return this.listByExample(dto).stream().findFirst().orElse(new RegisterBill());
+    }
+
+    /**
+     * 修改图片
+     * @param registerBill
+     */
+    public void doUpdateImage(RegisterBill registerBill) {
+        this.checkImageCertList(registerBill);
+        this.billService.updateHasImage(registerBill.getId(), registerBill.getImageCertList());
+    }
+
+    /**
+     * 对上传图片数量做判断
+     * @param registerBill
+     */
+    private void checkImageCertList(RegisterBill registerBill){
+
+        List<ImageCert> imageCertList =  StreamEx.ofNullable(registerBill.getImageCertList()).nonNull().flatCollection(Function.identity()).nonNull().toList();
+        if(imageCertList.size()>10){
+            throw new TraceBizException("所有凭证不能超过10张");
+        }
+        registerBill.setImageCertList(imageCertList);
     }
 }

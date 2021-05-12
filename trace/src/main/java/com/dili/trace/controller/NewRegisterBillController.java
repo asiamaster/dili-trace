@@ -1057,7 +1057,7 @@ public class NewRegisterBillController {
     public @ResponseBody
     BaseOutput updateImage(@RequestBody RegisterBill registerBill) {
         try {
-            this.sgRegisterBillService.doUpdateImage(registerBill);
+            this.registerBillService.doUpdateImage(registerBill);
             return BaseOutput.success();
         } catch (TraceBizException e) {
             logger.error(e.getMessage(), e);

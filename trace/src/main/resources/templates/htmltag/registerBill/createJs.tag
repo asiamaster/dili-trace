@@ -416,6 +416,10 @@
                         brandName: {
                             type: "autocomplete",
                             label: "品牌",
+                            rules: [{
+                                pattern:/^[\u4e00-\u9fa5_a-zA-Z0-9_]{0,20}$/,
+                                message: "请输入不超过20个长度中英文以及下划线"
+                            }],
                             required: filedNameRetMap.brandName.required === 1,
                             attrs: {
                                 valueKey: "brandName",
