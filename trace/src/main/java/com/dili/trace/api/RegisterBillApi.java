@@ -15,10 +15,13 @@ import com.dili.ss.dto.IDTO;
 import com.dili.trace.api.input.RegisterBillApiInputDto;
 import com.dili.trace.api.input.RegisterBillQueryInputDto;
 import com.dili.trace.domain.RegisterBill;
+import com.dili.trace.domain.RegisterTallyAreaNo;
 import com.dili.trace.domain.UserInfo;
 import com.dili.trace.dto.RegisterBillOutputDto;
+import com.dili.trace.enums.BillTypeEnum;
 import com.dili.trace.service.AssetsRpcService;
 import com.dili.trace.service.RegisterBillService;
+import com.dili.trace.service.RegisterTallyAreaNoService;
 import com.dili.trace.service.UserService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -54,7 +57,7 @@ public class RegisterBillApi {
     @Autowired
     private UserService userService;
     @Autowired
-    private AssetsRpcService categoryService;
+    RegisterTallyAreaNoService registerTallyAreaNoService;
 
     /**
      * 通过登记单ID获取登记单详细信息
@@ -77,6 +80,9 @@ public class RegisterBillApi {
                 return BaseOutput.failure("你还未登录");
             }
             RegisterBillOutputDto outputdto = this.registerBillService.viewTradeDetailBill(inputDto);
+            List<RegisterTallyAreaNo> arrivalTallynos = this.registerTallyAreaNoService.findTallyAreaNoByBillIdAndType(outputdto.getBillId(), BillTypeEnum.REGISTER_BILL);
+            outputdto.setArrivalTallynos(StreamEx.of(arrivalTallynos).map(RegisterTallyAreaNo::getTallyareaNo).toList());
+
             String data = JSON.toJSONString(outputdto, SerializerFeature.DisableCircularReferenceDetect);
             return BaseOutput.success().setData(JSON.parse(data));
 

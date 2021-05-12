@@ -1,8 +1,10 @@
 package com.dili.trace.controller;
 
+import com.alibaba.fastjson.JSON;
+import com.dili.trace.dto.ret.FieldConfigDetailRetDto;
+import com.dili.trace.enums.*;
 import com.dili.trace.events.DetectRequestMessageEvent;
 import com.dili.common.exception.TraceBizException;
-import com.dili.trace.enums.SalesTypeEnum;
 import com.dili.ss.domain.BaseOutput;
 import com.dili.ss.domain.EasyuiPageOutput;
 import com.dili.ss.dto.DTOUtils;
@@ -10,11 +12,12 @@ import com.dili.ss.util.DateUtils;
 import com.dili.trace.domain.*;
 import com.dili.trace.domain.QualityTraceTradeBill;
 import com.dili.trace.dto.*;
-import com.dili.trace.enums.BillTypeEnum;
 import com.dili.trace.glossary.RegisterSourceEnum;
 import com.dili.trace.service.*;
+import com.dili.trace.util.BeanMapUtil;
 import com.dili.trace.util.MarketUtil;
 import com.dili.trace.util.MaskUserInfo;
+import com.dili.uap.sdk.domain.Firm;
 import com.dili.uap.sdk.domain.User;
 import com.dili.uap.sdk.domain.UserTicket;
 import com.dili.uap.sdk.session.SessionContext;
@@ -36,6 +39,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.servlet.http.HttpServletRequest;
 import java.math.BigDecimal;
 import java.util.*;
+import java.util.function.Function;
 
 /**
  * 检测请求业务类
@@ -67,6 +71,14 @@ public class CustomerDetectRequestController {
     SgRegisterBillService registerBillService;
     @Autowired
     UpStreamService upStreamService;
+    @Autowired
+    RegisterTallyAreaNoService registerTallyAreaNoService;
+
+    @Autowired
+    EnumService enumService;
+
+    @Autowired
+    FieldConfigDetailService fieldConfigDetailService;
 
     /**
      * 跳转到DetectRequest页面
@@ -277,6 +289,20 @@ public class CustomerDetectRequestController {
     @RequestMapping(value = "/view.html", method = RequestMethod.GET)
     public String view(ModelMap modelMap, @RequestParam(required = true, name = "billId") Long billId
             , @RequestParam(required = false, name = "displayWeight") Boolean displayWeight) {
+
+        Firm currentFirm = this.uapRpcService.getCurrentFirm().orElse(DTOUtils.newDTO(Firm.class));
+        FieldConfigModuleTypeEnum moduleType = FieldConfigModuleTypeEnum.REGISTER;
+
+        Map<String, FieldConfigDetailRetDto> filedNameRetMap = StreamEx.of(this.fieldConfigDetailService.findByMarketIdAndModuleType(currentFirm.getId(), moduleType))
+                .toMap(item -> item.getDefaultFieldDetail().getFieldName(), Function.identity());
+        modelMap.put("filedNameRetMap", filedNameRetMap);
+
+        modelMap.put("measureTypeEnumList", JSON.toJSONString(StreamEx.of(MeasureTypeEnum.values()).map(BeanMapUtil::beanToMap).toList()));
+
+
+        List<ImageCertTypeEnum> imageCertTypeEnumList = this.enumService.listImageCertType(currentFirm.getId(), moduleType);
+        modelMap.put("imageCertTypeEnumList", imageCertTypeEnumList);
+
         RegisterBill item = billService.get(billId);
         if (item == null) {
             modelMap.put("registerBill", item);
@@ -328,8 +354,9 @@ public class CustomerDetectRequestController {
         List<ImageCert> imageCerts = this.registerBillService.findImageCertListByBillId(item.getBillId());
         item.setImageCertList(imageCerts);
 
-        RegisterBillOutputDto bill = new RegisterBillOutputDto();
-        BeanUtils.copyProperties(item,bill);
+        RegisterBillOutputDto bill = RegisterBillOutputDto.build(item,Lists.newArrayList());
+        List<RegisterTallyAreaNo> arrivalTallynos = this.registerTallyAreaNoService.findTallyAreaNoByBillIdAndType(bill.getBillId(), BillTypeEnum.REGISTER_BILL);
+        bill.setArrivalTallynos(StreamEx.of(arrivalTallynos).map(RegisterTallyAreaNo::getTallyareaNo).toList());
         modelMap.put("registerBill", bill);
 
         return "customerDetectRequest/view";
