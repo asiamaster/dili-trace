@@ -194,23 +194,25 @@
                             },
                             on: {
                                 change: function (val) {
-                                    let registerHeadCodeTemp = this.registerHeadCodeTemp;
-                                    for (let i = 0; i < registerHeadCodeTemp.length; i++) {
-                                        let obj = registerHeadCodeTemp[i];
+                                    let registerHeadCodeTempRef = app.registerHeadCodeTemp;
+                                    let formDataRef=app.formData;
+                                    for (let i = 0; i < registerHeadCodeTempRef.length; i++) {
+                                        let obj = registerHeadCodeTempRef[i];
                                         if (obj.code === val) {
-                                            this.formData.registerHeadWeight = obj.weight;
-                                            this.formData.registerHeadRemainWeight = obj.remainWeight;
-                                            this.formData.measureType = obj.measureType;
-                                            this.formData.truckType = obj.truckType;
-                                            this.formData.specName = obj.specName;
-                                            this.formData.brandName = obj.brandName;
-                                            this.formData.truckTareWeight = obj.truckTareWeight;
-                                            this.formData.arrivalDatetime = obj.arrivalDatetime;
-                                            this.formData.originId = obj.originId;
-                                            this.formData.originName = obj.originName;
-                                            this.formData.productId = obj.productId;
-                                            this.formData.productName = obj.productName;
-                                            this.formData.upStreamId = obj.upStreamId;
+                                            formDataRef.registerHeadWeight = obj.weight;
+                                            formDataRef.registerHeadRemainWeight = obj.remainWeight;
+
+                                            formDataRef.measureType = obj.measureType;
+                                            formDataRef.truckType = obj.truckType;
+                                            formDataRef.specName = obj.specName;
+                                            formDataRef.brandName = obj.brandName;
+                                            formDataRef.truckTareWeight = obj.truckTareWeight;
+                                            formDataRef.arrivalDatetime = obj.arrivalDatetime;
+                                            formDataRef.originId = obj.originId;
+                                            formDataRef.originName = obj.originName;
+                                            formDataRef.productId = obj.productId;
+                                            formDataRef.productName = obj.productName;
+                                            formDataRef.upStreamId = obj.upStreamId;
                                         }
                                     }
                                 }
