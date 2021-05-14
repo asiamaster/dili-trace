@@ -7,14 +7,18 @@ import com.dili.trace.domain.Category;
 import com.dili.trace.domain.UserInfo;
 import com.dili.trace.rpc.service.CustomerRpcService;
 import com.dili.trace.service.AssetsRpcService;
-import com.dili.trace.service.CategoryService;
+import com.dili.uap.sdk.domain.Firm;
 import com.google.common.collect.Lists;
 import one.util.streamex.StreamEx;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
+import org.springframework.scheduling.annotation.AsyncResult;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+import java.util.concurrent.Future;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 /**
  * 异步服务接口
@@ -25,6 +29,16 @@ public class AsyncService {
     AssetsRpcService assetsRpcService;
     @Autowired
     CustomerRpcService customerRpcService;
+
+    /**
+     * 查询
+     *
+     * @param supplier
+     */
+    @Async
+    public <T>Future<T> executeAsync(Supplier<T> supplier) {
+        return new AsyncResult<>(supplier.get());
+    }
 
     /**
      * 异步查询客户信息

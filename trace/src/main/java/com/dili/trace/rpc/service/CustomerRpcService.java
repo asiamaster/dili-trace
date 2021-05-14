@@ -17,6 +17,7 @@ import com.dili.trace.rpc.dto.AccountGetListQueryDto;
 import com.dili.trace.rpc.dto.AccountGetListResultDto;
 import com.dili.trace.service.GlobalVarService;
 import com.dili.trace.util.NumUtils;
+import com.dili.uap.sdk.domain.Firm;
 import com.google.common.collect.Lists;
 import one.util.streamex.StreamEx;
 import org.apache.commons.lang3.StringUtils;
@@ -444,5 +445,51 @@ public class CustomerRpcService {
                 .flatCollection(Function.identity())
                 .nonNull().toList();
 
+    }
+
+
+
+    /**
+     * 查询
+     *
+     * @param keyword
+     * @param firm
+     */
+    public List<Long> findCustomerIdListByKeywordFromCustomer(String keyword, Firm firm) {
+        if (StringUtils.isBlank(keyword) || firm == null) {
+            return Lists.newArrayList();
+        }
+
+        CustomerQueryInput query = new CustomerQueryInput();
+        query.setKeyword(keyword);
+        query.setPage(1);
+        query.setRows(50);
+        List<Long> customerIdList = StreamEx.of(this.listSeller(query, firm.getId()).getData()).map(customerExtendDto -> {
+            return customerExtendDto.getId();
+        }).toList();
+
+        return customerIdList;
+    }
+
+    /**
+     * 查询
+     *
+     * @param keyword
+     * @param firm
+     */
+    public List<Long> findCustomerIdListByKeywordFromAccount(String keyword, Firm firm) {
+        if (StringUtils.isBlank(keyword) || firm == null) {
+            return Lists.newArrayList();
+        }
+
+        AccountGetListQueryDto accountGetListQueryDto = new AccountGetListQueryDto();
+        accountGetListQueryDto.setKeyword(keyword);
+        accountGetListQueryDto.setFirmId(firm.getId());
+
+        List<Long> accountCustomerIdList = StreamEx.of(this.accountRpcService.getList(accountGetListQueryDto)).map(accountGetListResultDto -> {
+            return accountGetListResultDto.getCustomerId();
+        }).toList();
+
+        return accountCustomerIdList;
     }
 }

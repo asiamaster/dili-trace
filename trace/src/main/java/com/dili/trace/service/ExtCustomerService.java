@@ -1,24 +1,27 @@
 package com.dili.trace.service;
 
-import com.dili.customer.sdk.domain.dto.CustomerExtendDto;
 import com.dili.customer.sdk.domain.query.CustomerQueryInput;
-import com.dili.ss.domain.PageOutput;
+import com.dili.trace.async.AsyncService;
 import com.dili.trace.domain.TraceCustomer;
 import com.dili.trace.rpc.dto.AccountGetListQueryDto;
-import com.dili.trace.rpc.dto.AccountGetListResultDto;
 import com.dili.trace.rpc.service.AccountRpcService;
 import com.dili.trace.rpc.service.CustomerRpcService;
 import com.dili.trace.rpc.service.FirmRpcService;
 import com.dili.uap.sdk.domain.Firm;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import one.util.streamex.StreamEx;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 import java.util.function.Function;
 
 /**
@@ -26,12 +29,15 @@ import java.util.function.Function;
  */
 @Service
 public class ExtCustomerService {
+    private static final Logger logger = LoggerFactory.getLogger(ExtCustomerService.class);
     @Autowired
     CustomerRpcService customerRpcService;
     @Autowired
     AccountRpcService accountRpcService;
     @Autowired
     FirmRpcService firmRpcService;
+    @Autowired
+    AsyncService asyncService;
 
     /**
      * 根据卡号查询信息
@@ -100,26 +106,23 @@ public class ExtCustomerService {
         if (StringUtils.isBlank(keyword) || firm == null) {
             return Lists.newArrayList();
         }
+        List<Future<List<Long>>> futures = Lists.newArrayList(this.asyncService.executeAsync(() -> {
+                    return this.customerRpcService.findCustomerIdListByKeywordFromCustomer(keyword, firm);
+                }),
+                this.asyncService.executeAsync(() -> {
+                    return this.customerRpcService.findCustomerIdListByKeywordFromAccount(keyword, firm);
+                })
 
-        CustomerQueryInput query = new CustomerQueryInput();
-        query.setKeyword(keyword);
-        query.setPage(1);
-        query.setRows(50);
-        List<Long> customerIdList = StreamEx.of(this.customerRpcService.listSeller(query, firm.getId()).getData()).map(customerExtendDto -> {
-            return customerExtendDto.getId();
+        );
+        List<Long> customerIdList = StreamEx.of(futures).flatCollection(future -> {
+            try {
+                return future.get();
+            } catch (Exception e) {
+                logger.error(e.getMessage(), e);
+            }
+            return Lists.newArrayList();
         }).toList();
-
-        AccountGetListQueryDto accountGetListQueryDto = new AccountGetListQueryDto();
-        accountGetListQueryDto.setKeyword(keyword);
-        accountGetListQueryDto.setFirmId(firm.getId());
-
-        List<Long> accountCustomerIdList = StreamEx.of(this.accountRpcService.getList(accountGetListQueryDto)).map(accountGetListResultDto -> {
-            return accountGetListResultDto.getCustomerId();
-        }).toList();
-
-        List<Long> allCustomerIdList = StreamEx.of(customerIdList).append(accountCustomerIdList).toList();
-
-        return allCustomerIdList;
+        return customerIdList;
     }
 
     /**
@@ -172,40 +175,66 @@ public class ExtCustomerService {
      * @return
      */
     private List<TraceCustomer> findByCustomerIdList(List<Long> customerIdList, Firm firm) {
-
-
-        CustomerQueryInput query = new CustomerQueryInput();
-        query.setIdSet(Sets.newHashSet(customerIdList));
-        Map<Long, TraceCustomer> idCustMap = StreamEx.of(this.customerRpcService.listSeller(query, firm.getId()).getData()).toMap(c -> {
-            return c.getId();
-        }, c -> {
-            TraceCustomer customer = new TraceCustomer();
-            customer.setId(c.getId());
-            customer.setPhone(c.getContactsPhone());
-            customer.setCode(c.getCode());
-            customer.setName(c.getName());
-            customer.setFirmId(firm.getId());
-            customer.setFirmName(firm.getName());
-            return customer;
+        if (customerIdList.isEmpty() || firm == null) {
+            return Lists.newArrayList();
+        }
+        Future<Map<Long, TraceCustomer>> idCustMapFuture = this.asyncService.executeAsync(() -> {
+            CustomerQueryInput query = new CustomerQueryInput();
+            query.setIdSet(Sets.newHashSet(customerIdList));
+            return StreamEx.of(this.customerRpcService.listSeller(query, firm.getId()).getData()).toMap(c -> {
+                return c.getId();
+            }, c -> {
+                TraceCustomer customer = new TraceCustomer();
+                customer.setId(c.getId());
+                customer.setPhone(c.getContactsPhone());
+                customer.setCode(c.getCode());
+                customer.setName(c.getName());
+                customer.setFirmId(firm.getId());
+                customer.setFirmName(firm.getName());
+                return customer;
+            });
         });
+        Future<List<TraceCustomer>> custListFuture =
+                this.asyncService.executeAsync(() -> {
 
+                    AccountGetListQueryDto accountGetListQueryDto = new AccountGetListQueryDto();
+                    accountGetListQueryDto.setCustomerIds(customerIdList);
+                    accountGetListQueryDto.setFirmId(firm.getId());
+                    return StreamEx.of(this.accountRpcService.getList(accountGetListQueryDto)).map(accountGetListResultDto -> {
+                        TraceCustomer customer = new TraceCustomer();
+                        customer.setId(accountGetListResultDto.getCustomerId());
+                        customer.setCode(accountGetListResultDto.getCustomerCode());
+                        customer.setCardNo(accountGetListResultDto.getCardNo());
+                        customer.setName(accountGetListResultDto.getCustomerName());
 
-        AccountGetListQueryDto accountGetListQueryDto = new AccountGetListQueryDto();
-        accountGetListQueryDto.setCustomerIds(customerIdList);
-        accountGetListQueryDto.setFirmId(firm.getId());
+                        return customer;
 
-        List<TraceCustomer> customerList = StreamEx.of(this.accountRpcService.getList(accountGetListQueryDto)).map(accountGetListResultDto -> {
-            TraceCustomer customer = new TraceCustomer();
-            customer.setId(accountGetListResultDto.getCustomerId());
+                    }).toList();
+                });
+
+        Map<Long, TraceCustomer> idCustMap = Maps.newHashMap();
+        List<TraceCustomer> customerList = Lists.newArrayList();
+
+        try {
+            idCustMap.putAll(idCustMapFuture.get());
+        } catch (Exception e) {
+            logger.error(e.getMessage(), e);
+        }
+        try {
+            customerList.addAll(custListFuture.get());
+        } catch (Exception e) {
+            logger.error(e.getMessage(), e);
+        }
+        return StreamEx.of(customerList).filter(customer -> {
+            //过滤非经营户
+            return idCustMap.containsKey(customer.getId());
+        }).map(customer -> {
             customer.setPhone(idCustMap.getOrDefault(customer.getId(), customer).getPhone());
-            customer.setCode(accountGetListResultDto.getCustomerCode());
-            customer.setName(accountGetListResultDto.getCustomerName());
+            customer.setName(idCustMap.getOrDefault(customer.getId(), customer).getName());
             customer.setFirmId(firm.getId());
             customer.setFirmName(firm.getName());
             return customer;
 
         }).toList();
-
-        return customerList;
     }
 }
