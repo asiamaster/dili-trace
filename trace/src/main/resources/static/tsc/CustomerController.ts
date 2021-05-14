@@ -31,7 +31,7 @@ class CustomerController extends WebConfig {
                 if(_.isUndefined(cardNo)||$.trim(cardNo)==''){
                     cardNo='--'
                 }
-                return { "id": item.id, "value": item.name + ' | ' + item.phone + ' | ' + cardNo + ' | ' + item.marketName, "item": item };
+                return { "id": item.id, "value": item.name + ' | ' + item.phone + ' | ' + cardNo + ' | ' + item.firmName, "item": item };
             }).value();
         } catch (e) {
             console.error(e);

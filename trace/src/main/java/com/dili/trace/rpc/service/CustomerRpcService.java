@@ -1,6 +1,5 @@
 package com.dili.trace.rpc.service;
 
-import cn.hutool.http.HttpUtil;
 import com.alibaba.fastjson.JSON;
 import com.dili.common.annotation.AppAccess;
 import com.dili.common.entity.SessionData;
@@ -13,21 +12,17 @@ import com.dili.customer.sdk.rpc.CustomerMarketRpc;
 import com.dili.customer.sdk.rpc.CustomerRpc;
 import com.dili.ss.domain.BaseOutput;
 import com.dili.ss.domain.PageOutput;
-import com.dili.trace.domain.Customer;
-import com.dili.trace.rpc.dto.CardQueryInput;
-import com.dili.trace.rpc.dto.CardResultDto;
+import com.dili.trace.domain.TraceCustomer;
+import com.dili.trace.rpc.dto.AccountGetListQueryDto;
+import com.dili.trace.rpc.dto.AccountGetListResultDto;
 import com.dili.trace.service.GlobalVarService;
 import com.dili.trace.util.NumUtils;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Lists;
 import one.util.streamex.StreamEx;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
@@ -56,9 +51,10 @@ public class CustomerRpcService {
 
     @Autowired
     GlobalVarService globalVarService;
+    @Autowired
+    private AccountRpcService accountRpcService;
 
-    @Value("${accountService.url}")
-    private String accountServiceUrl;
+
 
     /**
      * 查询当前登录用户信息
@@ -361,8 +357,8 @@ public class CustomerRpcService {
      * @param cust
      * @return
      */
-    public Optional<com.dili.trace.domain.Customer> findCustomer(com.dili.trace.domain.Customer cust, Long marketId) {
-        return this.listCustomers(cust.getCustomerId(), cust.getPrintingCard(), marketId);
+    public Optional<TraceCustomer> findCustomer(TraceCustomer cust, Long marketId) {
+        return this.listCustomers(cust.getCode(), cust.getCardNo(), marketId);
     }
 
     /**
@@ -372,25 +368,26 @@ public class CustomerRpcService {
      * @param cardNo
      * @return
      */
-    private Optional<com.dili.trace.domain.Customer> listCustomers(String customerCode, String cardNo, Long marketId) {
+    private Optional<TraceCustomer> listCustomers(String customerCode, String cardNo, Long marketId) {
         if (StringUtils.isAllBlank(customerCode, cardNo)) {
             return Optional.empty();
         }
         return this.queryCardInfoByCustomerCode(customerCode, cardNo, marketId).map(card -> {
 
-            com.dili.trace.domain.Customer customer = new Customer();
-            customer.setPrintingCard(card.getCardNo());
-            customer.setCustomerId(customerCode);
-            customer.setName(card.getCustomerName());
-            customer.setIdNo(card.getCustomerCertificateNumber());
-            customer.setId(card.getCustomerId());
+
+            TraceCustomer traceCustomer = new TraceCustomer();
+            traceCustomer.setCardNo(card.getCardNo());
+            traceCustomer.setCode(customerCode);
+            traceCustomer.setName(card.getCustomerName());
+            traceCustomer.setIdNo(card.getCustomerCertificateNumber());
+            traceCustomer.setId(card.getCustomerId());
             Long customerId = card.getCustomerId();
             this.findCustomerById(customerId, marketId).ifPresent(cust -> {
-                customer.setPhone(cust.getContactsPhone());
-                customer.setAddress(cust.getCertificateAddr());
-                customer.setCustomerId(cust.getCode());
+                traceCustomer.setPhone(cust.getContactsPhone());
+                traceCustomer.setAddress(cust.getCertificateAddr());
+                traceCustomer.setCode(cust.getCode());
             });
-            return customer;
+            return traceCustomer;
 
         });
 
@@ -402,34 +399,15 @@ public class CustomerRpcService {
      * @param customerCode
      * @throws IOException
      */
-    public Optional<CardResultDto> queryCardInfoByCustomerCode(String customerCode, String cardNo, Long marketId) {
-        CardQueryInput input = new CardQueryInput();
-        input.setFirmId(marketId);
-        input.setCustomerCode(StringUtils.trimToNull(customerCode));
+    public Optional<AccountGetListResultDto> queryCardInfoByCustomerCode(String customerCode, String cardNo, Long marketId) {
+
+        AccountGetListQueryDto queryDto=new AccountGetListQueryDto();
+        queryDto.setFirmId(marketId);
+        queryDto.setCustomerCode(StringUtils.trimToNull(customerCode));
         if (StringUtils.isNotBlank(cardNo)) {
-            input.setCardNos(Lists.newArrayList(cardNo.trim()));
+            queryDto.setCardNos(Lists.newArrayList(cardNo.trim()));
         }
-
-
-        ObjectMapper mapper = new ObjectMapper();
-        mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-
-        try {
-            String jsonBody = mapper.writeValueAsString(input);
-//            System.out.println(jsonBody);
-            String respBody = HttpUtil.post(this.accountServiceUrl + "/api/account/getList", jsonBody);
-//            System.out.println(respBody);
-            BaseOutput<List<CardResultDto>> out = mapper.readValue(respBody, new TypeReference<BaseOutput<List<CardResultDto>>>() {
-            });
-            if (!"200".equals(out.getCode())) {
-                return Optional.empty();
-            }
-            return StreamEx.ofNullable(out.getData()).nonNull().flatCollection(Function.identity()).nonNull().findFirst();
-
-        } catch (Exception e) {
-            logger.error(e.getMessage(), e);
-        }
-        return Optional.empty();
+        return StreamEx.of(this.accountRpcService.getList(queryDto)).findFirst();
     }
 
     /**

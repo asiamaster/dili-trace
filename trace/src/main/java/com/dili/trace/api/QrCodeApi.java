@@ -9,7 +9,6 @@ import com.dili.customer.sdk.enums.CustomerEnum;
 import com.dili.ss.domain.BaseOutput;
 import com.dili.trace.api.output.QrInputDto;
 import com.dili.trace.api.output.QrOutputDto;
-import com.dili.trace.domain.Customer;
 import com.dili.trace.enums.ClientTypeEnum;
 import com.dili.trace.glossary.ColorEnum;
 import com.dili.trace.rpc.service.CustomerRpcService;

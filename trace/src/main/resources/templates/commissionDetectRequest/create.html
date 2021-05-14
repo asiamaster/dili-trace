@@ -337,14 +337,14 @@
         }
     }
     function customerId() {
-        var customerId = $("#tradeAccountInput").val();
-        if(customerId == ""){
+        var customerCode = $("#tradeAccountInput").val();
+        if(customerCode == ""){
             return;
         }
-        if (customerId.length > 0) {
+        if (customerCode.length > 0) {
             $.ajax({
                 type: 'post',
-                url: '/trade/customer/findCustomerByCode/'+customerId,
+                url: '/trade/customer/findCustomerByCode.action?customerCode='+customerCode,
                 dataType: 'json',
                 async: false,
                 success: function (ret) {
@@ -390,7 +390,7 @@
         if (cardNo.length > 0) {
             $.ajax({
                 type: 'post',
-                url: '/trade/customer/findCustomerByCardNo/'+cardNo,
+                url: '/trade/customer/findCustomerByCardNo.action?cardNo='+cardNo,
                 dataType: 'json',
                 async: false,
                 success: function (ret) {

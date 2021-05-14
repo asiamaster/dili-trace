@@ -8,13 +8,16 @@ import com.dili.customer.sdk.domain.query.CustomerQueryInput;
 import com.dili.ss.domain.BaseOutput;
 import com.dili.ss.domain.PageOutput;
 import com.dili.ss.dto.DTOUtils;
+import com.dili.trace.domain.TraceCustomer;
 import com.dili.trace.dto.CustomerExtendOutPutDto;
-import com.dili.trace.rpc.dto.CardResultDto;
+import com.dili.trace.rpc.dto.AccountGetListResultDto;
 import com.dili.trace.rpc.service.CustomerRpcService;
+import com.dili.trace.service.ExtCustomerService;
 import com.dili.trace.service.UapRpcService;
 import com.dili.uap.sdk.domain.Firm;
 import com.google.common.collect.Lists;
 import one.util.streamex.StreamEx;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,6 +41,8 @@ public class CustomerController {
     UapRpcService uapRpcService;
     @Autowired
     CustomerRpcService customerRpcService;
+    @Autowired
+    ExtCustomerService extCustomerService;
 
     /**
      * 通过摊位号查询客户信息
@@ -61,36 +66,37 @@ public class CustomerController {
 
     /**
      * 查询经营户并带出卡号
+     *
      * @param query
      * @return
      */
     @RequestMapping(value = "/listSeller.action")
     @ResponseBody
-    public BaseOutput<List<CustomerExtendOutPutDto>> listSeller(@RequestBody CustomerQueryInput query) {
-        if (StrUtil.isBlank(query.getKeyword())&&query.getId()==null) {
+    public BaseOutput<List<TraceCustomer>> listSeller(@RequestBody CustomerQueryInput query) {
+        if (StrUtil.isBlank(query.getKeyword()) && query.getId() == null) {
             return BaseOutput.success().setData(new ArrayList<>(0));
         }
         Firm firm = uapRpcService.getCurrentFirm().orElse(DTOUtils.newDTO(Firm.class));
-        query.setPage(1);
-        query.setRows(50);
-        PageOutput<List<CustomerExtendDto>> pageOutput = this.customerRpcService.listSeller(query, firm.getId());
-        if (!pageOutput.isSuccess()) {
-            return BaseOutput.failure(pageOutput.getMessage());
+        if (query.getId() != null) {
+            return BaseOutput.success().setData(this.extCustomerService.queryCustomerByCustomerId(query.getId(), firm));
+        } else if (StringUtils.isNotBlank(query.getKeyword())) {
+            return BaseOutput.success().setData(this.extCustomerService.queryCustomerByKeyWord(query.getKeyword().trim(), firm));
+        } else {
+            return BaseOutput.success();
         }
-        //转换并查询卡号
-        List<CustomerExtendOutPutDto> items = convertWithCardInfo(firm, pageOutput.getData());
-        return BaseOutput.success().setData(items);
+
     }
 
     /**
      * 查询经营户并带出卡号
+     *
      * @param query
      * @return
      */
     @RequestMapping(value = "/listSellerTallaryNoByUserId.action")
     @ResponseBody
     public BaseOutput<List<TallyingArea>> listSellerTallaryNoByUserId(@RequestBody CustomerQueryInput query) {
-        if (query.getId()==null) {
+        if (query.getId() == null) {
             return BaseOutput.success().setData(new ArrayList<>(0));
         }
         Firm firm = uapRpcService.getCurrentFirm().orElse(DTOUtils.newDTO(Firm.class));
@@ -100,9 +106,9 @@ public class CustomerController {
         if (!pageOutput.isSuccess()) {
             return BaseOutput.failure(pageOutput.getMessage());
         }
-        return StreamEx.of(pageOutput.getData()).findFirst().map(item->{
+        return StreamEx.of(pageOutput.getData()).findFirst().map(item -> {
             return BaseOutput.success().setData(item.getTallyingAreaList());
-        }).orElseGet(()->{
+        }).orElseGet(() -> {
             return BaseOutput.successData(Lists.newArrayList());
         });
 
@@ -110,6 +116,7 @@ public class CustomerController {
 
     /**
      * 转换并查询出卡号信息
+     *
      * @param tempList
      * @return
      */
@@ -124,8 +131,8 @@ public class CustomerController {
             item.setMarketId(firm.getId());
             item.setMarketName(firm.getName());
             item.setName(temp.getName());
-            item.setPhone(StrUtil.isBlank(temp.getContactsPhone()) ? " " : StrUtil.replace(temp.getContactsPhone(), 3, 7 , '*'));
-            CardResultDto cardResultDto = this.customerRpcService.queryCardInfoByCustomerCode(temp.getCode(), null, firm.getId()).orElse(null);
+            item.setPhone(StrUtil.isBlank(temp.getContactsPhone()) ? " " : StrUtil.replace(temp.getContactsPhone(), 3, 7, '*'));
+            AccountGetListResultDto cardResultDto = this.customerRpcService.queryCardInfoByCustomerCode(temp.getCode(), null, firm.getId()).orElse(null);
             item.setTradePrintingCard(cardResultDto == null ? " " : cardResultDto.getCardNo());
             items.add(item);
         });

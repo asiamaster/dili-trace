@@ -1,30 +1,19 @@
 package com.dili.trace.domain;
 
 import com.dili.customer.sdk.domain.dto.CustomerExtendDto;
-import com.dili.ss.dto.IBaseDomain;
-import com.dili.ss.metadata.FieldEditor;
-import com.dili.ss.metadata.annotation.EditMode;
-import com.dili.ss.metadata.annotation.FieldDef;
-import com.dili.trace.util.MaskUserInfo;
 import io.swagger.annotations.ApiModelProperty;
-
-import javax.persistence.*;
-import javax.persistence.Column;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
 
 /**
  * 由MyBatis Generator工具自动生成
  * <p>
  * This file was generated on 2019-07-31 14:56:14.
  */
-public class Customer {
+public class TraceCustomer {
+
 
     private Long id;
 
-    @ApiModelProperty(value = "交易账号")
-    private String customerId;
+    private String code;
 
     @ApiModelProperty(value = "客户姓名")
     private String name;
@@ -38,22 +27,43 @@ public class Customer {
     private String phone;
 
     @ApiModelProperty(value = "印刷卡号(客户账号)")
-    private String printingCard;
+    private String cardNo;
+    private String firmName;
 
+    private Long firmId;
+
+    public Long getFirmId() {
+        return firmId;
+    }
+
+    public void setFirmId(Long firmId) {
+        this.firmId = firmId;
+    }
+
+    public String getFirmName() {
+        return firmName;
+    }
+
+    public void setFirmName(String firmName) {
+        this.firmName = firmName;
+    }
 
     @ApiModelProperty(value = "作废状态")
 //    @FieldDef(label="0:作废，1：活跃")
     private Integer active;
-    public static Customer convert(CustomerExtendDto dto){
-        Customer c = new Customer();
+
+    public static TraceCustomer convert(CustomerExtendDto dto) {
+        TraceCustomer c = new TraceCustomer();
         c.setAddress(dto.getCertificateAddr());
-        c.setCustomerId(String.valueOf(dto.getId()));
+        c.setId(dto.getId());
         c.setIdNo(dto.getCertificateNumber());
         c.setName(dto.getName());
         c.setPhone(dto.getContactsPhone());
         return c;
 
     }
+
+
     public Long getId() {
         return id;
     }
@@ -62,12 +72,12 @@ public class Customer {
         this.id = id;
     }
 
-    public String getCustomerId() {
-        return customerId;
+    public String getCode() {
+        return code;
     }
 
-    public void setCustomerId(String customerId) {
-        this.customerId = customerId;
+    public void setCode(String code) {
+        this.code = code;
     }
 
     public String getName() {
@@ -102,12 +112,12 @@ public class Customer {
         this.phone = phone;
     }
 
-    public String getPrintingCard() {
-        return printingCard;
+    public String getCardNo() {
+        return cardNo;
     }
 
-    public void setPrintingCard(String printingCard) {
-        this.printingCard = printingCard;
+    public void setCardNo(String cardNo) {
+        this.cardNo = cardNo;
     }
 
     public Integer getActive() {

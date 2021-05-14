@@ -10,7 +10,7 @@ import com.dili.ss.domain.BasePage;
 import com.dili.ss.dto.IDTO;
 import com.dili.trace.api.input.CreateRegisterHeadInputDto;
 import com.dili.trace.dao.RegisterHeadMapper;
-import com.dili.trace.domain.Customer;
+import com.dili.trace.domain.TraceCustomer;
 import com.dili.trace.domain.ImageCert;
 import com.dili.trace.domain.RegisterBill;
 import com.dili.trace.domain.RegisterHead;
@@ -79,6 +79,10 @@ public class RegisterHeadService extends BaseServiceImpl<RegisterHead, Long> {
 	FieldConfigDetailService fieldConfigDetailService;
 
 
+	/**
+	 * 返回真实mapper
+	 * @return
+	 */
 	public RegisterHeadMapper getActualDao() {
 		return (RegisterHeadMapper) getDao();
 	}
@@ -99,10 +103,10 @@ public class RegisterHeadService extends BaseServiceImpl<RegisterHead, Long> {
 			CustomerExtendDto customer = this.clientRpcService.findApprovedCustomerByIdOrEx(dto.getUserId(), marketId);
 			RegisterHead registerHead = dto.build(customer);
 
-			Customer cq = new Customer();
-			cq.setCustomerId(customer.getCode());
+			TraceCustomer cq = new TraceCustomer();
+			cq.setCode(customer.getCode());
 			this.clientRpcService.findCustomer(cq, marketId).ifPresent(card -> {
-				registerHead.setThirdPartyCode(card.getPrintingCard());
+				registerHead.setThirdPartyCode(card.getCardNo());
 			});
 
 			registerHead.setMarketId(marketId);

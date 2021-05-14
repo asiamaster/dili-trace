@@ -1,7 +1,6 @@
 package com.dili.trace.api.manager;
 
 import com.dili.assets.sdk.dto.CarTypeDTO;
-import com.dili.assets.sdk.dto.CarTypePublicDTO;
 import com.dili.common.annotation.AppAccess;
 import com.dili.common.annotation.Role;
 import com.dili.common.entity.LoginSessionContext;
@@ -12,10 +11,9 @@ import com.dili.ss.domain.BaseOutput;
 import com.dili.ss.domain.PageOutput;
 import com.dili.trace.dto.*;
 import com.dili.trace.enums.ClientTypeEnum;
-import com.dili.trace.rpc.dto.CardResultDto;
+import com.dili.trace.rpc.dto.AccountGetListResultDto;
 import com.dili.trace.rpc.service.CarTypeRpcService;
 import com.dili.trace.rpc.service.CustomerRpcService;
-import com.dili.trace.service.AssetsRpcService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import one.util.streamex.StreamEx;
@@ -233,7 +231,7 @@ public class ManagerUserApi {
                     customerOutput.setPhone(c.getContactsPhone());
                     customerOutput.setClientType(clientTypeEnum.getCode());
 
-                    Optional<CardResultDto> cardResultDto = this.customerRpcService.queryCardInfoByCustomerCode(c.getCode(), null, marketId);
+                    Optional<AccountGetListResultDto> cardResultDto = this.customerRpcService.queryCardInfoByCustomerCode(c.getCode(), null, marketId);
                     cardResultDto.ifPresent(cardInfo -> {
                         customerOutput.setTradePrintingCard(cardInfo.getCardNo());
                     });

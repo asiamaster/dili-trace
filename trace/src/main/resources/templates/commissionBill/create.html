@@ -340,14 +340,14 @@
         }
     }
     function customerId() {
-        var customerId = $("#tradeAccountInput").val();
-        if(customerId == ""){
+        var customerCode = $("#tradeAccountInput").val();
+        if(customerCode == ""){
             return;
         }
-        if (customerId.length > 0) {
+        if (customerCode.length > 0) {
             $.ajax({
                 type: 'post',
-                url: '/trade/customer/findCustomerByCode/'+customerId,
+                url: '/trade/customer/findCustomerByCode.action?customerCode='+customerCode,
                 dataType: 'json',
                 async: false,
                 success: function (ret) {
@@ -357,8 +357,8 @@
                         $("#tradeAccount").val(customer.customerId).valid();
 
 
-                        $("#printingCardInput").val(customer.printingCard).valid();
-                        $("#tradePrintingCard").val(customer.printingCard).valid();
+                        $("#printingCardInput").val(customer.cardNo).valid();
+                        $("#tradePrintingCard").val(customer.cardNo).valid();
 
                         $("#idCardNo").val(customer.idNo).valid();
                         $("#name").val(customer.name).valid();
@@ -395,7 +395,7 @@
         if (cardNo.length > 0) {
             $.ajax({
                 type: 'post',
-                url: '/trade/customer/findCustomerByCardNo/'+cardNo,
+                url: '/trade/customer/findCustomerByCardNo.action?cardNo='+cardNo,
                 dataType: 'json',
                 async: false,
                 success: function (ret) {

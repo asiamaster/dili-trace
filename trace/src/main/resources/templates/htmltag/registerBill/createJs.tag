@@ -1,12 +1,12 @@
 <script type="text/javascript">
     let filedNameRetMap = JSON.parse('${filedNameRetMap}');
-    let measureTypeEnumList=JSON.parse('${measureTypeEnumList}');
+    let measureTypeEnumList = JSON.parse('${measureTypeEnumList}');
 
-    let measureTypeOptions=[];
-    if(filedNameRetMap.measureType&&filedNameRetMap.measureType.displayed ===1&&filedNameRetMap.measureType.availableValueList){
-        measureTypeEnumList.forEach(mt=>{
-            if($.inArray(new String(mt.code).toString(),filedNameRetMap.measureType.availableValueList) >-1){
-                measureTypeOptions.push({text:mt.name,value:mt.code})
+    let measureTypeOptions = [];
+    if (filedNameRetMap.measureType && filedNameRetMap.measureType.displayed === 1 && filedNameRetMap.measureType.availableValueList) {
+        measureTypeEnumList.forEach(mt => {
+            if ($.inArray(new String(mt.code).toString(), filedNameRetMap.measureType.availableValueList) > -1) {
+                measureTypeOptions.push({text: mt.name, value: mt.code})
             }
         })
     }
@@ -30,10 +30,10 @@
                         },
                         beforeRemove: function (file, c) {
                             vm.imageCertList.splice(vm.imageCertList.findIndex(item => item.uid === file.replace(prefix, "")), 1);
-                            this._data.fileList=this._data.fileList.splice(this._data.fileList.findIndex(item => item.uid === file.replace(prefix, "")), 1);
+                            this._data.fileList = this._data.fileList.splice(this._data.fileList.findIndex(item => item.uid === file.replace(prefix, "")), 1);
                         },
 
-                        fileType:["jpg","png","bmp"],
+                        fileType: ["jpg", "png", "bmp"],
                         limit: "10",
                     },
                     vif: function () {
@@ -66,7 +66,7 @@
                     total: 0,
                     pieceNum: "",
                     pieceweight: "",
-                    measureType: measureTypeOptions.length>0?measureTypeOptions[measureTypeOptions.length-1].value:'',
+                    measureType: measureTypeOptions.length > 0 ? measureTypeOptions[measureTypeOptions.length - 1].value : '',
                     registType: 10,
                     userId: "",
                     registerHeadCode: "",
@@ -77,18 +77,18 @@
                     weightUnit: 1,
                     productName: "",
                     originName: "",
-                    unitPrice:"",
+                    unitPrice: "",
                     pieceweightUnit: 1,
                 },
                 formConfig: {
                     formBtnSize: 'small',
                     formAttrs: {size: 'small'},
-                    isShowBackBtn:false,
+                    isShowBackBtn: false,
                     formBtns: [
                         {
                             text: '关闭',
                             click: () => {
-                                if(parent&&parent.bs4pop){
+                                if (parent && parent.bs4pop) {
                                     parent.bs4pop.removeAll();
                                 }
                             }
@@ -98,7 +98,7 @@
                         registType: {
                             options: loadProvider({provider: 'registTypeProvider', queryParams: {required: true}}),
                             type: "select",
-                            label: "单据类型"
+                            label: "单据类型",
                         },
                         userId: {
                             type: "select",
@@ -108,22 +108,20 @@
                                 if (this.editMode) {
                                     const list = await axios.post('/customer/listSeller.action', {'id': data.userId});
                                     return $.map(list.data.data, function (obj) {
-                                        let cardNo = obj.tradePrintingCard;
-                                        obj.text = obj.name + ' | ' + obj.phone + ' | ' + cardNo + ' | ' + obj.marketName
+                                        obj.text = $.makeArray([obj.name, obj.phone, obj.cardNo, obj.firmName]).join("|")
                                         return obj;
                                     });
                                 }
                             },
                             attrs: {
-                                placeholder:"姓名,手机号,卡号",
+                                placeholder: "编号,姓名,手机号,卡号",
                                 filterable: true,
                                 remote: true,
                                 remoteMethod(query, callback) {
                                     axios.post('/customer/listSeller.action', {'keyword': query})
                                         .then((res) => {
                                             const data = $.map(res.data.data, function (obj) {
-                                                let cardNo = obj.tradePrintingCard;
-                                                obj.text = obj.name + ' | ' + obj.phone + ' | ' + cardNo + ' | ' + obj.marketName
+                                                obj.text = $.makeArray([obj.name, obj.phone, obj.cardNo, obj.firmName]).join("|")
                                                 return obj;
                                             });
                                             callback(data);
@@ -138,6 +136,9 @@
                             type: "select",
                             label: "到货摊位",
                             optionsLinkageFields: ['userId', 'registerHeadCode'],
+                            disabled: function (data) {
+                                return data.registType === 30
+                            },
                             required: filedNameRetMap.arrivalTallynos.required === 1,
                             prop: {text: 'text', value: 'text'},
                             options: async data => {
@@ -195,7 +196,7 @@
                             on: {
                                 change: function (val) {
                                     let registerHeadCodeTempRef = app.registerHeadCodeTemp;
-                                    let formDataRef=app.formData;
+                                    let formDataRef = app.formData;
                                     for (let i = 0; i < registerHeadCodeTempRef.length; i++) {
                                         let obj = registerHeadCodeTempRef[i];
                                         if (obj.code === val) {
@@ -300,6 +301,9 @@
                             type: "select",
                             label: "商品品类",
                             prop: {text: 'name', value: 'id'},
+                            disabled: function (data) {
+                                return data.registType === 30
+                            },
                             optionsLinkageFields: ['registerHeadCode'],
                             options: data => {
                                 if (this !== undefined) {
@@ -356,7 +360,7 @@
                             type: "input",
                             label: "商品重量",
                             rules: [{
-                                pattern:/^([1-9][0-9]{0,7})$/,
+                                pattern: /^([1-9][0-9]{0,7})$/,
                                 message: "请输入1-99999999之间的数字"
                             }],
                             vif: function (form) {
@@ -367,7 +371,7 @@
                             type: "number",
                             label: "商品件数",
                             rules: [{
-                                pattern:/^([1-9][0-9]{0,7})$/,
+                                pattern: /^([1-9][0-9]{0,7})$/,
                                 message: "请输入1-99999999之间的数字"
                             }],
                             vif: function (form) {
@@ -376,11 +380,17 @@
                             },
                             on: {
                                 input: function (value) {
-                                    if (!value || !this.formData.pieceweight) {
-                                        this.formData.total = 0;
-                                    } else {
-                                        this.formData.total = this.formData.pieceweight * value;
+                                    try {
+                                        var formDataRef = app.formData;
+                                        if (!value || !formDataRef.pieceweight) {
+                                            formDataRef.total = 0;
+                                        } else {
+                                            formDataRef.total = formDataRef.pieceweight * value;
+                                        }
+                                    } catch (e) {
+                                        debugger
                                     }
+
 
                                 }
                             }
@@ -389,7 +399,7 @@
                             type: "number",
                             label: "件重",
                             rules: [{
-                                pattern:/^([1-9][0-9]{0,7})$/,
+                                pattern: /^([1-9][0-9]{0,7})$/,
                                 message: "请输入1-99999999之间的数字"
                             }],
                             vif: function (form) {
@@ -412,10 +422,12 @@
                             type: "input",
                             label: "商品规格",
                             rules: [{
-                                pattern:/^[\u4e00-\u9fa5_a-zA-Z0-9_]{0,10}$/,
+                                pattern: /^[\u4e00-\u9fa5_a-zA-Z0-9_]{0,10}$/,
                                 message: "请输入不超过10个长度中英文以及下划线"
                             }],
-
+                            disabled: function (data) {
+                                return data.registType === 30
+                            },
                             required: filedNameRetMap.specName.required === 1,
                             vif: function () {
                                 return filedNameRetMap.specName.displayed === 1;
@@ -425,9 +437,12 @@
                             type: "autocomplete",
                             label: "品牌",
                             rules: [{
-                                pattern:/^[\u4e00-\u9fa5_a-zA-Z0-9_]{0,20}$/,
+                                pattern: /^[\u4e00-\u9fa5_a-zA-Z0-9_]{0,20}$/,
                                 message: "请输入不超过20个长度中英文以及下划线"
                             }],
+                            disabled: function (data) {
+                                return data.registType === 30
+                            },
                             required: filedNameRetMap.brandName.required === 1,
                             attrs: {
                                 valueKey: "brandName",
@@ -449,6 +464,9 @@
                             type: "select",
                             label: "产地",
                             prop: {text: 'mergerName', value: 'id'},
+                            disabled: function (data) {
+                                return data.registType === 30
+                            },
                             required: filedNameRetMap.originId.required === 1,
                             optionsLinkageFields: ['registerHeadCode'],
                             options: data => {
@@ -500,6 +518,9 @@
                             type: "select",
                             label: "上游企业",
                             prop: {text: 'name', value: 'id'},
+                            disabled: function (data) {
+                                return data.registType === 30
+                            },
                             required: filedNameRetMap.upStreamId.required === 1,
                             optionsLinkageFields: ['registerHeadCode'],
                             options: data => {
@@ -545,7 +566,7 @@
                             type: "number",
                             label: "皮重",
                             rules: [{
-                                pattern:/^([1-9][0-9]{0,6})$/,
+                                pattern: /^([1-9][0-9]{0,6})$/,
                                 message: "请输入1-9999999之间的数字"
                             }],
                             required: filedNameRetMap.truckTareWeight.required === 1,
@@ -556,6 +577,9 @@
                         arrivalDatetime: {
                             type: "datetime",
                             label: "到场时间",
+                            disabled: function (data) {
+                                return data.registType === 30
+                            },
                             required: filedNameRetMap.arrivalDatetime.required === 1,
                             vif: function () {
                                 return filedNameRetMap.arrivalDatetime.displayed === 1;
@@ -565,10 +589,13 @@
                             type: "input",
                             label: "商品单价",
                             rules: [{
-                                pattern:/^(\s{0,0}|\d\.([1-9]{1,2}|[0-9][1-9])|[1-9]\d{0,3}(\.\d{1,2}){0,1})$/,
+                                pattern: /^(\s{0,0}|\d\.([1-9]{1,2}|[0-9][1-9])|[1-9]\d{0,3}(\.\d{1,2}){0,1})$/,
                                 message: "请输入0.01-9999.99之间的数字(两位小数)"
                             }],
                             attrs: {},
+                            disabled: function (data) {
+                                return data.registType === 30
+                            },
                             required: filedNameRetMap.unitPrice.required === 1,
                             vif: function () {
                                 return filedNameRetMap.unitPrice.displayed === 1;
@@ -578,9 +605,12 @@
                             type: "textarea",
                             label: "备注",
                             rules: [{
-                                pattern:/^[\u4e00-\u9fa5_a-zA-Z0-9_]{0,200}$/,
+                                pattern: /^[\u4e00-\u9fa5_a-zA-Z0-9_]{0,200}$/,
                                 message: "请输入不超过200个长度中英文以及下划线"
                             }],
+                            disabled: function (data) {
+                                return data.registType === 30
+                            },
                             required: filedNameRetMap.remark.required === 1,
                             vif: function () {
                                 return filedNameRetMap.remark.displayed === 1;
@@ -634,7 +664,7 @@
                         }
                         bs4pop.removeAll();
                         bs4pop.alert('操作成功', {type: 'info', autoClose: 600});
-                        if(parent&&parent.window['RegisterBillGridObj']){
+                        if (parent && parent.window['RegisterBillGridObj']) {
                             parent.window['RegisterBillGridObj'].removeAllAndLoadData()
                         }
                     })

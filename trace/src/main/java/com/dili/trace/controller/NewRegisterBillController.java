@@ -990,10 +990,10 @@ public class NewRegisterBillController {
 
                     CustomerExtendDto customerExtendDto = this.customerService.findApprovedCustomerByIdOrEx(rb.getUserId(), rb.getMarketId());
 
-                    Customer cq = new Customer();
-                    cq.setCustomerId(customerExtendDto.getCode());
+                    TraceCustomer cq = new TraceCustomer();
+                    cq.setCode(customerExtendDto.getCode());
                     this.customerService.findCustomer(cq, rb.getMarketId()).ifPresent(card -> {
-                        rb.setThirdPartyCode(card.getPrintingCard());
+                        rb.setThirdPartyCode(card.getCardNo());
                     });
 
                     return rb;
@@ -1097,17 +1097,17 @@ public class NewRegisterBillController {
         UserInfoDto userInfoDto = new UserInfoDto();
 
 
-        Customer condition = new Customer();
-        condition.setCustomerId(StringUtils.trimToNull(registerBill.getTradeAccount()));
-        condition.setPrintingCard(StringUtils.trimToNull(registerBill.getTradePrintingCard()));
-        Customer customer = this.customerService.findCustomer(condition, this.uapRpcService.getCurrentFirm().get().getId()).orElse(null);
-        if (customer != null) {
-            userInfoDto.setUserId(customer.getCustomerId());
-            userInfoDto.setName(customer.getName());
-            userInfoDto.setIdCardNo(customer.getIdNo());
-            userInfoDto.setPhone(customer.getPhone());
-            userInfoDto.setAddr(customer.getAddress());
-            userInfoDto.setPrintingCard(customer.getPrintingCard());
+        TraceCustomer condition = new TraceCustomer();
+        condition.setCode(registerBill.getTradeAccount());
+        condition.setCardNo(StringUtils.trimToNull(registerBill.getTradePrintingCard()));
+        TraceCustomer traceCustomer = this.customerService.findCustomer(condition, this.uapRpcService.getCurrentFirm().get().getId()).orElse(null);
+        if (traceCustomer != null) {
+            userInfoDto.setUserId(String.valueOf(traceCustomer.getId()));
+            userInfoDto.setName(traceCustomer.getName());
+            userInfoDto.setIdCardNo(traceCustomer.getIdNo());
+            userInfoDto.setPhone(traceCustomer.getPhone());
+            userInfoDto.setAddr(traceCustomer.getAddress());
+            userInfoDto.setPrintingCard(traceCustomer.getCardNo());
         }
 
         return userInfoDto;

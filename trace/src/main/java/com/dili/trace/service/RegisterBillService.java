@@ -226,9 +226,9 @@ public class RegisterBillService extends BaseServiceImpl<RegisterBill, Long> {
      * @return
      */
     private Optional<String> findPrintingCard(CustomerExtendDto user, Long marketId) {
-        Customer cq = new Customer();
-        cq.setCustomerId(user.getCode());
-        return this.clientRpcService.findCustomer(cq, marketId).map(Customer::getPrintingCard);
+        TraceCustomer cq = new TraceCustomer();
+        cq.setCode(user.getCode());
+        return this.clientRpcService.findCustomer(cq, marketId).map(TraceCustomer::getCardNo);
     }
 
     /**

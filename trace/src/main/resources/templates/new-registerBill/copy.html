@@ -193,7 +193,7 @@
        if($.trim(query)==''){
            return;
        }
-       let url= '${contextPath!}/trade/customer/findCustomerByCardNo/'+$.trim(query)
+       let url= '${contextPath!}/trade/customer/findCustomerByCardNo.action?cardNo='+$.trim(query)
        try{
            let ret=await jq.ajax({url:url,method:'post'});
            if(ret.code!='200'){
