@@ -385,16 +385,11 @@
                             on: {
                                 input: function (value) {
                                     let formDataRef = app.formData;
-                                    let total=0;
-                                    try {
-                                        total=formDataRef.pieceweight * value;
-                                    } catch (e) {
-                                        debugger
+                                    if(isNaN(formDataRef.pieceweight)||isNaN(value)){
+                                        formDataRef.total = 0;
+                                    }else{
+                                        formDataRef.total = formDataRef.pieceweight * value;
                                     }
-                                    if(isNaN(total)){
-                                        total=0;
-                                    }
-                                    formDataRef.total = total;
                                 }
                             }
                         },
