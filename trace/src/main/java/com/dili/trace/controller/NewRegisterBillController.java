@@ -192,7 +192,7 @@ public class NewRegisterBillController {
             return m;
         }).toList()));
         modelMap.put("measureTypeEnumList", JSON.toJSONString(StreamEx.of(MeasureTypeEnum.values()).map(BeanMapUtil::beanToMap).toList()));
-
+        modelMap.put("truckTypeEnumEnumList", JSON.toJSONString(StreamEx.of(TruckTypeEnum.values()).map(BeanMapUtil::beanToMap).toList()));
 
         RegisterBillOutputDto item = new RegisterBillOutputDto();
         item.setMeasureType(MeasureTypeEnum.COUNT_WEIGHT.getCode());
@@ -301,6 +301,7 @@ public class NewRegisterBillController {
         modelMap.put("filedNameRetMap", JSON.toJSONString(filedNameRetMap));
 
         modelMap.put("measureTypeEnumList", JSON.toJSONString(StreamEx.of(MeasureTypeEnum.values()).map(BeanMapUtil::beanToMap).toList()));
+        modelMap.put("truckTypeEnumEnumList", JSON.toJSONString(StreamEx.of(TruckTypeEnum.values()).map(BeanMapUtil::beanToMap).toList()));
 
         List<ImageCertTypeEnum> imageCertTypeEnumList = this.enumService.listImageCertType(currentFirm.getId(), moduleType);
         modelMap.put("imageCertTypeEnumMap", JSON.toJSONString(StreamEx.of(imageCertTypeEnumList).map(e -> {
@@ -646,7 +647,7 @@ public class NewRegisterBillController {
         modelMap.put("filedNameRetMap", filedNameRetMap);
 
         modelMap.put("measureTypeEnumList", JSON.toJSONString(StreamEx.of(MeasureTypeEnum.values()).map(BeanMapUtil::beanToMap).toList()));
-
+        modelMap.put("truckTypeEnumEnumList", JSON.toJSONString(StreamEx.of(TruckTypeEnum.values()).map(BeanMapUtil::beanToMap).toList()));
 
         List<ImageCertTypeEnum> imageCertTypeEnumList = this.enumService.listImageCertType(currentFirm.getId(), moduleType);
         modelMap.put("imageCertTypeEnumList", imageCertTypeEnumList);

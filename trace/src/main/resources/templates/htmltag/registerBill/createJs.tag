@@ -1,6 +1,7 @@
 <script type="text/javascript">
     let filedNameRetMap = JSON.parse('${filedNameRetMap}');
     let measureTypeEnumList = JSON.parse('${measureTypeEnumList}');
+    let truckTypeEnumEnumList=JSON.parse('${truckTypeEnumEnumList}');
 
     let measureTypeOptions = [];
     if (filedNameRetMap.measureType && filedNameRetMap.measureType.displayed === 1 && filedNameRetMap.measureType.availableValueList) {
@@ -10,6 +11,16 @@
             }
         })
     }
+
+    let truckTypeOptions = [];
+    if (filedNameRetMap.truckType && filedNameRetMap.truckType.displayed === 1 && filedNameRetMap.truckType.availableValueList) {
+        truckTypeEnumEnumList.forEach(mt => {
+            if ($.inArray(new String(mt.code).toString(), filedNameRetMap.truckType.availableValueList) > -1) {
+                truckTypeOptions.push({text: mt.name, value: mt.code})
+            }
+        })
+    }
+
     var app = new Vue({
         el: '#app',
         created: function () {
@@ -61,6 +72,8 @@
                 rules: {
                     plate: {required: false, type: 'string', message: '必须填写车牌'},
                     plateList: {required: true, type: 'string', message: '必须填写车牌'},
+                    registerHeadCode: {required: false, type: 'string', message: '必须选择台账'},
+
                 },
                 formData: {
                     total: 0,
@@ -72,7 +85,7 @@
                     registerHeadCode: "",
                     arrivalTallynos: "",
                     plateList: [],
-                    truckType: 10,
+                    truckType: truckTypeOptions.length > 0 ? truckTypeOptions[truckTypeOptions.length - 1].value : '',
                     weight: "",
                     weightUnit: 1,
                     productName: "",
@@ -100,6 +113,11 @@
                             type: "select",
                             label: "单据类型",
                             required: true,
+                            on:{
+                                change:function (val){
+                                    app.rules.registerHeadCode.required = (val === 30);
+                                }
+                            },
                         },
                         userId: {
                             type: "select",
@@ -241,16 +259,7 @@
                             }
                         },
                         truckType: {
-                            options: [
-                                {
-                                    text: "是",
-                                    value: 20
-                                },
-                                {
-                                    text: "否",
-                                    value: 10
-                                }
-                            ],
+                            options: truckTypeOptions,
                             required: filedNameRetMap.truckType.required === 1,
                             type: "radio",
                             label: "是否拼车",
