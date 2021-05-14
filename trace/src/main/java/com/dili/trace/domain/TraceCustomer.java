@@ -28,24 +28,24 @@ public class TraceCustomer {
 
     @ApiModelProperty(value = "印刷卡号(客户账号)")
     private String cardNo;
-    private String firmName;
+    private String marketName;
 
-    private Long firmId;
+    private Long marketId;
 
-    public Long getFirmId() {
-        return firmId;
+    public String getMarketName() {
+        return marketName;
     }
 
-    public void setFirmId(Long firmId) {
-        this.firmId = firmId;
+    public void setMarketName(String marketName) {
+        this.marketName = marketName;
     }
 
-    public String getFirmName() {
-        return firmName;
+    public Long getMarketId() {
+        return marketId;
     }
 
-    public void setFirmName(String firmName) {
-        this.firmName = firmName;
+    public void setMarketId(Long marketId) {
+        this.marketId = marketId;
     }
 
     @ApiModelProperty(value = "作废状态")

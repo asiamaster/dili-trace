@@ -59,7 +59,7 @@
                 pieceweightUnit: "",
                 productOptionsTemp: [],
                 rules: {
-                    plate: {required: true, type: 'string', message: '必须填写车牌'},
+                    plate: {required: false, type: 'string', message: '必须填写车牌'},
                     plateList: {required: true, type: 'string', message: '必须填写车牌'},
                 },
                 formData: {
@@ -99,16 +99,18 @@
                             options: loadProvider({provider: 'registTypeProvider', queryParams: {required: true}}),
                             type: "select",
                             label: "单据类型",
+                            required: true,
                         },
                         userId: {
                             type: "select",
                             label: "经营户",
+                            required: true,
                             prop: {text: 'text', value: 'id'},
                             options: async data => {
                                 if (this.editMode) {
                                     const list = await axios.post('/customer/listSeller.action', {'id': data.userId});
                                     return $.map(list.data.data, function (obj) {
-                                        obj.text = $.makeArray([obj.name, obj.phone, obj.cardNo, obj.firmName]).join("|")
+                                        obj.text = $.makeArray([obj.name, obj.phone, obj.cardNo, obj.marketName]).join("|")
                                         return obj;
                                     });
                                 }
@@ -121,7 +123,7 @@
                                     axios.post('/customer/listSeller.action', {'keyword': query})
                                         .then((res) => {
                                             const data = $.map(res.data.data, function (obj) {
-                                                obj.text = $.makeArray([obj.name, obj.phone, obj.cardNo, obj.firmName]).join("|")
+                                                obj.text = $.makeArray([obj.name, obj.phone, obj.cardNo, obj.marketName]).join("|")
                                                 return obj;
                                             });
                                             callback(data);
@@ -300,6 +302,7 @@
                         productId: {
                             type: "select",
                             label: "商品品类",
+                            required: true,
                             prop: {text: 'name', value: 'id'},
                             disabled: function (data) {
                                 return data.registType === 30
@@ -359,6 +362,7 @@
                         weight: {
                             type: "input",
                             label: "商品重量",
+                            required: $.inArray('20',filedNameRetMap.measureType.availableValueList)>-1,
                             rules: [{
                                 pattern: /^([1-9][0-9]{0,7})$/,
                                 message: "请输入1-99999999之间的数字"
@@ -368,39 +372,39 @@
                             },
                         },
                         pieceNum: {
-                            type: "number",
+                            type: "input",
                             label: "商品件数",
+                            required: $.inArray('10',filedNameRetMap.measureType.availableValueList)>-1,
                             rules: [{
-                                pattern: /^([1-9][0-9]{0,7})$/,
-                                message: "请输入1-99999999之间的数字"
+                                pattern: /^([1-9][0-9]{0,6})$/,
+                                message: "请输入1-9999999之间的数字"
                             }],
                             vif: function (form) {
                                 return form.measureType !== 20;
-
                             },
                             on: {
                                 input: function (value) {
+                                    let formDataRef = app.formData;
+                                    let total=0;
                                     try {
-                                        var formDataRef = app.formData;
-                                        if (!value || !formDataRef.pieceweight) {
-                                            formDataRef.total = 0;
-                                        } else {
-                                            formDataRef.total = formDataRef.pieceweight * value;
-                                        }
+                                        total=formDataRef.pieceweight * value;
                                     } catch (e) {
                                         debugger
                                     }
-
-
+                                    if(isNaN(total)){
+                                        total=0;
+                                    }
+                                    formDataRef.total = total;
                                 }
                             }
                         },
                         pieceweight: {
                             type: "number",
                             label: "件重",
+                            required: $.inArray('10',filedNameRetMap.measureType.availableValueList)>-1,
                             rules: [{
-                                pattern: /^([1-9][0-9]{0,7})$/,
-                                message: "请输入1-99999999之间的数字"
+                                pattern: /^([1-9][0-9]{0,6})$/,
+                                message: "请输入1-9999999之间的数字"
                             }],
                             vif: function (form) {
                                 return form.measureType !== 20;

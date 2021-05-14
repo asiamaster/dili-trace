@@ -102,11 +102,11 @@
                         <input type="text" class="form-control input-sm" value="<%if(null!= pieceNum!){%>${pieceNum}<%}else{%>-<%}%>" required readonly/>
                     </div>
                     <div class="form-group col">
-                        <label class="label-title text-right"><span class="red">&lowast;</span>件重</label>
+                        <label class="label-title text-right"><span class="red">&lowast;</span>件重/${registerBill.weightUnitName!}</label>
                         <input type="text" class="form-control input-sm" value="<%if(null!= pieceWeight!){%>${pieceWeight}<%}else{%>-<%}%>" required readonly/>
                     </div>
                     <div class="form-group col">
-                        <label class="label-title text-right"><span class="red">&lowast;</span>合计</label>
+                        <label class="label-title text-right"><span class="red">&lowast;</span>合计/${registerBill.weightUnitName!}</label>
                         <input type="text" class="form-control input-sm" value="<%if(null!= pieceNum! && null!= pieceWeight){%>${pieceNum*pieceWeight}<%}else{%>-<%}%>" required readonly/>
                     </div>
                 <%}}%>

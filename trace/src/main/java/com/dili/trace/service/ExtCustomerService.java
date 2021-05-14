@@ -189,8 +189,6 @@ public class ExtCustomerService {
                 customer.setPhone(c.getContactsPhone());
                 customer.setCode(c.getCode());
                 customer.setName(c.getName());
-                customer.setFirmId(firm.getId());
-                customer.setFirmName(firm.getName());
                 return customer;
             });
         });
@@ -206,7 +204,6 @@ public class ExtCustomerService {
                         customer.setCode(accountGetListResultDto.getCustomerCode());
                         customer.setCardNo(accountGetListResultDto.getCardNo());
                         customer.setName(accountGetListResultDto.getCustomerName());
-
                         return customer;
 
                     }).toList();
@@ -231,8 +228,8 @@ public class ExtCustomerService {
         }).map(customer -> {
             customer.setPhone(idCustMap.getOrDefault(customer.getId(), customer).getPhone());
             customer.setName(idCustMap.getOrDefault(customer.getId(), customer).getName());
-            customer.setFirmId(firm.getId());
-            customer.setFirmName(firm.getName());
+            customer.setMarketId(firm.getId());
+            customer.setMarketName(firm.getName());
             return customer;
 
         }).toList();
