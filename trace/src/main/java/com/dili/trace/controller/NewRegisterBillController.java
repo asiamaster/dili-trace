@@ -19,6 +19,7 @@ import com.dili.trace.glossary.UsualAddressTypeEnum;
 import com.dili.trace.rpc.service.CustomerRpcService;
 import com.dili.trace.service.*;
 import com.dili.trace.util.BeanMapUtil;
+import com.dili.trace.util.ImageCertUtil;
 import com.dili.trace.util.MaskUserInfo;
 import com.dili.uap.sdk.domain.Firm;
 import com.dili.uap.sdk.domain.UserTicket;
@@ -347,10 +348,15 @@ public class NewRegisterBillController {
         registerBillOutputDto.setUpStreamName(upstreamName);
 
         Map<Object,Object>   item= Maps.newHashMap(new BeanMap(registerBillOutputDto));
-        StreamEx.of(imageCertTypeEnumList).forEach(e->{
-            List<String>imageUidList=StreamEx.of(registerBillOutputDto.getGroupedImageCertList().get(e)).nonNull().map(ImageCert::getUid).nonNull().map(uid->this.globalVarService.getDfsImageViewPathPrefix()+"/"+uid).toList();
-            item.put("certType"+e.getCode(),imageUidList);
-        });
+
+        Map<ImageCertTypeEnum, List<ImageCert>>groupedImageList=registerBillOutputDto.getGroupedImageCertList();
+        List<String>uniqueCertTypeNameList=StreamEx.of(imageCertTypeEnumList).map(e->{
+            List<String>imageUidList=StreamEx.of(groupedImageList.get(e)).nonNull().map(ImageCert::getUid).nonNull().map(uid->this.globalVarService.getDfsImageViewPathPrefix()+"/"+uid).toList();
+            String uniqueCertTypeName="certType"+e.getCode();
+            item.put(uniqueCertTypeName,imageUidList);
+            return uniqueCertTypeName;
+        }).toList();
+        modelMap.put("uniqueCertTypeNameList", uniqueCertTypeNameList);
         modelMap.put("item", JSON.toJSONString(item));
 
 

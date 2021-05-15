@@ -28,9 +28,16 @@
             let prefix = "${imageViewPathPrefix}/";
             let vm = this;
             imageCertTypeEnumMap.forEach(it => {
-                vm.formConfig.formDesc["certType" + it.certType] = {
+                let uniqueCertTypeName="certType" + it.certType;
+                vm.formConfig.formDesc[uniqueCertTypeName] = {
                     type: "image-uploader",
                     label: it.certTypeName,
+                    // disabled: function (data) {
+                    //     return data.registType === 30
+                    // },
+                    // readonly:function(){
+                    //     return true;
+                    // },
                     attrs: {
                         name: "file",
                         multiple: true,
@@ -53,6 +60,16 @@
                 }
             })
             init(this);
+            let formDataRef = this.formData;
+            if(this.formData.measureType=='10'){
+                if(isNaN(formDataRef.pieceWeight)||isNaN(formDataRef.pieceNum)){
+                    formDataReftotal = 0;
+                }else{
+                    formDataRef.total = formDataRef.pieceWeight * formDataRef.pieceNum;
+                }
+            }else{
+                formDataRef.total = '';
+            }
         },
         data() {
             return {
@@ -78,7 +95,7 @@
                 formData: {
                     total: 0,
                     pieceNum: "",
-                    pieceweight: "",
+                    pieceWeight: "",
                     measureType: measureTypeOptions.length > 0 ? measureTypeOptions[measureTypeOptions.length - 1].value : '',
                     registType: 10,
                     userId: "",
@@ -235,6 +252,19 @@
                                             formDataRef.productId = obj.productId;
                                             formDataRef.productName = obj.productName;
                                             formDataRef.upStreamId = obj.upStreamId;
+                                            formDataRef.unitPrice = obj.unitPrice;
+
+                                            formDataRef.arrivalTallynos=obj.arrivalTallynos;
+                                            formDataRef.remark=obj.remark;
+
+                                            $.makeArray(obj.uniqueCertTypeNameList).forEach(ct=>{
+                                                if(obj[ct]){
+                                                    formDataRef[ct]=  obj[ct];
+                                                }else{
+                                                    formDataRef[ct]=  [];
+                                                }
+                                            });
+
                                         }
                                     }
                                 }
@@ -395,15 +425,15 @@
                             on: {
                                 input: function (value) {
                                     let formDataRef = app.formData;
-                                    if(isNaN(formDataRef.pieceweight)||isNaN(value)){
+                                    if(isNaN(formDataRef.pieceWeight)||isNaN(value)){
                                         formDataRef.total = 0;
                                     }else{
-                                        formDataRef.total = formDataRef.pieceweight * value;
+                                        formDataRef.total = formDataRef.pieceWeight * value;
                                     }
                                 }
                             }
                         },
-                        pieceweight: {
+                        pieceWeight: {
                             type: "number",
                             label: "件重",
                             required: $.inArray('10',filedNameRetMap.measureType.availableValueList)>-1,
@@ -639,7 +669,7 @@
                         "measureType",
                         "weight",
                         "pieceNum",
-                        "pieceweight",
+                        "pieceWeight",
                         "total",
                         "specName",
                         "brandName",

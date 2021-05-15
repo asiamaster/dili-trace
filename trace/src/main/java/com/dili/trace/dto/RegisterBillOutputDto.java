@@ -12,6 +12,7 @@ import com.alibaba.fastjson.annotation.JSONField;
 import com.dili.trace.domain.*;
 import com.dili.trace.domain.QualityTraceTradeBill;
 import com.dili.trace.enums.ImageCertTypeEnum;
+import com.dili.trace.util.ImageCertUtil;
 import com.google.common.collect.Lists;
 import one.util.streamex.StreamEx;
 import org.apache.commons.beanutils.BeanUtils;
@@ -63,16 +64,7 @@ public class RegisterBillOutputDto extends RegisterBill {
     }
     @JSONField(serialize = false)
     public Map<ImageCertTypeEnum, List<ImageCert>> getGroupedImageCertList() {
-
-        Map<ImageCertTypeEnum, List<ImageCert>>map= StreamEx.ofNullable(this.getImageCertList()).flatCollection(Function.identity()).nonNull().filter(item->item.getCertType()!=null)
-                .mapToEntry(item -> ImageCertTypeEnum.fromCode(item.getCertType()).orElse(null), Function.identity()).filterKeys(Objects::nonNull)
-                .grouping();
-        StreamEx.of(ImageCertTypeEnum.values()).filter(e->{
-            return !map.containsKey(e);
-        }).forEach(e->{
-            map.put(e,new ArrayList<>());
-        });
-        return map;
+        return ImageCertUtil.groupedImageCertList(this.getImageCertList());
     }
     @JSONField(serialize = false)
     public Map<ImageCertTypeEnum, List<String>> getGroupedImageUidList() {

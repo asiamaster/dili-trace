@@ -3,28 +3,43 @@ package com.dili.trace.controller;
 import com.dili.common.exception.TraceBizException;
 import com.dili.commons.glossary.YesOrNoEnum;
 import com.dili.ss.domain.BaseOutput;
+import com.dili.ss.dto.DTOUtils;
 import com.dili.ss.util.DateUtils;
-import com.dili.trace.domain.*;
-import com.dili.trace.dto.*;
+import com.dili.trace.domain.ImageCert;
+import com.dili.trace.domain.RegisterBill;
+import com.dili.trace.domain.RegisterHead;
+import com.dili.trace.domain.UpStream;
+import com.dili.trace.dto.OperatorUser;
+import com.dili.trace.dto.RegisterHeadDto;
+import com.dili.trace.dto.UpStreamDto;
+import com.dili.trace.enums.BillTypeEnum;
+import com.dili.trace.enums.FieldConfigModuleTypeEnum;
+import com.dili.trace.enums.ImageCertTypeEnum;
 import com.dili.trace.rpc.service.CustomerRpcService;
 import com.dili.trace.service.*;
+import com.dili.trace.util.ImageCertUtil;
+import com.dili.uap.sdk.domain.Firm;
 import com.dili.uap.sdk.domain.UserTicket;
 import com.dili.uap.sdk.session.SessionContext;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import one.util.streamex.StreamEx;
+import org.apache.commons.beanutils.BeanMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import java.util.*;
-import java.util.function.Function;
 
 /**
  * 进门主台账单实现类
@@ -49,6 +64,12 @@ public class RegisterHeadController {
     UapRpcService uapRpcService;
     @Autowired
     UpStreamService upStreamService;
+    @Autowired
+    EnumService enumService;
+    @Autowired
+    GlobalVarService globalVarService;
+    @Autowired
+    ImageCertService imageCertService;
 
     /**
      * 跳转到RegisterHead页面
@@ -184,16 +205,32 @@ public class RegisterHeadController {
 
         Map<Long, List<String>> plateListMap = this.registerHeadPlateService.findPlateByRegisterHeadIdList(registerHeadIdList);
         Map<Long, List<String>> tallyAreaNoListMap = this.registerTallyAreaNoService.findTallyAreaNoByRegisterHeadIdList(registerHeadIdList);
-        List<RegisterHead> dataList = StreamEx.of(list).map(rh -> {
+
+
+        Firm currentFirm = this.uapRpcService.getCurrentFirm().orElse(DTOUtils.newDTO(Firm.class));
+        FieldConfigModuleTypeEnum moduleType = FieldConfigModuleTypeEnum.REGISTER;
+        List<ImageCertTypeEnum> imageCertTypeEnumList = this.enumService.listImageCertType(currentFirm.getId(), moduleType);
+        List<Map<Object,Object>> dataList = StreamEx.of(list).map(rh -> {
             List<String> plateList = plateListMap.getOrDefault(rh.getId(), Lists.newArrayList());
             rh.setPlateList(plateList);
 
             List<String> registerTallyAreaNoList = tallyAreaNoListMap.getOrDefault(rh.getId(), Lists.newArrayList());
             rh.setArrivalTallynos(registerTallyAreaNoList);
-
             rh.setUpStreamName(upStreamIdNameMap.getOrDefault(rh.getUpStreamId(),""));
-            return rh;
 
+
+            Map<Object,Object>   item= Maps.newHashMap(new BeanMap(rh));
+
+            List<ImageCert> imageCertList=this.imageCertService.findImageCertListByBillId(rh.getId(), BillTypeEnum.MASTER_BILL);
+            Map<ImageCertTypeEnum, List<ImageCert>>groupedImageList=ImageCertUtil.groupedImageCertList(imageCertList);
+            List<String>uniqueCertTypeNameList=StreamEx.of(imageCertTypeEnumList).map(e->{
+                List<String>imageUidList=StreamEx.of(groupedImageList.get(e)).nonNull().map(ImageCert::getUid).nonNull().map(uid->this.globalVarService.getDfsImageViewPathPrefix()+"/"+uid).toList();
+                String uniqueCertTypeName="certType"+e.getCode();
+                item.put(uniqueCertTypeName,imageUidList);
+                return uniqueCertTypeName;
+            }).toList();
+            item.put("uniqueCertTypeNameList", uniqueCertTypeNameList);
+            return item;
         }).toList();
 
 
