@@ -92,6 +92,7 @@
                     originName: "",
                     unitPrice: "",
                     pieceweightUnit: 1,
+                    originId:'',
                 },
                 formConfig: {
                     formBtnSize: 'small',
@@ -483,12 +484,12 @@
                                     for (let i = 0; i < registerHeadCodeTemp.length; i++) {
                                         let obj = registerHeadCodeTemp[i];
                                         if (obj.code === data.registerHeadCode) {
-                                            return [{name: obj.originName, id: obj.originId}]
+                                            return [{mergerName: obj.originName, id: obj.originId}]
                                         }
                                     }
                                 }
                                 if (this.editMode) {
-                                    return [{name: data.originName, id: data.originId}]
+                                    return [{mergerName: data.originName, id: data.originId}]
                                 }
                                 return [];
                             },

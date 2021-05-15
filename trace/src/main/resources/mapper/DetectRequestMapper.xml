@@ -62,6 +62,9 @@
         <if test="detectStatus != null">
             AND b.detect_status=#{detectStatus}
         </if>
+        <if test="marketId != null">
+            AND b.market_id=#{marketId}
+        </if>
         <if test="keyword != null and keyword != ''">
             AND (b.product_name LIKE CONCAT('%',#{keyword},'%')
             OR b.name LIKE CONCAT('%',#{keyword},'%'))

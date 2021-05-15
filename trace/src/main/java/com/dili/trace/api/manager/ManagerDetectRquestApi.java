@@ -87,6 +87,7 @@ public class ManagerDetectRquestApi {
         }
         detectRequestDto.setIsDeleted(YesOrNoEnum.NO.getCode());
         detectRequestDto.setDetectStatusList(detectStatusList);
+        detectRequestDto.setMarketId(this.sessionContext.getSessionData().getMarketId());
         if(StringUtils.isBlank(detectRequestDto.getSort())){
             detectRequestDto.setSort("created");
             detectRequestDto.setOrder("desc");
@@ -184,6 +185,7 @@ public class ManagerDetectRquestApi {
     @RequestMapping("/countByDetectStatus.api")
     public BaseOutput<List<CountDetectStatusDto>> countByDetectStatus(@RequestBody DetectRequestQueryDto queryInput) {
         queryInput.setIsDeleted(YesOrNoEnum.NO.getCode());
+        queryInput.setMarketId(this.sessionContext.getSessionData().getMarketId());
         Map<Integer,Integer>statusCntMap= StreamEx.of(this.detectRequestService.countByDetectStatus(queryInput))
                 .toMap(CountDetectStatusDto::getDetectStatus, CountDetectStatusDto::getCnt);
 
@@ -280,6 +282,7 @@ public class ManagerDetectRquestApi {
     public BaseOutput<BasePage<SampleSourceListOutputDto>> listPagedSampleSourceDetect(@RequestBody DetectRequestQueryDto query) {
         try {
             query.setIsDeleted(YesOrNoEnum.NO.getCode());
+            query.setMarketId(this.sessionContext.getSessionData().getMarketId());
             if(StringUtils.isBlank(query.getSort())){
                 query.setSort("created");
                 query.setOrder("desc");
@@ -300,6 +303,7 @@ public class ManagerDetectRquestApi {
     @RequestMapping(value = "/countBySampleSource.api", method = {RequestMethod.POST})
     public BaseOutput<List<VerifyStatusCountOutputDto>> countBySampleSource(@RequestBody DetectRequestQueryDto query) {
         try {
+            query.setMarketId(this.sessionContext.getSessionData().getMarketId());
             List<SampleSourceCountOutputDto> list = this.detectRequestService.countBySampleSource(query);
             return BaseOutput.success().setData(list);
         } catch (TraceBizException e) {
