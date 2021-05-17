@@ -28,16 +28,16 @@
             let prefix = "${imageViewPathPrefix}/";
             let vm = this;
             imageCertTypeEnumMap.forEach(it => {
-                let uniqueCertTypeName="certType" + it.certType;
+                let uniqueCertTypeName="certType" + it  .certType;
                 vm.formConfig.formDesc[uniqueCertTypeName] = {
-                    type: "image-uploader",
+                    type: function(formData) {
+                        if(formData.registType=='30'){
+                            return 'image';
+                        }else{
+                            return 'image-uploader'
+                        }
+                    },//"image-uploader",
                     label: it.certTypeName,
-                    // disabled: function (data) {
-                    //     return data.registType === 30
-                    // },
-                    // readonly:function(){
-                    //     return true;
-                    // },
                     attrs: {
                         name: "file",
                         multiple: true,
@@ -80,6 +80,7 @@
                     value: 2,
                     label: '公斤'
                 }],
+
                 editMode: false,
                 imageCertList: [],
                 registerHeadCodeTemp: [],
