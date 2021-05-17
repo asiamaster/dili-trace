@@ -9,10 +9,12 @@ import com.dili.customer.sdk.enums.CustomerEnum;
 import com.dili.ss.domain.BaseOutput;
 import com.dili.trace.api.output.QrInputDto;
 import com.dili.trace.api.output.QrOutputDto;
+import com.dili.trace.domain.UserInfo;
 import com.dili.trace.enums.ClientTypeEnum;
-import com.dili.trace.glossary.ColorEnum;
+import com.dili.trace.glossary.UserQrStatusEnum;
 import com.dili.trace.rpc.service.CustomerRpcService;
 import com.dili.trace.service.QrCodeService;
+import com.dili.trace.service.UserInfoService;
 import io.swagger.annotations.Api;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -35,6 +37,8 @@ public class QrCodeApi {
     QrCodeService qrCodeService;
     @Autowired
     CustomerRpcService customerRpcService;
+    @Autowired
+    UserInfoService userInfoService;
 
     /**
      * 生成指定参数用户的二维码
@@ -67,10 +71,14 @@ public class QrCodeApi {
         QrOutputDto dto = new QrOutputDto();
         dto.setClientId(input.getClientId());
         dto.setMarketId(input.getMarketId());
-        dto.setColor(ColorEnum.BLACK.getCode());
+        dto.setColor(UserQrStatusEnum.BLACK.getCode());
         dto.setClientType(clientTypeEnum.getCode());
 
         try {
+            if(ClientTypeEnum.SELLER==clientTypeEnum){
+                Integer userQrStatus=this.userInfoService.findByUserId(input.getClientId(),input.getMarketId()).map(UserInfo::getQrStatus).orElse(UserQrStatusEnum.BLACK.getCode());
+                dto.setColor(userQrStatus);
+            }
             String base64QrCode = this.qrCodeService.getBase64QrCode(JSONUtil.toJsonStr(dto), 200, 200);
             dto.setBase64QrCode(base64QrCode);
             return BaseOutput.successData(dto);
@@ -92,7 +100,7 @@ public class QrCodeApi {
         QrInputDto input = new QrInputDto();
         input.setClientId(sessionData.getUserId());
         input.setMarketId(sessionData.getMarketId());
-        input.setColor(ColorEnum.BLACK.getCode());
+        input.setColor(UserQrStatusEnum.BLACK.getCode());
 
         if (Role.Manager == sessionContext.getSessionData().getRole()) {
             input.setClientType(ClientTypeEnum.MANAGER.getCode());

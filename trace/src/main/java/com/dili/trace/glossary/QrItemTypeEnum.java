@@ -6,26 +6,26 @@ public enum QrItemTypeEnum {
 	/**
 	 * 个人信息
 	 */
-	USER(10, "个人信息", false, ColorEnum.RED),
+	USER(10, "个人信息", false, UserQrStatusEnum.RED),
 	/**
 	 * 上游信息
 	 */
-	UPSTREAM(20, "上游信息", true, ColorEnum.RED),
+	UPSTREAM(20, "上游信息", true, UserQrStatusEnum.RED),
 	/**
 	 * 登记单信息
 	 */
-	BILL(30, "登记单信息", false, ColorEnum.YELLOW),
+	BILL(30, "登记单信息", false, UserQrStatusEnum.YELLOW),
 	/**
 	 * 其他
 	 */
-	OTHER(100, "其他", false, ColorEnum.RED),;
+	OTHER(100, "其他", false, UserQrStatusEnum.RED),;
 
 	private Integer code;
 	private String desc;
 	private Boolean addable;
-	private ColorEnum defaultColor;
+	private UserQrStatusEnum defaultColor;
 
-	QrItemTypeEnum(Integer code, String desc, Boolean addable, ColorEnum defaultColor) {
+	QrItemTypeEnum(Integer code, String desc, Boolean addable, UserQrStatusEnum defaultColor) {
 		this.code = code;
 		this.desc = desc;
 		this.addable = addable;
@@ -41,7 +41,7 @@ public enum QrItemTypeEnum {
 
 	}
 
-	public ColorEnum getDefaultColor() {
+	public UserQrStatusEnum getDefaultColor() {
 		return defaultColor;
 	}
 

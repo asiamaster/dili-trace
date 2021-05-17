@@ -4,7 +4,7 @@ import com.dili.ss.metadata.FieldMeta;
 import com.dili.ss.metadata.ValuePair;
 import com.dili.ss.metadata.ValuePairImpl;
 import com.dili.ss.metadata.ValueProvider;
-import com.dili.trace.glossary.ColorEnum;
+import com.dili.trace.glossary.UserQrStatusEnum;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -25,7 +25,7 @@ public class ColorEnumProvider implements ValueProvider {
 	private static List<ValuePair<?>> buildValuePair() {
 
 		List<ValuePair<?>> list = new ArrayList<>();
-		list.addAll(Stream.of(ColorEnum.values())
+		list.addAll(Stream.of(UserQrStatusEnum.values())
 				.map(e -> new ValuePairImpl<>(e.getDesc(), e.getCode().toString())).collect(Collectors.toList()));
 		return list;
 	}

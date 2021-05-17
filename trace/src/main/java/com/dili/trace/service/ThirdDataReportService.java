@@ -1,8 +1,6 @@
 package com.dili.trace.service;
 
 import com.dili.commons.glossary.YesOrNoEnum;
-import com.dili.ss.domain.BasePage;
-import com.dili.trace.api.input.UserQueryDto;
 import com.dili.trace.domain.UserInfo;
 import com.dili.trace.domain.UserQrHistory;
 import com.dili.trace.dto.query.UserQrHistoryQueryDto;
@@ -11,25 +9,21 @@ import com.dili.trace.dto.thirdparty.report.ReportQrCodeDto;
 import com.dili.trace.dto.thirdparty.report.ReportUserDto;
 import com.dili.trace.dto.thirdparty.report.ReportUserImgDto;
 import com.dili.trace.enums.ReportInterfacePicEnum;
-import com.dili.trace.glossary.ColorEnum;
 import com.dili.trace.glossary.UserQrStatusEnum;
 import com.dili.trace.glossary.UserTypeEnum;
 import com.google.common.collect.Lists;
 import one.util.streamex.EntryStream;
 import one.util.streamex.StreamEx;
-import org.apache.catalina.User;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import java.sql.Date;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 /**
  * @author asa.lee
@@ -199,6 +193,11 @@ public class ThirdDataReportService {
         return this.buildReportQrCodeDto(dataMap);
     }
 
+    /**
+     * 生成上报信息
+     * @param dataMap
+     * @return
+     */
     private List<ReportQrCodeDto> buildReportQrCodeDto(Map<UserInfo, List<UserQrHistory>> dataMap) {
         List<ReportQrCodeDto> qrCodeDtos = EntryStream.of(dataMap).mapKeyValue((userInfo, qrHistoryList) -> {
             Long userId = userInfo.getUserId();
@@ -228,6 +227,11 @@ public class ThirdDataReportService {
         return qrCodeDtos;
     }
 
+    /**
+     * 转换状态
+     * @param userQrStatusEnum
+     * @return
+     */
     private Integer convertColorStatus(UserQrStatusEnum userQrStatusEnum) {
         //0-黑 1-绿 2-黄 3-红
         if (UserQrStatusEnum.GREEN == userQrStatusEnum) {

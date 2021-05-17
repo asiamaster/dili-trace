@@ -5,7 +5,6 @@ import com.dili.ss.metadata.ValuePair;
 import com.dili.ss.metadata.ValuePairImpl;
 import com.dili.ss.metadata.ValueProvider;
 import com.dili.trace.enums.DetectResultEnum;
-import com.dili.trace.glossary.ColorEnum;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
