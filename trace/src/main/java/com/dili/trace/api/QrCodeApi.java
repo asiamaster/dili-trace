@@ -75,8 +75,8 @@ public class QrCodeApi {
         dto.setClientType(clientTypeEnum.getCode());
 
         try {
-            if(ClientTypeEnum.SELLER==clientTypeEnum){
-                Integer userQrStatus=this.userInfoService.findByUserId(input.getClientId(),input.getMarketId()).map(UserInfo::getQrStatus).orElse(UserQrStatusEnum.BLACK.getCode());
+            if (ClientTypeEnum.SELLER == clientTypeEnum || ClientTypeEnum.BUYER == clientTypeEnum) {
+                Integer userQrStatus = this.userInfoService.findByUserId(input.getClientId(), input.getMarketId()).map(UserInfo::getQrStatus).orElse(UserQrStatusEnum.BLACK.getCode());
                 dto.setColor(userQrStatus);
             }
             String base64QrCode = this.qrCodeService.getBase64QrCode(JSONUtil.toJsonStr(dto), 200, 200);
