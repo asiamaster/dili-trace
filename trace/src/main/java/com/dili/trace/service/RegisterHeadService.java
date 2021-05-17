@@ -141,6 +141,14 @@ public class RegisterHeadService extends BaseServiceImpl<RegisterHead, Long> {
 
 	}
 
+	/**
+	 * 创建台账
+	 * @param registerHead
+	 * @param imageCertList
+	 * @param fieldConfigDetailRetDtoMap
+	 * @param operatorUser
+	 * @return
+	 */
 	private Long createRegisterHead(RegisterHead registerHead, List<ImageCert> imageCertList, Map<String, FieldConfigDetailRetDto> fieldConfigDetailRetDtoMap,
 									Optional<OperatorUser> operatorUser) {
 		this.checkRegisterHead(registerHead, fieldConfigDetailRetDtoMap);
@@ -358,19 +366,21 @@ public class RegisterHeadService extends BaseServiceImpl<RegisterHead, Long> {
 		}
 
 		//到货摊位
-		List<String> arrivalTallynos = StreamEx.ofNullable(registerHead.getArrivalTallynos()).flatCollection(Function.identity()).filter(StringUtils::isNotBlank).toList();
+		List<String> arrivalTallynos = StreamEx.ofNullable(registerHead.getArrivalTallynos()).flatCollection(Function.identity()).map(StringUtils::trimToNull).nonNull().toList();
 		if (arrivalTallynos.isEmpty()) {
 			String propName = PropertyUtils.getPropertyDescriptor(registerHead, RegisterHead::getArrivalTallynos).getName();
 			FieldConfigDetailRetDto retDto = fieldConfigDetailRetDtoMap.getOrDefault(propName, null);
 			if (retDto != null && YesOrNoEnum.YES.getCode().equals(retDto.getDisplayed()) && YesOrNoEnum.YES.getCode().equals(retDto.getRequired())) {
 				throw new TraceBizException("到货摊位不能为空");
 			}
-			boolean inValid=StreamEx.of(arrivalTallynos).anyMatch(no->{
-				return !RegUtils.isValidInput(no);
-			});
-			if(inValid){
-				throw  new TraceBizException("到货摊位包含非法字符");
-			}
+		}
+		registerHead.setArrivalTallynos(arrivalTallynos);
+
+		boolean hasValidTallyno=StreamEx.of(arrivalTallynos).anyMatch(no->{
+			return !RegUtils.isValidInput(no);
+		});
+		if(hasValidTallyno){
+			throw  new TraceBizException("到货摊位包含非法字符");
 		}
 
 		// 计重类型，把件数和件重置空
@@ -421,8 +431,8 @@ public class RegisterHeadService extends BaseServiceImpl<RegisterHead, Long> {
 
 		// 车牌转大写
 		List<String> plateList = registerHead.getPlateList();
-		boolean inValidPlate = StreamEx.of(plateList).anyMatch(plate -> !RegUtils.isPlate(plate));
-		if (inValidPlate) {
+		boolean hasValidPlate = StreamEx.of(plateList).anyMatch(plate -> !RegUtils.isPlate(plate));
+		if (hasValidPlate) {
 			throw new TraceBizException("车牌格式错误");
 		}
 
@@ -496,8 +506,8 @@ public class RegisterHeadService extends BaseServiceImpl<RegisterHead, Long> {
 		}
 		List<String> plateList = StreamEx.ofNullable(input.getPlateList()).flatCollection(Function.identity())
 				.filter(StringUtils::isNotBlank).map(p -> p.toUpperCase()).toList();
-		boolean inValidPlate = StreamEx.of(plateList).anyMatch(plate -> !RegUtils.isPlate(plate));
-		if (inValidPlate) {
+		boolean hasValidPlate = StreamEx.of(plateList).anyMatch(plate -> !RegUtils.isPlate(plate));
+		if (hasValidPlate) {
 			throw new TraceBizException("车牌格式错误");
 		}
 //        // 车牌转大写
@@ -657,6 +667,11 @@ public class RegisterHeadService extends BaseServiceImpl<RegisterHead, Long> {
 		return StreamEx.of(this.listByExample(q)).findFirst();
 	}
 
+	/**
+	 * 创建Like sql
+	 * @param query
+	 * @return
+	 */
 	private Optional<String> buildLikeKeyword(RegisterHeadDto query) {
 		String sql = null;
 		if (StringUtils.isNotBlank(query.getKeyword())) {

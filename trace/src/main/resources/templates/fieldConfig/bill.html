@@ -13,6 +13,7 @@
 
                 </div>
             </div>
+
             <%if (@defaultFieldNameIdMap.containsKey('truckTareWeight')){%>
                 <div class="row row-cols-12">
                     <input type="hidden" name="fieldConfigDetailList[${defaultFiledNameIndexMap['truckTareWeight']}][fieldName]" value="truckTareWeight">
@@ -23,11 +24,11 @@
                         <label>皮重</label>
                     </div>
                     <div class="form-group col-1">
-                        <input type="radio"  name="fieldConfigDetailList[${defaultFiledNameIndexMap['truckTareWeight']}][required]" value="1" checked>
+                        <input type="radio"  name="fieldConfigDetailList[${defaultFiledNameIndexMap['truckTareWeight']}][required]" value="1" <%if(filedNameRetMap['truckTareWeight'].required!1==1){%>checked<%}%> >
                         <label>必填</label>
                     </div>
                     <div class="form-group col-1">
-                        <input type="radio"  name="fieldConfigDetailList[${defaultFiledNameIndexMap['truckTareWeight']}][required]" value="0">
+                        <input type="radio"  name="fieldConfigDetailList[${defaultFiledNameIndexMap['truckTareWeight']}][required]" value="0" <%if(filedNameRetMap['truckTareWeight'].required!1!=1){%>checked<%}%>>
                         <label>非必填</label>
                     </div>
                 </div>
@@ -43,7 +44,7 @@
                         <input type="checkbox" name="fieldConfigDetailList[${defaultFiledNameIndexMap['truckType']}][displayed]" value="1" <%if(filedNameRetMap['truckType'].displayed!1==1){%>checked<%}%> >
                         <label>是否拼车/车牌号</label>
                     </div>
-                     <input type="hidden"  name="fieldConfigDetailList[${defaultFiledNameIndexMap['truckType']}][required]" value="1" >
+                     <input type="hidden"  name="fieldConfigDetailList[${defaultFiledNameIndexMap['truckType']}][required]" value="1"  >
 
                     <div class="form-group col-6">
                         <select class="form-control" <%if(filedNameRetMap['truckType'].displayed!1==1){%>required<%}%> multiple="multiple"  name="fieldConfigDetailList[${defaultFiledNameIndexMap['truckType']}][availableValues][]">
@@ -68,11 +69,11 @@
                         <label>商品单价</label>
                     </div>
                     <div class="form-group col-1">
-                        <input type="radio"  name="fieldConfigDetailList[${defaultFiledNameIndexMap['unitPrice']}][required]" value="1" checked>
+                        <input type="radio"  name="fieldConfigDetailList[${defaultFiledNameIndexMap['unitPrice']}][required]" value="1" <%if(filedNameRetMap['unitPrice'].required!1==1){%>checked<%}%>>
                         <label>必填</label>
                     </div>
                     <div class="form-group col-1">
-                        <input type="radio"  name="fieldConfigDetailList[${defaultFiledNameIndexMap['unitPrice']}][required]" value="0">
+                        <input type="radio"  name="fieldConfigDetailList[${defaultFiledNameIndexMap['unitPrice']}][required]" value="0" <%if(filedNameRetMap['unitPrice'].required!1!=1){%>checked<%}%>>
                         <label>非必填</label>
                     </div>
                 </div>
@@ -88,11 +89,11 @@
                         <label>商品规格</label>
                     </div>
                     <div class="form-group col-1">
-                        <input type="radio"  name="fieldConfigDetailList[${defaultFiledNameIndexMap['specName']}][required]" value="1" checked>
+                        <input type="radio"  name="fieldConfigDetailList[${defaultFiledNameIndexMap['specName']}][required]" value="1" <%if(filedNameRetMap['specName'].required!1==1){%>checked<%}%>>
                         <label>必填</label>
                     </div>
                     <div class="form-group col-1">
-                        <input type="radio"  name="fieldConfigDetailList[${defaultFiledNameIndexMap['specName']}][required]" value="0">
+                        <input type="radio"  name="fieldConfigDetailList[${defaultFiledNameIndexMap['specName']}][required]" value="0" <%if(filedNameRetMap['specName'].required!1!=1){%>checked<%}%>>
                         <label>非必填</label>
                     </div>
                 </div>
@@ -109,11 +110,11 @@
                         <label>品牌</label>
                     </div>
                     <div class="form-group col-1">
-                        <input type="radio"  name="fieldConfigDetailList[${defaultFiledNameIndexMap['brandName']}][required]" value="1" checked>
+                        <input type="radio"  name="fieldConfigDetailList[${defaultFiledNameIndexMap['brandName']}][required]" value="1" <%if(filedNameRetMap['brandName'].required!1==1){%>checked<%}%>>
                         <label>必填</label>
                     </div>
                     <div class="form-group col-1">
-                        <input type="radio"  name="fieldConfigDetailList[${defaultFiledNameIndexMap['brandName']}][required]" value="0">
+                        <input type="radio"  name="fieldConfigDetailList[${defaultFiledNameIndexMap['brandName']}][required]" value="0" <%if(filedNameRetMap['brandName'].required!1!=1){%>checked<%}%>>
                         <label>非必填</label>
                     </div>
                 </div>
@@ -129,11 +130,11 @@
                     <label>产地</label>
                 </div>
                 <div class="form-group col-1">
-                    <input type="radio"  name="fieldConfigDetailList[${defaultFiledNameIndexMap['originId']}][required]" value="1" checked>
+                    <input type="radio"  name="fieldConfigDetailList[${defaultFiledNameIndexMap['originId']}][required]" value="1" <%if(filedNameRetMap['originId'].required!1==1){%>checked<%}%>>
                     <label>必填</label>
                 </div>
                 <div class="form-group col-1">
-                    <input type="radio"  name="fieldConfigDetailList[${defaultFiledNameIndexMap['originId']}][required]" value="0">
+                    <input type="radio"  name="fieldConfigDetailList[${defaultFiledNameIndexMap['originId']}][required]" value="0" <%if(filedNameRetMap['originId'].required!1!=1){%>checked<%}%>>
                     <label>非必填</label>
                 </div>
 
@@ -150,11 +151,11 @@
                     <label>上传证明</label>
                 </div>
                 <div class="form-group col-1">
-                    <input type="radio"  name="fieldConfigDetailList[${defaultFiledNameIndexMap['imageCertList']}][required]" value="1" checked>
+                    <input type="radio"  name="fieldConfigDetailList[${defaultFiledNameIndexMap['imageCertList']}][required]" value="1" <%if(filedNameRetMap['imageCertList'].required!1==1){%>checked<%}%>>
                     <label for="">必填</label>
                 </div>
                 <div class="form-group col-1">
-                    <input type="radio"  name="fieldConfigDetailList[${defaultFiledNameIndexMap['imageCertList']}][required]" value="0">
+                    <input type="radio"  name="fieldConfigDetailList[${defaultFiledNameIndexMap['imageCertList']}][required]" value="0"  <%if(filedNameRetMap['imageCertList'].required!1!=1){%>checked<%}%>>
                     <label for="">非必填</label>
                 </div>
                 <div class="form-group col-6">
@@ -177,10 +178,10 @@
                 <input type="hidden" name="fieldConfigDetailList[${defaultFiledNameIndexMap['measureType']}][defaultId]" value="${defaultFieldNameIdMap['measureType']}">
                 <div class="form-group col-2">
                     <input type="hidden" name="fieldConfigDetailList[${defaultFiledNameIndexMap['measureType']}][displayed]" value="0">
-                    <input type="checkbox" name="fieldConfigDetailList[${defaultFiledNameIndexMap['measureType']}][displayed]" value="1" <%if(filedNameRetMap['measureType'].displayed!1==1){%>checked<%}%> >
+                    <input type="checkbox" name="fieldConfigDetailList[${defaultFiledNameIndexMap['measureType']}][displayed]" value="1" <%if(filedNameRetMap['measureType'].displayed!1==1){%>checked<%}%>>
                     <label>计重方式</label>
                 </div>
-                <input type="hidden"  name="fieldConfigDetailList[${defaultFiledNameIndexMap['measureType']}][required]" value="1">
+                <input type="hidden"  name="fieldConfigDetailList[${defaultFiledNameIndexMap['measureType']}][required]" value="1" >
                 <div class="form-group col-6">
                     <select class="form-control" <%if(filedNameRetMap['measureType'].displayed!1==1){%>required<%}%> multiple="multiple"  name="fieldConfigDetailList[${defaultFiledNameIndexMap['measureType']}][availableValues][]">
                     <%for(measureType in measureTypeEnumList){%>
@@ -203,11 +204,11 @@
                     <label>预计到场时间</label>
                 </div>
                 <div class="form-group col-1">
-                    <input type="radio"  name="fieldConfigDetailList[${defaultFiledNameIndexMap['arrivalDatetime']}][required]" value="1" checked>
+                    <input type="radio"  name="fieldConfigDetailList[${defaultFiledNameIndexMap['arrivalDatetime']}][required]" value="1" <%if(filedNameRetMap['arrivalDatetime'].required!1==1){%>checked<%}%>>
                     <label>必填</label>
                 </div>
                 <div class="form-group col-1">
-                    <input type="radio"  name="fieldConfigDetailList[${defaultFiledNameIndexMap['arrivalDatetime']}][required]" value="0">
+                    <input type="radio"  name="fieldConfigDetailList[${defaultFiledNameIndexMap['arrivalDatetime']}][required]" value="0" <%if(filedNameRetMap['arrivalDatetime'].required!1!=1){%>checked<%}%>>
                     <label>非必填</label>
                 </div>
             </div>
@@ -224,11 +225,11 @@
                     <label>到货摊位</label>
                 </div>
                 <div class="form-group col-1">
-                    <input type="radio"  name="fieldConfigDetailList[${defaultFiledNameIndexMap['arrivalTallynos']}][required]" value="1" checked>
+                    <input type="radio"  name="fieldConfigDetailList[${defaultFiledNameIndexMap['arrivalTallynos']}][required]" value="1" <%if(filedNameRetMap['arrivalTallynos'].required!1==1){%>checked<%}%>>
                     <label>必填</label>
                 </div>
                 <div class="form-group col-1">
-                    <input type="radio"  name="fieldConfigDetailList[${defaultFiledNameIndexMap['arrivalTallynos']}][required]" value="0">
+                    <input type="radio"  name="fieldConfigDetailList[${defaultFiledNameIndexMap['arrivalTallynos']}][required]" value="0" <%if(filedNameRetMap['arrivalTallynos'].required!1!=1){%>checked<%}%>>
                     <label>非必填</label>
                 </div>
             </div>
@@ -244,11 +245,11 @@
                     <label>备注</label>
                 </div>
                 <div class="form-group col-1">
-                    <input type="radio"  name="fieldConfigDetailList[${defaultFiledNameIndexMap['remark']}][required]" value="1" checked>
+                    <input type="radio"  name="fieldConfigDetailList[${defaultFiledNameIndexMap['remark']}][required]" value="1" <%if(filedNameRetMap['remark'].required!1==1){%>checked<%}%>>
                     <label>必填</label>
                 </div>
                 <div class="form-group col-1">
-                    <input type="radio"  name="fieldConfigDetailList[${defaultFiledNameIndexMap['remark']}][required]" value="0">
+                    <input type="radio"  name="fieldConfigDetailList[${defaultFiledNameIndexMap['remark']}][required]" value="0" <%if(filedNameRetMap['remark'].required!1!=1){%>checked<%}%>>
                     <label>非必填</label>
                 </div>
 
@@ -265,11 +266,11 @@
                     <label>上游企业</label>
                 </div>
                 <div class="form-group col-1">
-                    <input type="radio"  name="fieldConfigDetailList[${defaultFiledNameIndexMap['upStreamId']}][required]" value="1" checked>
+                    <input type="radio"  name="fieldConfigDetailList[${defaultFiledNameIndexMap['upStreamId']}][required]" value="1" <%if(filedNameRetMap['upStreamId'].required!1==1){%>checked<%}%>>
                     <label>必填</label>
                 </div>
                 <div class="form-group col-1">
-                    <input type="radio"  name="fieldConfigDetailList[${defaultFiledNameIndexMap['upStreamId']}][required]" value="0">
+                    <input type="radio"  name="fieldConfigDetailList[${defaultFiledNameIndexMap['upStreamId']}][required]" value="0" <%if(filedNameRetMap['upStreamId'].required!1!=1){%>checked<%}%>>
                     <label>非必填</label>
                 </div>
 

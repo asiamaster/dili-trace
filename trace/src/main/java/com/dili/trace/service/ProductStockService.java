@@ -167,7 +167,7 @@ public class ProductStockService extends BaseServiceImpl<ProductStock, Long> {
     @Transactional
     public int updateDetectFailedWeightByBillIdAfterDetect(Long billId) {
         logger.info("开始更新检测失败库存:billId={}", billId);
-        if(this!=null){
+        if (this != null) {
             return 0;
         }
         if (Objects.isNull(billId)) {
@@ -227,4 +227,47 @@ public class ProductStockService extends BaseServiceImpl<ProductStock, Long> {
         return StreamEx.of(this.tradeDetailService.listByExample(td)).groupingBy(TradeDetail::getProductStockId);
     }
 
+    /**
+     * 增减库存重量(正数增加,负数减少)
+     *
+     * @param productStockId
+     * @param alterWeight
+     * @return
+     */
+    private int updateStockWeight(Long productStockId, BigDecimal alterWeight) {
+
+        ProductStock item = this.get(productStockId);
+        if (item == null) {
+            throw new TraceBizException("库存信息不存在");
+        }
+        if (alterWeight.compareTo(BigDecimal.ZERO) < 0 && item.getStockWeight().add(alterWeight).compareTo(BigDecimal.ZERO) < 0) {
+            throw new TraceBizException("扣减库存不能超过总库存");
+        }
+        ProductStock up = new ProductStock();
+        up.setId(item.getId());
+        up.setStockWeight(item.getStockWeight().add(alterWeight));
+        return this.updateSelective(up);
+    }
+
+    /**
+     * 增减检测失败重量(正数增加,负数减少)
+     *
+     * @param productStockId
+     * @param alterWeight
+     * @return
+     */
+    private int updateDetectFailedWeight(Long productStockId, BigDecimal alterWeight) {
+
+        ProductStock item = this.get(productStockId);
+        if (item == null) {
+            throw new TraceBizException("库存信息不存在");
+        }
+        if (alterWeight.compareTo(BigDecimal.ZERO) < 0 && item.getDetectFailedWeight().add(alterWeight).compareTo(BigDecimal.ZERO) < 0) {
+            throw new TraceBizException("扣减库存不能超过总库存");
+        }
+        ProductStock up = new ProductStock();
+        up.setId(item.getId());
+        up.setDetectFailedWeight(item.getDetectFailedWeight().add(alterWeight));
+        return this.updateSelective(up);
+    }
 }

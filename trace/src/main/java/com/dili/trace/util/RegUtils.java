@@ -27,4 +27,9 @@ public class RegUtils {
         String regex = "^(\\w|[\\u4e00-\\u9fa5]|-)+$";
         return Pattern.matches(regex, input);
     }
+
+    public static void main(String[] args) {
+        String regex="[\\u4e00-\\u9fa5_a-zA-Z0-9_]{0,10}";
+        System.out.println(RegUtils.isValidInput( "\uD83D\uDE01"));
+    }
 }
