@@ -142,6 +142,8 @@ public class UserInfoService extends TraceBaseService<UserInfo, Long> {
         if (userInfoItem == null) {
             return 0;
         }
+        LOGGER.info("id={},userId={},approvalStatus={}",id,extDto.getId(),extDto.getCustomerMarket().getApprovalStatus());
+
         try {
             UserInfo userInfo = new UserInfo();
             userInfo.setId(id);

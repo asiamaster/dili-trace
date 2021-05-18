@@ -14,6 +14,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.util.Optional;
 
 public class PCTest {
     @Test
@@ -25,5 +26,19 @@ public class PCTest {
         PermissionContext permissionContext = new PermissionContext(req, resp, null, new ManageConfig(), "");
         String accessToken = permissionContext.getAccessToken();
         String refreshToken = permissionContext.getRefreshToken();
+    }
+
+    @Test
+    public void optTest() {
+
+        Optional<String> opt = Optional.of("aaa").map(s -> {
+            String ss = null;
+            System.out.println("ddd");
+            return Optional.ofNullable(ss).orElse("fff");
+
+        });
+        System.out.println(opt.isPresent());
+
+
     }
 }

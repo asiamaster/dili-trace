@@ -124,14 +124,14 @@ public class UserQrHistoryService extends TraceBaseService<UserQrHistory, Long> 
      *
      * @param billId
      */
-    public void createUserQrHistoryForVerifyBill(Long billId) {
+    public Optional<UserQrHistory> createUserQrHistoryForVerifyBill(Long billId) {
         RegisterBill billItem = this.billService.getAvaiableBill(billId).orElseThrow(() -> {
             return new TraceBizException("登记单不存在");
         });
         if (billItem == null) {
-            return;
+            return Optional.empty();
         }
-        this.createUserQrHistoryForVerifyBill(billItem, billItem.getUserId());
+        return this.createUserQrHistoryForVerifyBill(billItem, billItem.getUserId());
     }
 
     /**
@@ -140,25 +140,26 @@ public class UserQrHistoryService extends TraceBaseService<UserQrHistory, Long> 
      * @param billItem
      * @param userId
      */
-    public void createUserQrHistoryForVerifyBill(RegisterBill billItem, Long userId) {
+    public Optional<UserQrHistory> createUserQrHistoryForVerifyBill(RegisterBill billItem, Long userId) {
         if (billItem == null) {
-            return;
+            return Optional.empty();
         }
         BillVerifyStatusEnum billVerifyStatusEnum = BillVerifyStatusEnum.fromCode(billItem.getVerifyStatus())
                 .orElse(null);
         if (billVerifyStatusEnum == null) {
-            return;
+            return Optional.empty();
         }
         UserQrStatusEnum userQrStatus = getUserQrStatusEnum(billVerifyStatusEnum);
         String content = "最新操作报备单审核状态是" + billVerifyStatusEnum.getName() + ",变为" + userQrStatus.getDesc() + "码";
 
-        this.userInfoService.saveUserInfo(userId, billItem.getMarketId()).ifPresent(userInfoItem -> {
+        return this.userInfoService.saveUserInfo(userId, billItem.getMarketId()).map(userInfoItem -> {
 
 //            if (userInfoItem.getQrHistoryId() != null) {
 //                return;
 //            }
             //插入qrhistory对象
-            this.buildUserQrHistory(userInfoItem.getId(), userQrStatus, QrHistoryEventTypeEnum.REGISTER_BILL, billItem.getId()).ifPresent(userQrHistory -> {
+            return this.buildUserQrHistory(userInfoItem.getId(), userQrStatus, QrHistoryEventTypeEnum.REGISTER_BILL, billItem.getId())
+                    .map(userQrHistory -> {
 
                 userQrHistory.setContent(content);
                 this.insertSelective(userQrHistory);
@@ -171,7 +172,8 @@ public class UserQrHistoryService extends TraceBaseService<UserQrHistory, Long> 
                 userInfo.setQrStatus(userQrHistory.getQrStatus());
                 userInfo.setQrContent(content);
                 this.userInfoService.updateSelective(userInfo);
-            });
+                return userQrHistory;
+            }).orElse(null);
 
         });
     }

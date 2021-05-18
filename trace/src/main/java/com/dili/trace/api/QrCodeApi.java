@@ -17,6 +17,8 @@ import com.dili.trace.service.QrCodeService;
 import com.dili.trace.service.UserInfoService;
 import io.swagger.annotations.Api;
 import one.util.streamex.StreamEx;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -32,6 +34,7 @@ import java.util.List;
 @RequestMapping(value = "/api/qrCodeApi")
 @AppAccess(role = Role.ANY)
 public class QrCodeApi {
+    private static final Logger logger= LoggerFactory.getLogger(QrCodeApi.class);
     @Autowired
     LoginSessionContext sessionContext;
     @Autowired
@@ -72,9 +75,9 @@ public class QrCodeApi {
         QrOutputDto dto = new QrOutputDto();
         dto.setClientId(input.getClientId());
         dto.setMarketId(input.getMarketId());
-        dto.setColor(UserQrStatusEnum.BLACK.getCode());
         dto.setClientType(clientTypeEnum.getCode());
 
+        logger.info("generateQR:userId={},clientType={}",dto.getClientId(),clientTypeEnum.getDesc());
         try {
             UserQrStatusEnum userQrStatusEnum = StreamEx.of(dto).filter(o -> {
                 return ClientTypeEnum.SELLER == clientTypeEnum || ClientTypeEnum.BUYER == clientTypeEnum;
@@ -84,6 +87,7 @@ public class QrCodeApi {
                 return UserQrStatusEnum.fromCode(qrStatus).orElse(UserQrStatusEnum.BLACK);
             }).findFirst().orElse(UserQrStatusEnum.BLACK);
 
+            dto.setColor(userQrStatusEnum.getCode());
             String base64QrCode = this.qrCodeService.getBase64QrCode(JSONUtil.toJsonStr(dto), 200, 200, userQrStatusEnum.getARgb());
             dto.setBase64QrCode(base64QrCode);
             return BaseOutput.successData(dto);
@@ -105,7 +109,8 @@ public class QrCodeApi {
         QrInputDto input = new QrInputDto();
         input.setClientId(sessionData.getUserId());
         input.setMarketId(sessionData.getMarketId());
-        input.setColor(UserQrStatusEnum.BLACK.getCode());
+
+        ClientTypeEnum clientTypeEnum=ClientTypeEnum.OTHERS;
 
         if (Role.Manager == sessionContext.getSessionData().getRole()) {
             input.setClientType(ClientTypeEnum.MANAGER.getCode());
@@ -114,19 +119,19 @@ public class QrCodeApi {
             if (subRoles.size() == 1) {
                 CustomerEnum.CharacterType characterType = subRoles.get(0);
                 if (CustomerEnum.CharacterType.买家 == characterType) {
-                    input.setClientType(ClientTypeEnum.BUYER.getCode());
+                    clientTypeEnum=ClientTypeEnum.BUYER;
                 }
                 if (CustomerEnum.CharacterType.经营户 == characterType) {
-                    input.setClientType(ClientTypeEnum.SELLER.getCode());
+                    clientTypeEnum=ClientTypeEnum.SELLER;
                 }
                 if (CustomerEnum.CharacterType.其他类型 == characterType) {
-                    input.setClientType(ClientTypeEnum.DRIVER.getCode());
+                    clientTypeEnum=ClientTypeEnum.DRIVER;
                 }
             } else {
-                input.setClientType(ClientTypeEnum.OTHERS.getCode());
+                clientTypeEnum=ClientTypeEnum.OTHERS;
             }
         }
-        return this.generateQR(input, ClientTypeEnum.fromCode(input.getClientType()));
+        return this.generateQR(input, clientTypeEnum);
 
     }
 

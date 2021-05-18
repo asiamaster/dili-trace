@@ -602,15 +602,6 @@ public class TradeOrderService extends BaseServiceImpl<TradeOrder, Long> {
      * @param tradeRequest
      * @return
      */
-    public List<TradeRequestDetail> createTradeRequestDetail(TradeRequest tradeRequest) {
-        return this.findOrCreateTradeRequestDetail(tradeRequest);
-    }
-
-    /**
-     * @param tradeRequest
-     * @param tradeRequest
-     * @return
-     */
     public List<TradeRequestDetail> findOrCreateTradeRequestDetail(TradeRequest tradeRequest) {
 
         ProductStock productStockItem = this.productStockService.selectByIdForUpdate(tradeRequest.getProductStockId())
@@ -621,7 +612,6 @@ public class TradeOrderService extends BaseServiceImpl<TradeOrder, Long> {
         if (BigDecimal.ZERO.compareTo(totalTradeWeight) >= 0) {
             throw new TraceBizException("购买重量要大于0");
         }
-
         if (productStockItem.getStockWeight().compareTo(totalTradeWeight) < 0) {
             throw new TraceBizException("购买重量不能超过总库存重量");
         }
