@@ -113,7 +113,7 @@ public class UserQrHistoryService extends TraceBaseService<UserQrHistory, Long> 
             userInfo.setId(userInfoItem.getId());
             userInfo.setQrHistoryId(userQrHistory.getId());
             userInfo.setPreQrStatus(userInfoItem.getQrStatus());
-            userInfo.setQrStatus(qrStatusEnum.getCode());
+            userInfo.setQrStatus(userQrHistory.getQrStatus());
             userInfo.setQrContent(content);
             this.userInfoService.updateSelective(userInfo);
         });
@@ -157,9 +157,8 @@ public class UserQrHistoryService extends TraceBaseService<UserQrHistory, Long> 
 //            if (userInfoItem.getQrHistoryId() != null) {
 //                return;
 //            }
-            UserQrStatusEnum qrStatusEnum = UserQrStatusEnum.BLACK;
             //插入qrhistory对象
-            this.buildUserQrHistory(userInfoItem.getId(), qrStatusEnum, QrHistoryEventTypeEnum.REGISTER_BILL, billItem.getId()).ifPresent(userQrHistory -> {
+            this.buildUserQrHistory(userInfoItem.getId(), userQrStatus, QrHistoryEventTypeEnum.REGISTER_BILL, billItem.getId()).ifPresent(userQrHistory -> {
 
                 userQrHistory.setContent(content);
                 this.insertSelective(userQrHistory);
@@ -169,7 +168,7 @@ public class UserQrHistoryService extends TraceBaseService<UserQrHistory, Long> 
                 userInfo.setId(userInfoItem.getId());
                 userInfo.setQrHistoryId(userQrHistory.getId());
                 userInfo.setPreQrStatus(userInfoItem.getQrStatus());
-                userInfo.setQrStatus(qrStatusEnum.getCode());
+                userInfo.setQrStatus(userQrHistory.getQrStatus());
                 userInfo.setQrContent(content);
                 this.userInfoService.updateSelective(userInfo);
             });
@@ -220,7 +219,7 @@ public class UserQrHistoryService extends TraceBaseService<UserQrHistory, Long> 
                 userInfo.setId(userInfoItem.getId());
                 userInfo.setQrHistoryId(userQrHistory.getId());
                 userInfo.setPreQrStatus(userInfoItem.getQrStatus());
-                userInfo.setQrStatus(qrStatusEnum.getCode());
+                userInfo.setQrStatus(userQrHistory.getQrStatus());
                 userInfo.setQrContent(content);
                 this.userInfoService.updateSelective(userInfo);
             });

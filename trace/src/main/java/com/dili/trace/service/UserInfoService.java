@@ -33,6 +33,7 @@ public class UserInfoService extends TraceBaseService<UserInfo, Long> {
 
     /**
      * 查询信息
+     *
      * @param historyQueryDto
      * @return
      */
@@ -61,6 +62,7 @@ public class UserInfoService extends TraceBaseService<UserInfo, Long> {
 
     /**
      * 查询并锁定
+     *
      * @param userInfoId
      * @return
      */
@@ -100,6 +102,9 @@ public class UserInfoService extends TraceBaseService<UserInfo, Long> {
      * @return
      */
     public Optional<UserInfo> saveUserInfo(Long userId, Long marketId) {
+        if (marketId == null || marketId == 0) {
+            return Optional.empty();
+        }
         try {
             UserInfo userInfo = new UserInfo();
             userInfo.setUserId(userId);
@@ -148,7 +153,7 @@ public class UserInfoService extends TraceBaseService<UserInfo, Long> {
             userInfo.setModified(Date.from(extDto.getModifyTime().atZone(ZoneId.systemDefault()).toInstant()));
             userInfo.setState(extDto.getCustomerMarket() != null ? extDto.getCustomerMarket().getState() : null);
             this.updateSelective(userInfo);
-            this.userQrHistoryService.createUserQrHistoryForUserRegist(this.get(userInfo.getId()),userInfo.getMarketId());
+            this.userQrHistoryService.createUserQrHistoryForUserRegist(this.get(userInfo.getId()), userInfo.getMarketId());
         } catch (Exception e) {
             LOGGER.error(e.getMessage(), e);
         }
