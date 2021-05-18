@@ -16,6 +16,7 @@ import com.dili.trace.rpc.service.CustomerRpcService;
 import com.dili.trace.service.QrCodeService;
 import com.dili.trace.service.UserInfoService;
 import io.swagger.annotations.Api;
+import one.util.streamex.StreamEx;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -75,11 +76,15 @@ public class QrCodeApi {
         dto.setClientType(clientTypeEnum.getCode());
 
         try {
-            if (ClientTypeEnum.SELLER == clientTypeEnum || ClientTypeEnum.BUYER == clientTypeEnum) {
-                Integer userQrStatus = this.userInfoService.findByUserId(input.getClientId(), input.getMarketId()).map(UserInfo::getQrStatus).orElse(UserQrStatusEnum.BLACK.getCode());
-                dto.setColor(userQrStatus);
-            }
-            String base64QrCode = this.qrCodeService.getBase64QrCode(JSONUtil.toJsonStr(dto), 200, 200);
+            UserQrStatusEnum userQrStatusEnum = StreamEx.of(dto).filter(o -> {
+                return ClientTypeEnum.SELLER == clientTypeEnum || ClientTypeEnum.BUYER == clientTypeEnum;
+            }).map(o -> {
+                return this.userInfoService.findByUserId(input.getClientId(), input.getMarketId()).map(UserInfo::getQrStatus).orElse(UserQrStatusEnum.BLACK.getCode());
+            }).map(qrStatus -> {
+                return UserQrStatusEnum.fromCode(qrStatus).orElse(UserQrStatusEnum.BLACK);
+            }).findFirst().orElse(UserQrStatusEnum.BLACK);
+
+            String base64QrCode = this.qrCodeService.getBase64QrCode(JSONUtil.toJsonStr(dto), 200, 200, userQrStatusEnum.getARgb());
             dto.setBase64QrCode(base64QrCode);
             return BaseOutput.successData(dto);
         } catch (Exception e) {
