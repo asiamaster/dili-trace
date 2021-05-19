@@ -243,7 +243,7 @@ public class CustomerRpcService {
         }
         try {
             BaseOutput<CustomerExtendDto> out = this.customerRpc.get(customerId, marketId);
-            if (out.isSuccess()) {
+            if (out!=null&&out.isSuccess()) {
                 return Optional.ofNullable(out.getData());
             }
         } catch (Exception e) {

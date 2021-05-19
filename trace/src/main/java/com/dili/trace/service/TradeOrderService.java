@@ -214,7 +214,7 @@ public class TradeOrderService extends BaseServiceImpl<TradeOrder, Long> {
             return new TraceBizException("创建/查询卖家库存失败");
         });
 
-        TradeDetail buyerTD=this.createTradeDetailForRegisterBill(registerBill, productStock.getProductStockId());
+        TradeDetail buyerTD = this.createTradeDetailForRegisterBill(registerBill, productStock.getProductStockId());
 
 
 //        TradeDto tradeDto = new TradeDto();
@@ -302,7 +302,7 @@ public class TradeOrderService extends BaseServiceImpl<TradeOrder, Long> {
 
         List<TradeRequest> tradeRequestList = StreamEx.of(productStockInputList).map(productStockInput -> {
             TradeRequest tradeRequest = this.createTradeRequest(tradeDto, productStockInput, tradeOrder, productStockInput.getTradeWeight());
-            List<TradeRequestDetail> tradeRequestDetailList = this.createTradeRequestDetailForInput(productStockInput.getTradeDetailInputList(), tradeRequest);
+            List<TradeRequestDetail> tradeRequestDetailList = this.createTradeRequestDetail(tradeRequest);
             return tradeRequest;
         }).toList();
         this.dealTradeOrder(tradeOrder, TradeOrderStatusEnum.FINISHED, tradeRequestList);
@@ -341,7 +341,7 @@ public class TradeOrderService extends BaseServiceImpl<TradeOrder, Long> {
 
         List<TradeRequest> tradeRequestList = StreamEx.of(productStockInputList).map(productStockInput -> {
             TradeRequest tradeRequest = this.createTradeRequest(tradeDto, productStockInput, tradeOrder, productStockInput.getTradeWeight());
-            List<TradeRequestDetail> tradeRequestDetailList = this.findOrCreateTradeRequestDetail(tradeRequest);
+            List<TradeRequestDetail> tradeRequestDetailList = this.createTradeRequestDetail(tradeRequest);
             return tradeRequest;
         }).toList();
         return tradeOrder;
@@ -354,7 +354,7 @@ public class TradeOrderService extends BaseServiceImpl<TradeOrder, Long> {
      * @param tradeOrderStatusEnum
      * @param tradeRequestList
      */
-    private void dealTradeOrder(TradeOrder tradeOrderItem, TradeOrderStatusEnum tradeOrderStatusEnum, List<TradeRequest> tradeRequestList) {
+    protected void dealTradeOrder(TradeOrder tradeOrderItem, TradeOrderStatusEnum tradeOrderStatusEnum, List<TradeRequest> tradeRequestList) {
 
         if (TradeOrderStatusEnum.NONE == tradeOrderStatusEnum) {
             return;
@@ -490,7 +490,7 @@ public class TradeOrderService extends BaseServiceImpl<TradeOrder, Long> {
      * @param tradeOrderTypeEnum
      */
     private void dealTradeRequest(TradeRequest tradeRequest, TradeOrderStatusEnum tradeOrderStatusEnum, TradeOrderTypeEnum tradeOrderTypeEnum) {
-        List<TradeRequestDetail> tradeRequestDetailList = this.findOrCreateTradeRequestDetail(tradeRequest);
+        List<TradeRequestDetail> tradeRequestDetailList = this.findTradeRequestDetailList(tradeRequest);
 
         for (TradeRequestDetail trd : tradeRequestDetailList) {
             if (TradeOrderStatusEnum.FINISHED == tradeOrderStatusEnum) {
@@ -602,7 +602,7 @@ public class TradeOrderService extends BaseServiceImpl<TradeOrder, Long> {
      * @param tradeRequest
      * @return
      */
-    public List<TradeRequestDetail> findOrCreateTradeRequestDetail(TradeRequest tradeRequest) {
+    public List<TradeRequestDetail> createTradeRequestDetail(TradeRequest tradeRequest) {
 
         ProductStock productStockItem = this.productStockService.selectByIdForUpdate(tradeRequest.getProductStockId())
                 .orElseThrow(() -> {
@@ -630,8 +630,8 @@ public class TradeOrderService extends BaseServiceImpl<TradeOrder, Long> {
         TradeDetailQueryDto tradeDetailQuery = new TradeDetailQueryDto();
         tradeDetailQuery.setSaleStatus(SaleStatusEnum.FOR_SALE.getCode());
         tradeDetailQuery.setProductStockId(productStockItem.getId());
-        tradeDetailQuery.setSort("created");
-        tradeDetailQuery.setOrder("asc");
+        tradeDetailQuery.setSort("created,id");
+        tradeDetailQuery.setOrder("asc,asc");
         tradeDetailQuery.setMinStockWeight(BigDecimal.ZERO);
 
         List<TradeDetail> tradeDetailList = this.tradeDetailService.listByExample(tradeDetailQuery);
@@ -646,7 +646,6 @@ public class TradeOrderService extends BaseServiceImpl<TradeOrder, Long> {
             tradeRequestDetail.setTradeDetailId(tradeDetail.getTradeDetailId());
             tradeRequestDetail.setTradeRequestId(tradeRequest.getTradeRequestId());
 
-            BigDecimal softWeight = BigDecimal.ZERO;
             if (totalTradeWeight.compareTo(tradeDetail.getStockWeight()) >= 0) {
                 tradeRequestDetail.setTradeWeight(tradeDetail.getStockWeight());
                 td.setStockWeight(BigDecimal.ZERO);
@@ -668,6 +667,18 @@ public class TradeOrderService extends BaseServiceImpl<TradeOrder, Long> {
         return tradeRequestDetailList;
     }
 
+    /**
+     * @param tradeRequest
+     * @param tradeRequest
+     * @return
+     */
+    public List<TradeRequestDetail> findTradeRequestDetailList(TradeRequest tradeRequest) {
+
+        List<TradeRequestDetail> tradeRequestDetailList = this.tradeRequestDetailService.findByTradeRequestIdList(Arrays.asList(tradeRequest.getId()));
+
+        return tradeRequestDetailList;
+
+    }
 
     /**
      * createOrFind

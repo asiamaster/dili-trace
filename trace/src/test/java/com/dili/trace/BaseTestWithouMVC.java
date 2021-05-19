@@ -54,7 +54,7 @@ import tk.mybatis.spring.annotation.MapperScan;
 
 @ExtendWith(SpringExtension.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
-@ActiveProfiles("test")
+@ActiveProfiles("dev")
 @WebAppConfiguration("src/main/resources")
 //@TestExecutionListeners(mergeMode = MergeMode.MERGE_WITH_DEFAULTS, inheritListeners = true, value = {
 //		MockitoDependencyInjectionTestExecutionListener.class }) // ,

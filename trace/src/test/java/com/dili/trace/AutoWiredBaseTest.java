@@ -5,19 +5,18 @@ import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
+import java.util.stream.Stream;
 
 import com.dili.common.exception.TraceBizException;
+import com.dili.customer.sdk.domain.CustomerMarket;
 import com.dili.customer.sdk.domain.dto.CustomerExtendDto;
+import com.dili.customer.sdk.enums.CustomerEnum;
 import com.dili.ss.dto.DTOUtils;
 import com.dili.trace.api.input.CheckInApiInput;
 import com.dili.trace.api.input.CheckOutApiInput;
 import com.dili.trace.api.input.CreateRegisterBillInputDto;
-import com.dili.trace.domain.CheckinOutRecord;
-import com.dili.trace.domain.ImageCert;
-import com.dili.trace.domain.RegisterBill;
-import com.dili.trace.domain.TradeDetail;
-import com.dili.trace.domain.UpStream;
-import com.dili.trace.domain.UserInfo;
+import com.dili.trace.domain.*;
 import com.dili.trace.dto.OperatorUser;
 import com.dili.trace.enums.*;
 import com.dili.trace.rpc.service.CustomerRpcService;
@@ -57,6 +56,13 @@ public class AutoWiredBaseTest extends BaseTestWithouMVC {
     TradeRequestService tradeRequestService;
     @SpyBean
     protected CustomerRpcService customerRpcService;
+    @SpyBean
+    protected AssetsRpcService assetsRpcService;
+    @Autowired
+    protected ProductStockService productStockService;
+
+    @Autowired
+    BrandService brandService;
 
     @BeforeEach
     public void mockInit() {
@@ -70,6 +76,71 @@ public class AutoWiredBaseTest extends BaseTestWithouMVC {
          * Mockito.doReturn(BaseOutput.success().setData(Arrays.asList(this.
          * mockedProduct))).when(this.productRpc) .listByIds(Mockito.any());
          */
+
+    }
+
+
+    protected ProductStock buildProductStock(Long marketId, Long userId, List<BigDecimal> weightList) {
+        assertNotNull(marketId);
+        assertNotNull(userId);
+        assertNotNull(weightList);
+
+        Mockito.doAnswer(invocation -> {
+            CustomerExtendDto dto = new CustomerExtendDto();
+            Long uid = (Long) invocation.getArguments()[0];
+            Long marketid = (Long) invocation.getArguments()[1];
+            dto.setName("test-user-" + uid);
+            dto.setId(uid);
+            dto.setCustomerMarket(new CustomerMarket());
+            dto.getCustomerMarket().setMarketId(marketid);
+            dto.getCustomerMarket().setApprovalStatus(CustomerEnum.ApprovalStatus.PASSED.getCode());
+            return Optional.ofNullable(dto);
+        }).when(customerRpcService).findCustomerById(marketId, userId);
+
+        Mockito.doAnswer(invocation -> {
+            return Lists.newArrayList();
+        }).when(assetsRpcService).listCusCategory(Mockito.any(), Mockito.anyLong());
+
+
+        Long productId = 11L;
+        String productName = "test-商品";
+
+        Long originId = 22L;
+        String originName = "test-产地";
+
+        WeightUnitEnum weightUnitEnum = WeightUnitEnum.KILO;
+        String specName = "test-规格";
+        String brandName = "test-品牌";
+        Long brandId = this.brandService.createOrUpdateBrand(brandName, userId, marketId).orElse(null);
+        assertNotNull(brandId);
+        Brand brand = this.brandService.get(brandId);
+
+        ProductStock q = new ProductStock();
+        q.setUserId(userId);
+        q.setMarketId(marketId);
+        q.setProductId(productId);
+        q.setWeightUnit(weightUnitEnum.getCode());
+        q.setSpecName(specName);
+        q.setBrandId(brandId);
+
+        this.productStockService.deleteByExample(q);
+
+
+        StreamEx.of(weightList).map(weight -> {
+            Long billId = this.baseCreateRegisterBill(marketId, userId, weight, productId, productName, specName, originId, originName, brand, WeightUnitEnum.KILO);
+            return this.registerBillService.get(billId);
+        }).forEach(rb -> {
+            if (BillVerifyStatusEnum.WAIT_AUDIT.equalsToCode(rb.getVerifyStatus())) {
+                this.registerBillService.doVerifyBeforeCheckIn(rb, Optional.empty());
+            }
+            this.checkinOutRecordService.doOneCheckin(rb.getBillId(), CheckinStatusEnum.ALLOWED, Optional.empty());
+        });
+
+
+        ProductStock ps = StreamEx.of(this.productStockService.listByExample(q)).findFirst().orElse(null);
+        assertNotNull(ps);
+        assertEquals(ps.getStockWeight().compareTo(StreamEx.of(weightList).reduce(BigDecimal::add).orElse(BigDecimal.ZERO)), 0);
+        return ps;
 
     }
 
@@ -98,14 +169,49 @@ public class AutoWiredBaseTest extends BaseTestWithouMVC {
 
     protected Long doVerifyBeforeCheckIn(Long billId) {
 
-        RegisterBill input=new RegisterBill();
+        RegisterBill input = new RegisterBill();
         input.setId(billId);
         input.setVerifyStatus(BillVerifyStatusEnum.PASSED.getCode());
         this.registerBillService.doVerifyBeforeCheckIn(input, Optional.empty());
         return billId;
     }
 
-    protected Long baseCreateRegisterBill(Long marketId, Long userId,BigDecimal weight) {
+    protected Long baseCreateRegisterBill() {
+        Long marketId = 8L;
+        Long customerId = 1L;
+        BigDecimal weight = BigDecimal.valueOf(100L);
+        return this.baseCreateRegisterBill(marketId, customerId, weight);
+    }
+
+    protected Long baseCreateRegisterBill(Long marketId, Long userId, BigDecimal weight) {
+        Long productId = 1L;
+        String productName = "test-白菜";
+        return this.baseCreateRegisterBill(marketId, userId, weight, productId, productName);
+    }
+
+    protected Long baseCreateRegisterBill(Long marketId, Long userId, BigDecimal weight, Long productId, String productName) {
+        return this.baseCreateRegisterBill(marketId, userId, weight, productId, productName, "test-规格");
+    }
+
+    protected Long baseCreateRegisterBill(Long marketId, Long userId, BigDecimal weight, Long productId, String productName, String spec) {
+
+        return this.baseCreateRegisterBill(marketId, userId, weight, productId, productName, spec, 1L, "test-产地");
+    }
+
+    protected Long baseCreateRegisterBill(Long marketId, Long userId, BigDecimal weight, Long productId, String productName, String spec, Long originId, String originName) {
+        return this.baseCreateRegisterBill(marketId, userId, weight, productId, productName, spec, originId, originName, 1L, "test-品牌", WeightUnitEnum.KILO);
+    }
+
+    protected Long baseCreateRegisterBill(Long marketId, Long userId, BigDecimal weight, Long productId, String productName, String spec,
+                                          Long originId, String originName, Long brandId, String brandName, WeightUnitEnum weightUnitEnum) {
+        Brand brand = new Brand();
+        brand.setId(brandId);
+        brand.setBrandName(brandName);
+        return this.baseCreateRegisterBill(marketId, userId, weight, productId, productName, spec, originId, originName, brand, weightUnitEnum);
+    }
+
+    protected Long baseCreateRegisterBill(Long marketId, Long userId, BigDecimal weight, Long productId, String productName, String spec,
+                                          Long originId, String originName, Brand brand, WeightUnitEnum weightUnitEnum) {
         CreateRegisterBillInputDto inputDto = new CreateRegisterBillInputDto();
         inputDto.setRegistType(RegistTypeEnum.NONE.getCode());
 
@@ -121,17 +227,16 @@ public class AutoWiredBaseTest extends BaseTestWithouMVC {
         CreatorRoleEnum creatorRoleEnum = CreatorRoleEnum.MANAGER;
 
 
-
         inputDto.setWeight(weight);
 
 
-        inputDto.setWeightUnit(WeightUnitEnum.KILO.getCode());
+        inputDto.setWeightUnit(weightUnitEnum.getCode());
 
-        inputDto.setProductId(1L);
-        inputDto.setProductName("白菜");
+        inputDto.setProductId(productId);
+        inputDto.setProductName(productName);
 
-        inputDto.setOriginId(2L);
-        inputDto.setOriginName("四川成都");
+        inputDto.setOriginId(originId);
+        inputDto.setOriginName(originName);
         inputDto.setRemark("备注信息");
 
         inputDto.setTruckTareWeight(BigDecimal.ONE);
@@ -145,91 +250,25 @@ public class AutoWiredBaseTest extends BaseTestWithouMVC {
 
         inputDto.setUnitPrice(BigDecimal.ONE);
 
-        inputDto.setSpecName("箱子");
+        inputDto.setSpecName(spec);
 
-        inputDto.setBrandName("好巴适");
-
+        inputDto.setBrandName(brand.getBrandName());
+        inputDto.setBrandId(brand.getId());
 
         inputDto.setUpStreamId(10L);
         inputDto.setArrivalDatetime(new Date());
 
         inputDto.setArrivalTallynos(Lists.newArrayList("222"));
 
-        ImageCert imageCert = new ImageCert();
-        imageCert.setCertType(ImageCertTypeEnum.DETECT_REPORT.getCode());
-        imageCert.setUid("abcd");
+        List<ImageCert> imageCertList = StreamEx.of(ImageCertTypeEnum.values()).map(ct -> {
+            ImageCert imageCert = new ImageCert();
+            imageCert.setCertType(ImageCertTypeEnum.DETECT_REPORT.getCode());
+            imageCert.setUid(UUID.randomUUID().toString());
+            return imageCert;
+        }).toList();
 
-        ImageCert imageCert2 = new ImageCert();
-        imageCert2.setCertType(ImageCertTypeEnum.DETECT_REPORT.getCode());
-        imageCert2.setUid("abcd");
-
-        inputDto.setImageCertList(Lists.newArrayList(imageCert, imageCert2));
+        inputDto.setImageCertList(imageCertList);
         List<Long> idList = this.registerBillService.createRegisterBillList(marketId, inputBillDtoList, userId, operatorUser, creatorRoleEnum);
-        assertNotNull(idList);
-        return idList.get(0);
-    }
-
-    protected Long baseCreateRegisterBill() {
-
-        CreateRegisterBillInputDto inputDto = new CreateRegisterBillInputDto();
-        inputDto.setRegistType(RegistTypeEnum.NONE.getCode());
-
-        Long marketId = 8L;
-        List<CreateRegisterBillInputDto> inputBillDtoList = Lists.newArrayList(inputDto);
-
-        Long customerId = 1L;
-        CustomerExtendDto customerExtendDto = new CustomerExtendDto();
-        customerExtendDto.setId(customerId);
-        customerExtendDto.setName("testuser");
-        Mockito.doReturn(customerExtendDto).when(this.customerRpcService)
-                .findApprovedCustomerByIdOrEx(Mockito.anyLong(), Mockito.anyLong());
-
-        Optional<OperatorUser> operatorUser = Optional.empty();
-        CreatorRoleEnum creatorRoleEnum = CreatorRoleEnum.MANAGER;
-
-
-        inputDto.setWeight(BigDecimal.valueOf(1.23D));
-
-
-        inputDto.setWeight(BigDecimal.valueOf(-1));
-
-
-        inputDto.setWeight(BigDecimal.valueOf(99999999L + 1));
-
-
-        inputDto.setWeight(BigDecimal.TEN);
-
-
-        inputDto.setWeightUnit(WeightUnitEnum.KILO.getCode());
-
-        inputDto.setProductId(1L);
-        inputDto.setProductName("白菜");
-
-        inputDto.setOriginId(2L);
-        inputDto.setOriginName("四川成都");
-        inputDto.setRemark("备注信息");
-
-        inputDto.setTruckTareWeight(BigDecimal.ONE);
-
-
-        inputDto.setTruckType(TruckTypeEnum.POOL.getCode());
-
-
-        inputDto.setPlate("川A12345");
-
-
-        inputDto.setUnitPrice(BigDecimal.ONE);
-
-        inputDto.setSpecName("箱子");
-
-        inputDto.setBrandName("好巴适");
-
-
-        inputDto.setUpStreamId(10L);
-        inputDto.setArrivalDatetime(new Date());
-
-        inputDto.setArrivalTallynos(Lists.newArrayList("222"));
-        List<Long> idList = this.registerBillService.createRegisterBillList(marketId, inputBillDtoList, customerId, operatorUser, creatorRoleEnum);
         assertNotNull(idList);
         return idList.get(0);
     }

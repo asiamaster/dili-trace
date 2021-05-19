@@ -335,7 +335,7 @@ public class RegisterBillService extends BaseServiceImpl<RegisterBill, Long> {
 
             registerHead.setRemainWeight(remianWeight.subtract(billWeight));
             registerHeadService.updateSelective(registerHead);
-            List<String>arrivalTallynos=StreamEx.of(registerTallyAreaNoService.findTallyAreaNoByBillIdAndType(registerHead.getId(),BillTypeEnum.MASTER_BILL)).map(RegisterTallyAreaNo::getTallyareaNo).toList();
+            List<String> arrivalTallynos = StreamEx.of(registerTallyAreaNoService.findTallyAreaNoByBillIdAndType(registerHead.getId(), BillTypeEnum.MASTER_BILL)).map(RegisterTallyAreaNo::getTallyareaNo).toList();
             registerBill.setArrivalTallynos(arrivalTallynos);
         }
 
@@ -386,6 +386,7 @@ public class RegisterBillService extends BaseServiceImpl<RegisterBill, Long> {
 
         return registerBill.getId();
     }
+
     /**
      * 检查用户输入参数
      *
@@ -418,21 +419,21 @@ public class RegisterBillService extends BaseServiceImpl<RegisterBill, Long> {
         }
 
         String brandName = StringUtils.trimToNull(registerBill.getBrandName());
-        if(Objects.nonNull(brandName)){
+        if (Objects.nonNull(brandName)) {
             if (!RegUtils.isValidInput(brandName)) {
                 throw new TraceBizException("品牌包含非法字符");
             }
-            if (brandName.length()>20) {
+            if (brandName.length() > 20) {
                 throw new TraceBizException("品牌不能超过20字符");
             }
         }
 
         String remark = StringUtils.trimToNull(registerBill.getRemark());
-        if(Objects.nonNull(remark)){
+        if (Objects.nonNull(remark)) {
             if (!RegUtils.isValidInput(remark)) {
                 throw new TraceBizException("备注包含非法字符");
             }
-            if (remark.length()>200) {
+            if (remark.length() > 200) {
                 throw new TraceBizException("备注不能超过200字符");
             }
         }
@@ -475,8 +476,9 @@ public class RegisterBillService extends BaseServiceImpl<RegisterBill, Long> {
                 throw new TraceBizException("商品件重必须为整数");
             }
         }
-        return  registerBill;
+        return registerBill;
     }
+
     /**
      * 检查用户输入参数
      *
@@ -537,16 +539,16 @@ public class RegisterBillService extends BaseServiceImpl<RegisterBill, Long> {
 //                throw new TraceBizException("业户名称不能超过50字符");
 //            }
 //        }
-        if(StringUtils.isNotBlank(registerBill.getCorporateName())){
-            if(!RegUtils.isValidInput(registerBill.getCorporateName())){
+        if (StringUtils.isNotBlank(registerBill.getCorporateName())) {
+            if (!RegUtils.isValidInput(registerBill.getCorporateName())) {
                 throw new TraceBizException("企业名称不能有特殊字符");
             }
-            if(StringUtils.trimToEmpty(registerBill.getProductAliasName()).length()>50){
+            if (StringUtils.trimToEmpty(registerBill.getProductAliasName()).length() > 50) {
                 throw new TraceBizException("企业名称不能超过50字符");
             }
         }
 
-        if(StringUtils.trimToEmpty(registerBill.getProductAliasName()).length()>40){
+        if (StringUtils.trimToEmpty(registerBill.getProductAliasName()).length() > 40) {
             throw new TraceBizException("商品别名不能超过40字符");
         }
         //登记单类型字段
@@ -578,11 +580,11 @@ public class RegisterBillService extends BaseServiceImpl<RegisterBill, Long> {
             }
         }
         String remark = StringUtils.trimToNull(registerBill.getRemark());
-        if(Objects.nonNull(remark)){
+        if (Objects.nonNull(remark)) {
             if (!RegUtils.isValidInput(remark)) {
                 throw new TraceBizException("备注包含非法字符");
             }
-            if (remark.length()>200) {
+            if (remark.length() > 200) {
                 throw new TraceBizException("备注不能超过200字符");
             }
         }
@@ -656,11 +658,11 @@ public class RegisterBillService extends BaseServiceImpl<RegisterBill, Long> {
         }
 
         String brandName = StringUtils.trimToNull(registerBill.getBrandName());
-        if(Objects.nonNull(brandName)){
+        if (Objects.nonNull(brandName)) {
             if (!RegUtils.isValidInput(brandName)) {
                 throw new TraceBizException("品牌包含非法字符");
             }
-            if (brandName.length()>20) {
+            if (brandName.length() > 20) {
                 throw new TraceBizException("品牌不能超过20字符");
             }
         }
@@ -695,35 +697,34 @@ public class RegisterBillService extends BaseServiceImpl<RegisterBill, Long> {
 
         }
         registerBill.setArrivalTallynos(arrivalTallynos);
-        boolean hasValidTallyno=StreamEx.of(arrivalTallynos).anyMatch(no->{
+        boolean hasValidTallyno = StreamEx.of(arrivalTallynos).anyMatch(no -> {
             return !RegUtils.isValidInput(no);
         });
-        if(hasValidTallyno){
-            throw  new TraceBizException("到货摊位包含非法字符");
+        if (hasValidTallyno) {
+            throw new TraceBizException("到货摊位包含非法字符");
         }
         //图片凭证
         String propName = PropertyUtils.getPropertyDescriptor(registerBill, RegisterBill::getImageCertList).getName();
         FieldConfigDetailRetDto retDto = fieldConfigDetailRetDtoMap.getOrDefault(propName, null);
         if (retDto != null && YesOrNoEnum.YES.getCode().equals(retDto.getDisplayed()) && YesOrNoEnum.YES.getCode().equals(retDto.getRequired())) {
-            if(CollectionUtils.isEmpty(registerBill.getImageCertList())){
+            if (CollectionUtils.isEmpty(registerBill.getImageCertList())) {
                 throw new TraceBizException("凭证不能为空");
-            }else{
+            } else {
 
                 String json = JSON.toJSONString(registerBill);
-                List<Integer>certTypeList= JsonPathUtil.parse(json,retDto.getDefaultFieldDetail().getJsonPath(),Integer.class);
-                List<Integer>availableValueList=   StreamEx.ofNullable(retDto.getAvailableValueList()).flatCollection(Function.identity()).nonNull().map(String::valueOf).map(v->{
-                    try{
+                List<Integer> inputCertTypeList = JsonPathUtil.parse(json, retDto.getDefaultFieldDetail().getJsonPath(), Integer.class);
+                List<Integer> availableValueList = StreamEx.ofNullable(retDto.getAvailableValueList()).flatCollection(Function.identity()).nonNull().map(String::valueOf).map(v -> {
+                    try {
                         return Integer.parseInt(v);
-                    }catch (Exception e){
+                    } catch (Exception e) {
                         return null;
                     }
                 }).nonNull().toList();
-                if(!availableValueList.containsAll(certTypeList)){
+                if (!inputCertTypeList.containsAll(availableValueList)) {
                     throw new TraceBizException("凭证类型错误");
                 }
             }
         }
-
 
 
         // 计重类型，把件数和件重置空
@@ -1580,6 +1581,7 @@ public class RegisterBillService extends BaseServiceImpl<RegisterBill, Long> {
 
     /**
      * 修改图片
+     *
      * @param registerBill
      */
     public void doUpdateImage(RegisterBill registerBill) {
@@ -1589,12 +1591,13 @@ public class RegisterBillService extends BaseServiceImpl<RegisterBill, Long> {
 
     /**
      * 对上传图片数量做判断
+     *
      * @param registerBill
      */
-    private void checkImageCertList(RegisterBill registerBill){
+    private void checkImageCertList(RegisterBill registerBill) {
 
-        List<ImageCert> imageCertList =  StreamEx.ofNullable(registerBill.getImageCertList()).nonNull().flatCollection(Function.identity()).nonNull().toList();
-        if(imageCertList.size()>10){
+        List<ImageCert> imageCertList = StreamEx.ofNullable(registerBill.getImageCertList()).nonNull().flatCollection(Function.identity()).nonNull().toList();
+        if (imageCertList.size() > 10) {
             throw new TraceBizException("所有凭证不能超过10张");
         }
         registerBill.setImageCertList(imageCertList);

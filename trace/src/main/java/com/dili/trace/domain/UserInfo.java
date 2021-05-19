@@ -338,6 +338,21 @@ public class UserInfo extends BaseDomain {
     @Column(name = "`qr_history_id`")
     private Long qrHistoryId;
 
+    /**
+     * 状态
+     */
+    @ApiModelProperty(value = "状态")
+    @Column(name = "`approval_status`")
+    private Integer approvalStatus;
+
+    public Integer getApprovalStatus() {
+        return approvalStatus;
+    }
+
+    public void setApprovalStatus(Integer approvalStatus) {
+        this.approvalStatus = approvalStatus;
+    }
+
     public String getQrContent() {
         return qrContent;
     }

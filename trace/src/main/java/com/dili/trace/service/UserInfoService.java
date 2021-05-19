@@ -2,6 +2,7 @@ package com.dili.trace.service;
 
 import com.dili.commons.glossary.YesOrNoEnum;
 import com.dili.customer.sdk.domain.dto.CustomerExtendDto;
+import com.dili.customer.sdk.enums.CustomerEnum;
 import com.dili.ss.domain.BasePage;
 import com.dili.trace.api.input.UserQueryDto;
 import com.dili.trace.dao.UserMapper;
@@ -144,6 +145,7 @@ public class UserInfoService extends TraceBaseService<UserInfo, Long> {
         }
         LOGGER.info("id={},userId={},approvalStatus={}",id,extDto.getId(),extDto.getCustomerMarket().getApprovalStatus());
 
+
         try {
             UserInfo userInfo = new UserInfo();
             userInfo.setId(id);
@@ -154,6 +156,7 @@ public class UserInfoService extends TraceBaseService<UserInfo, Long> {
             userInfo.setCreated(Date.from(extDto.getCreateTime().atZone(ZoneId.systemDefault()).toInstant()));
             userInfo.setModified(Date.from(extDto.getModifyTime().atZone(ZoneId.systemDefault()).toInstant()));
             userInfo.setState(extDto.getCustomerMarket() != null ? extDto.getCustomerMarket().getState() : null);
+            userInfo.setApprovalStatus(extDto.getCustomerMarket().getApprovalStatus());
             this.updateSelective(userInfo);
             this.userQrHistoryService.createUserQrHistoryForUserRegist(this.get(userInfo.getId()), userInfo.getMarketId());
         } catch (Exception e) {

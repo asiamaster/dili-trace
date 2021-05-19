@@ -1,44 +1,45 @@
 package com.dili.trace.service;
 
-import cn.hutool.db.sql.SqlFormatter;
 import com.dili.customer.sdk.domain.CustomerMarket;
 import com.dili.customer.sdk.domain.dto.CustomerExtendDto;
 import com.dili.customer.sdk.enums.CustomerEnum;
 import com.dili.customer.sdk.rpc.CustomerRpc;
 import com.dili.ss.domain.BaseOutput;
 import com.dili.trace.AutoWiredBaseTest;
-import com.dili.trace.api.input.CreateRegisterBillInputDto;
 import com.dili.trace.api.input.ProductStockInput;
-import com.dili.trace.api.input.TradeDetailQueryDto;
 import com.dili.trace.api.input.TradeRequestHandleDto;
 import com.dili.trace.domain.*;
-import com.dili.trace.dto.CreateListBillParam;
 import com.dili.trace.dto.TradeDto;
-import com.dili.trace.enums.*;
-import com.dili.trace.rpc.service.CustomerRpcService;
+import com.dili.trace.enums.BuyerTypeEnum;
+import com.dili.trace.enums.TradeOrderStatusEnum;
+import com.dili.trace.enums.TradeOrderTypeEnum;
+import com.google.common.collect.Lists;
+import mockit.*;
 import one.util.streamex.StreamEx;
+import org.apache.commons.beanutils.BeanMap;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.platform.commons.util.ReflectionUtils;
 import org.mockito.Mockito;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
-import org.springframework.test.annotation.Commit;
-import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicBoolean;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @EnableDiscoveryClient
+//@DirtiesContext(classMode = AFTER_CLASS)
 public class TradeOrderServiceTest extends AutoWiredBaseTest {
     @Autowired
     TradeOrderService tradeOrderService;
@@ -46,6 +47,11 @@ public class TradeOrderServiceTest extends AutoWiredBaseTest {
     TradeRequestService tradeRequestService;
     @Autowired
     ProductStockService productStockService;
+    @Autowired
+    TradeRequestDetailService tradeRequestDetailService;
+    @Autowired
+    TradeDetailService tradeDetailService;
+
     //对真实的bean进行一次spy之后再注入。
     //相当于 @Autowired之后进行Spy然后再替换这个Service (@Autowired+@Spy)
 //    @SpyBean
@@ -53,7 +59,17 @@ public class TradeOrderServiceTest extends AutoWiredBaseTest {
     //用mock的bean来代码本次testcase相关的所有依赖的bean(@Autowired+@Mocked)
     @MockBean
     CustomerRpc customerRpc;
+    @Autowired
+    RegisterBillService registerBillService;
+    @Autowired
+    CheckinOutRecordService checkinOutRecordService;
+    @Autowired
+    BrandService brandService;
 
+//    @BeforeAll
+//    public static void applySpringIntegration() {
+//        new FakeBeanFactory();
+//    }
 
     //@Mock标注的Bean并没有被初始化，需要对当前对象进行初始化init(MockitoAnnotations.initMocks(this);)
     //@Spy的bean一定要有真实的属性值
@@ -61,6 +77,17 @@ public class TradeOrderServiceTest extends AutoWiredBaseTest {
 //    private CustomerRpc t; //MockitoAnnotations.initMocks(this);相当于t= Mockito.mock(CustomerRpc.class)
 //    @Spy
 //    private CustomerRpc t=new CustomerRpc();
+    private CustomerExtendDto buildCustExt(Long marketId, Long userId) {
+        CustomerExtendDto dto = new CustomerExtendDto();
+        dto.setName("test-user-" + userId);
+        dto.setId(userId);
+        dto.setCustomerMarket(new CustomerMarket());
+        dto.getCustomerMarket().setMarketId(marketId);
+        dto.setCreateTime(LocalDateTime.now());
+        dto.setModifyTime(LocalDateTime.now());
+        dto.getCustomerMarket().setApprovalStatus(CustomerEnum.ApprovalStatus.PASSED.getCode());
+        return dto;
+    }
 
     @Test
     public void findCustomerById() {
@@ -216,12 +243,12 @@ public class TradeOrderServiceTest extends AutoWiredBaseTest {
         List<Long> billIdList = StreamEx.of(this.registerBillService.listByExample(del)).map(RegisterBill::getId).toList();
         this.registerBillService.deleteByExample(del);
 
-        StreamEx.of(billIdList).forEach(billId->{
-            TradeDetail td=new TradeDetail();
+        StreamEx.of(billIdList).forEach(billId -> {
+            TradeDetail td = new TradeDetail();
             td.setBillId(billId);
             this.tradeDetailService.deleteByExample(td);
         });
-        ProductStock productStock=new ProductStock();
+        ProductStock productStock = new ProductStock();
         productStock.setUserId(userDto.getId());
         productStock.setMarketId(userDto.getCustomerMarket().getMarketId());
         this.productStockService.deleteByExample(productStock);
@@ -293,4 +320,211 @@ public class TradeOrderServiceTest extends AutoWiredBaseTest {
         Optional<TradeOrder> tradeOrder = this.tradeOrderService.createTradeFromRegisterBill(this.registerBillService.get(4L));
         Assertions.assertNotNull(tradeOrder);
     }
+
+    @Test
+    public void testBuyTrade() {
+
+        Long marketId = 8L;
+        Long userId = 100L;
+        List<BigDecimal> weightList = Lists.newArrayList(BigDecimal.valueOf(100L), BigDecimal.valueOf(80L));
+        Mockito.doAnswer(invocation -> {
+
+            Long uid = (Long) invocation.getArguments()[0];
+            Long mid = (Long) invocation.getArguments()[1];
+            return Optional.ofNullable(this.buildCustExt(mid, uid));
+        }).when(customerRpcService).findCustomerById(Mockito.anyLong(), Mockito.anyLong());
+
+        Mockito.doAnswer(invocation -> {
+            return Lists.newArrayList();
+        }).when(assetsRpcService).listCusCategory(Mockito.any(), Mockito.anyLong());
+
+        ProductStock ps = super.buildProductStock(marketId, userId, weightList);
+        BigDecimal totalWeight = StreamEx.of(weightList).reduce(BigDecimal.ZERO, BigDecimal::add);
+        assertEquals(ps.getStockWeight().compareTo(totalWeight), 0, "报备进门总重量与库存总重量不相等");
+
+        TradeDetail td = new TradeDetail();
+        td.setProductStockId(ps.getProductStockId());
+        List<TradeDetail> tradeDetailList = this.tradeDetailService.listByExample(td);
+        BigDecimal sumWeight = StreamEx.of(tradeDetailList).map(TradeDetail::getStockWeight).reduce(BigDecimal.ZERO, BigDecimal::add);
+        assertEquals(sumWeight.compareTo(totalWeight), 0, "报备进门总重量与批次库存总重量不相等");
+
+        TradeDto tradeDto = new TradeDto();
+        tradeDto.setMarketId(marketId);
+        tradeDto.setTradeOrderType(TradeOrderTypeEnum.BUY);
+
+        tradeDto.getSeller().setSellerId(ps.getUserId());
+        tradeDto.getSeller().setSellerName(ps.getUserName());
+
+        tradeDto.getBuyer().setBuyerType(BuyerTypeEnum.NORMAL_BUYER);
+        tradeDto.getBuyer().setBuyerId(2L);
+        tradeDto.getBuyer().setBuyerName("lisi");
+
+
+        BigDecimal tradeWeight = BigDecimal.valueOf(110);
+        List<ProductStockInput> batchStockInputList = new ArrayList<>();
+        ProductStockInput input = new ProductStockInput();
+        input.setProductStockId(ps.getProductStockId());
+        input.setTradeWeight(tradeWeight);
+        batchStockInputList.add(input);
+
+        TradeOrder tradeOrder = this.tradeOrderService.createBuyTrade(tradeDto, batchStockInputList);
+        Assertions.assertNotNull(tradeOrder);
+
+        ProductStock afterTradePs = this.productStockService.get(ps.getProductStockId());
+
+        List<TradeDetail> afterTradeDetailList = StreamEx.of(tradeDetailList).map(TradeDetail::getId).map(this.tradeDetailService::get).toList();
+        BigDecimal afterTradeSumWeight = StreamEx.of(afterTradeDetailList).map(TradeDetail::getStockWeight).reduce(BigDecimal.ZERO, BigDecimal::add);
+        BigDecimal afterTradeSumSoftWeight = StreamEx.of(afterTradeDetailList).map(TradeDetail::getSoftWeight).reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        assertEquals(afterTradePs.getStockWeight().compareTo(afterTradeSumWeight), 0, "剩余总库存与剩余批次总库存不一致");
+
+        assertEquals(afterTradeSumSoftWeight.add(afterTradeSumWeight).compareTo(totalWeight), 0, "锁定库存+剩余批次总库存之和不等于总进门重量");
+
+
+        TradeRequest treq = new TradeRequest();
+        treq.setTradeOrderId(tradeOrder.getTradeOrderId());
+        List<TradeRequest> tradeRequestList = this.tradeRequestService.listByExample(treq);
+
+
+        List<TradeRequestDetail> tradeRequestDetailList = StreamEx.of(tradeRequestList).map(TradeRequest::getId).flatCollection(treqId -> {
+            TradeRequestDetail trdQ = new TradeRequestDetail();
+            trdQ.setTradeRequestId(treqId);
+            return this.tradeRequestDetailService.listByExample(trdQ);
+
+        }).toList();
+        BigDecimal tradeWeightTotal = StreamEx.of(tradeRequestDetailList).map(TradeRequestDetail::getTradeWeight).reduce(BigDecimal.ZERO, BigDecimal::add);
+        assertEquals(tradeWeightTotal.compareTo(afterTradeSumSoftWeight), 0, "锁定库存与交易重量不一致");
+
+    }
+
+    @Test
+    @Transactional
+    public void testSellTrade() {
+
+        Long marketId = 8L;
+        Long sellerId = 100L;
+
+        Long buyerId = 2L;
+
+
+        List<BigDecimal> weightList = Lists.newArrayList(BigDecimal.valueOf(100L), BigDecimal.valueOf(80L));
+        Mockito.doAnswer(invocation -> {
+            Long uid = (Long) invocation.getArguments()[0];
+            Long mid = (Long) invocation.getArguments()[1];
+            return Optional.ofNullable(this.buildCustExt(mid, uid));
+        }).when(customerRpcService).findCustomerById(Mockito.anyLong(), Mockito.anyLong());
+
+        Mockito.doAnswer(invocation -> {
+            return Lists.newArrayList();
+        }).when(assetsRpcService).listCusCategory(Mockito.any(), Mockito.anyLong());
+
+        ProductStock ps = super.buildProductStock(marketId, sellerId, weightList);
+        BigDecimal totalWeight = StreamEx.of(weightList).reduce(BigDecimal.ZERO, BigDecimal::add);
+        assertEquals(ps.getStockWeight().compareTo(totalWeight), 0, "报备进门总重量与库存总重量不相等");
+
+        TradeDetail td = new TradeDetail();
+        td.setProductStockId(ps.getProductStockId());
+        List<TradeDetail> tradeDetailList = this.tradeDetailService.listByExample(td);
+        BigDecimal sumWeight = StreamEx.of(tradeDetailList).map(TradeDetail::getStockWeight).reduce(BigDecimal.ZERO, BigDecimal::add);
+        assertEquals(sumWeight.compareTo(totalWeight), 0, "报备进门总重量与批次库存总重量不相等");
+
+        TradeDto tradeDto = new TradeDto();
+        tradeDto.setMarketId(marketId);
+        tradeDto.setTradeOrderType(TradeOrderTypeEnum.SELL);
+
+        tradeDto.getSeller().setSellerId(ps.getUserId());
+        tradeDto.getSeller().setSellerName(ps.getUserName());
+
+
+        tradeDto.getBuyer().setBuyerType(BuyerTypeEnum.NORMAL_BUYER);
+        tradeDto.getBuyer().setBuyerId(buyerId);
+        tradeDto.getBuyer().setBuyerName("lisi");
+
+
+        //clean buyer ps
+
+        ProductStock q = new ProductStock();
+        q.setUserId(buyerId);
+        q.setMarketId(marketId);
+        q.setProductId(ps.getProductId());
+        q.setWeightUnit(ps.getWeightUnit());
+        q.setSpecName(ps.getSpecName());
+        q.setBrandId(ps.getBrandId());
+        this.productStockService.deleteByExample(q);
+
+
+        BigDecimal tradeWeight = BigDecimal.valueOf(110);
+        List<ProductStockInput> batchStockInputList = new ArrayList<>();
+        ProductStockInput input = new ProductStockInput();
+        input.setProductStockId(ps.getProductStockId());
+        input.setTradeWeight(tradeWeight);
+        batchStockInputList.add(input);
+        System.out.println(this.tradeOrderService);
+        System.out.println(this.tradeOrderService.tradeRequestService);
+
+        AtomicBoolean fakeDealTradeOrder = new AtomicBoolean(true);
+
+        new MockUp<TradeOrderService>() {
+            @Mock
+            protected void dealTradeOrder(Invocation inv, TradeOrder tradeOrderItem, TradeOrderStatusEnum tradeOrderStatusEnum, List<TradeRequest> tradeRequestList) {
+                if (fakeDealTradeOrder.get()) {
+                    System.out.println("fake dealTradeOrder");
+                } else {
+                    inv.proceed(tradeOrderItem, tradeOrderStatusEnum, tradeRequestList);
+                }
+            }
+        };
+        fakeDealTradeOrder.set(true);
+        TradeOrder tradeOrder = this.tradeOrderService.createSellTrade(tradeDto, batchStockInputList);
+
+
+        Assertions.assertNotNull(tradeOrder);
+//        Mockito.doReturn(null).when(this.tradeOrderService);
+
+        ProductStock afterTradePs = this.productStockService.get(ps.getProductStockId());
+
+        List<TradeDetail> afterTradeDetailList = StreamEx.of(tradeDetailList).map(TradeDetail::getId).map(this.tradeDetailService::get).toList();
+        BigDecimal afterTradeSumWeight = StreamEx.of(afterTradeDetailList).map(TradeDetail::getStockWeight).reduce(BigDecimal.ZERO, BigDecimal::add);
+        BigDecimal afterTradeSumSoftWeight = StreamEx.of(afterTradeDetailList).map(TradeDetail::getSoftWeight).reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        assertEquals(afterTradePs.getStockWeight().compareTo(afterTradeSumWeight), 0, "剩余总库存与剩余批次总库存不一致");
+
+        assertEquals(afterTradeSumSoftWeight.add(afterTradeSumWeight).compareTo(totalWeight), 0, "锁定库存+剩余批次总库存之和不等于总进门重量");
+
+
+        TradeRequest treq = new TradeRequest();
+        treq.setTradeOrderId(tradeOrder.getTradeOrderId());
+        List<TradeRequest> tradeRequestList = this.tradeRequestService.listByExample(treq);
+
+
+        List<TradeRequestDetail> tradeRequestDetailList = StreamEx.of(tradeRequestList).map(TradeRequest::getId).flatCollection(treqId -> {
+            TradeRequestDetail trdQ = new TradeRequestDetail();
+            trdQ.setTradeRequestId(treqId);
+            return this.tradeRequestDetailService.listByExample(trdQ);
+
+        }).toList();
+        BigDecimal tradeWeightTotal = StreamEx.of(tradeRequestDetailList).map(TradeRequestDetail::getTradeWeight).reduce(BigDecimal.ZERO, BigDecimal::add);
+        assertEquals(tradeWeightTotal.compareTo(afterTradeSumSoftWeight), 0, "锁定库存与交易重量不一致");
+
+
+        fakeDealTradeOrder.set(false);
+        this.tradeOrderService.dealTradeOrder(tradeOrder, TradeOrderStatusEnum.FINISHED, tradeRequestList);
+
+        ProductStock buyerPs = StreamEx.of(this.productStockService.listByExample(q)).findFirst().orElse(null);
+        assertNotNull(buyerPs);
+        assertEquals(buyerPs.getStockWeight().compareTo(tradeWeightTotal), 0);
+
+        TradeDetail tdq = new TradeDetail();
+        tdq.setProductStockId(buyerPs.getProductStockId());
+        List<TradeDetail> buyerTradeDetailList = this.tradeDetailService.listByExample(tdq);
+
+
+        long count = StreamEx.of(buyerTradeDetailList).count();
+        assertEquals(count, 2);
+        BigDecimal totalBuyedWeight = StreamEx.of(buyerTradeDetailList).map(TradeDetail::getStockWeight).reduce(BigDecimal.ZERO, BigDecimal::add);
+        assertEquals(totalBuyedWeight.compareTo(tradeWeightTotal), 0);
+
+    }
+
+
 }

@@ -7,6 +7,7 @@ import java.util.Optional;
 
 import com.dili.common.exception.TraceBizException;
 import com.dili.commons.glossary.YesOrNoEnum;
+import com.dili.customer.sdk.enums.CustomerEnum;
 import com.dili.ss.base.BaseServiceImpl;
 import com.dili.ss.domain.BasePage;
 import com.dili.trace.dao.UserQrHistoryMapper;
@@ -101,20 +102,32 @@ public class UserQrHistoryService extends TraceBaseService<UserQrHistory, Long> 
             return;
         }
         UserQrStatusEnum qrStatusEnum = UserQrStatusEnum.BLACK;
+
+        StringBuilder content = new StringBuilder();
+//        String content = "完成注册,默认为" + qrStatusEnum.getDesc() + "码";
+        if (CustomerEnum.ApprovalStatus.PASSED.equalsToCode(userInfoItem.getApprovalStatus())) {
+            qrStatusEnum = UserQrStatusEnum.GREEN;
+            content.append("用户审核通过,变为绿码");
+        } else if (CustomerEnum.ApprovalStatus.UN_PASS.equalsToCode(userInfoItem.getApprovalStatus())) {
+            qrStatusEnum = UserQrStatusEnum.RED;
+            content.append("用户审核未通过,变为红码");
+        } else if (CustomerEnum.ApprovalStatus.WAIT_CONFIRM.equalsToCode(userInfoItem.getApprovalStatus())) {
+            qrStatusEnum = UserQrStatusEnum.BLACK;
+            content.append("用户待审核,变为黑码");
+        }
         //插入qrhistory对象
-        String content = "完成注册,默认为" + qrStatusEnum.getDesc() + "码";
         this.buildUserQrHistory(userInfoItem.getId(), qrStatusEnum, QrHistoryEventTypeEnum.NEW_USER, null).ifPresent(userQrHistory -> {
 
-            userQrHistory.setContent(content);
+            userQrHistory.setContent(content.toString());
             this.insertSelective(userQrHistory);
 
             //更新userinfo的qr信息
             UserInfo userInfo = new UserInfo();
             userInfo.setId(userInfoItem.getId());
-            userInfo.setQrHistoryId(userQrHistory.getId());
             userInfo.setPreQrStatus(userInfoItem.getQrStatus());
+            userInfo.setQrHistoryId(userQrHistory.getId());
             userInfo.setQrStatus(userQrHistory.getQrStatus());
-            userInfo.setQrContent(content);
+            userInfo.setQrContent(userQrHistory.getContent());
             this.userInfoService.updateSelective(userInfo);
         });
     }
@@ -161,19 +174,19 @@ public class UserQrHistoryService extends TraceBaseService<UserQrHistory, Long> 
             return this.buildUserQrHistory(userInfoItem.getId(), userQrStatus, QrHistoryEventTypeEnum.REGISTER_BILL, billItem.getId())
                     .map(userQrHistory -> {
 
-                userQrHistory.setContent(content);
-                this.insertSelective(userQrHistory);
+                        userQrHistory.setContent(content);
+                        this.insertSelective(userQrHistory);
 
-                //更新userinfo的qr信息
-                UserInfo userInfo = new UserInfo();
-                userInfo.setId(userInfoItem.getId());
-                userInfo.setQrHistoryId(userQrHistory.getId());
-                userInfo.setPreQrStatus(userInfoItem.getQrStatus());
-                userInfo.setQrStatus(userQrHistory.getQrStatus());
-                userInfo.setQrContent(content);
-                this.userInfoService.updateSelective(userInfo);
-                return userQrHistory;
-            }).orElse(null);
+                        //更新userinfo的qr信息
+                        UserInfo userInfo = new UserInfo();
+                        userInfo.setId(userInfoItem.getId());
+                        userInfo.setPreQrStatus(userInfoItem.getQrStatus());
+                        userInfo.setQrHistoryId(userQrHistory.getId());
+                        userInfo.setQrStatus(userQrHistory.getQrStatus());
+                        userInfo.setQrContent(userQrHistory.getContent());
+                        this.userInfoService.updateSelective(userInfo);
+                        return userQrHistory;
+                    }).orElse(null);
 
         });
     }
@@ -219,10 +232,10 @@ public class UserQrHistoryService extends TraceBaseService<UserQrHistory, Long> 
                 //更新userinfo的qr信息
                 UserInfo userInfo = new UserInfo();
                 userInfo.setId(userInfoItem.getId());
-                userInfo.setQrHistoryId(userQrHistory.getId());
                 userInfo.setPreQrStatus(userInfoItem.getQrStatus());
+                userInfo.setQrHistoryId(userQrHistory.getId());
                 userInfo.setQrStatus(userQrHistory.getQrStatus());
-                userInfo.setQrContent(content);
+                userInfo.setQrContent(userQrHistory.getContent());
                 this.userInfoService.updateSelective(userInfo);
             });
 
