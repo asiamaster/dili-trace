@@ -56,6 +56,9 @@ public class UserOutput {
      */
     private String marketName;
 
+    private Long marketId;
+
+
     /**
      * 营业执照
      */
@@ -75,6 +78,14 @@ public class UserOutput {
      * 营业执照
      */
     private Attachment businessLicenseAttachment;
+
+    public Long getMarketId() {
+        return marketId;
+    }
+
+    public void setMarketId(Long marketId) {
+        this.marketId = marketId;
+    }
 
     public Attachment getBusinessLicenseAttachment() {
         return businessLicenseAttachment;

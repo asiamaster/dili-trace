@@ -107,7 +107,7 @@ public class UserQrHistoryService extends TraceBaseService<UserQrHistory, Long> 
 //        String content = "完成注册,默认为" + qrStatusEnum.getDesc() + "码";
         if (CustomerEnum.ApprovalStatus.PASSED.equalsToCode(userInfoItem.getApprovalStatus())) {
             qrStatusEnum = UserQrStatusEnum.GREEN;
-            content.append("用户审核通过,变为绿码");
+            content.append("用户审核通过,变为黑码");
         } else if (CustomerEnum.ApprovalStatus.UN_PASS.equalsToCode(userInfoItem.getApprovalStatus())) {
             qrStatusEnum = UserQrStatusEnum.RED;
             content.append("用户审核未通过,变为红码");

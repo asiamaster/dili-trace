@@ -360,6 +360,19 @@ public class TradeOrderServiceTest extends AutoWiredBaseTest {
         tradeDto.getBuyer().setBuyerName("lisi");
 
 
+
+        //clean buyer ps
+
+        ProductStock q = new ProductStock();
+        q.setUserId(tradeDto.getBuyer().getBuyerId());
+        q.setMarketId(marketId);
+        q.setProductId(ps.getProductId());
+        q.setWeightUnit(ps.getWeightUnit());
+        q.setSpecName(ps.getSpecName());
+        q.setBrandId(ps.getBrandId());
+        this.productStockService.deleteByExample(q);
+
+
         BigDecimal tradeWeight = BigDecimal.valueOf(110);
         List<ProductStockInput> batchStockInputList = new ArrayList<>();
         ProductStockInput input = new ProductStockInput();
@@ -394,6 +407,21 @@ public class TradeOrderServiceTest extends AutoWiredBaseTest {
         }).toList();
         BigDecimal tradeWeightTotal = StreamEx.of(tradeRequestDetailList).map(TradeRequestDetail::getTradeWeight).reduce(BigDecimal.ZERO, BigDecimal::add);
         assertEquals(tradeWeightTotal.compareTo(afterTradeSumSoftWeight), 0, "锁定库存与交易重量不一致");
+        this.tradeOrderService.dealTradeOrder(tradeOrder, TradeOrderStatusEnum.FINISHED, tradeRequestList);
+
+        ProductStock buyerPs = StreamEx.of(this.productStockService.listByExample(q)).findFirst().orElse(null);
+        assertNotNull(buyerPs);
+        assertEquals(buyerPs.getStockWeight().compareTo(tradeWeightTotal), 0);
+
+        TradeDetail tdq = new TradeDetail();
+        tdq.setProductStockId(buyerPs.getProductStockId());
+        List<TradeDetail> buyerTradeDetailList = this.tradeDetailService.listByExample(tdq);
+
+
+        long count = StreamEx.of(buyerTradeDetailList).count();
+        assertEquals(count, 2);
+        BigDecimal totalBuyedWeight = StreamEx.of(buyerTradeDetailList).map(TradeDetail::getStockWeight).reduce(BigDecimal.ZERO, BigDecimal::add);
+        assertEquals(totalBuyedWeight.compareTo(tradeWeightTotal), 0);
 
     }
 

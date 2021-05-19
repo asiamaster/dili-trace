@@ -22,8 +22,10 @@ import com.dili.trace.glossary.BizNumberType;
 import com.dili.trace.glossary.UpStreamTypeEnum;
 import com.dili.trace.glossary.UserTypeEnum;
 import com.dili.trace.rpc.service.CustomerRpcService;
+import com.dili.trace.rpc.service.FirmRpcService;
 import com.dili.trace.rpc.service.ProductRpcService;
 import com.dili.trace.rpc.service.UidRestfulRpcService;
+import com.dili.uap.sdk.domain.Firm;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
 import one.util.streamex.EntryStream;
@@ -79,6 +81,8 @@ public class TradeRequestService extends BaseServiceImpl<TradeRequest, Long> {
     UidRestfulRpcService uidRestfulRpcService;
     @Autowired
     ProductRpcService productRpcService;
+    @Autowired
+    FirmRpcService firmRpcService;
 
     /**
      * 返回真实mapper
@@ -98,8 +102,6 @@ public class TradeRequestService extends BaseServiceImpl<TradeRequest, Long> {
     private String getNextCode() {
         return this.uidRestfulRpcService.bizNumber(BizNumberType.TRADE_REQUEST_CODE);
     }
-
-
 
 
     /**
@@ -158,7 +160,7 @@ public class TradeRequestService extends BaseServiceImpl<TradeRequest, Long> {
             tradeDetail.setSaleStatus(SaleStatusEnum.NOT_FOR_SALE.getCode());
             tradeDetail.setSoftWeight(td.getStockWeight());
             tradeDetail.setStockWeight(BigDecimal.ZERO);
-            this.productRpcService.lock(td.getThirdPartyStockId(),buyerPS.getMarketId(),td.getStockWeight());
+            this.productRpcService.lock(td.getThirdPartyStockId(), buyerPS.getMarketId(), td.getStockWeight());
             this.tradeDetailService.updateSelective(tradeDetail);
 
         });
@@ -203,7 +205,7 @@ public class TradeRequestService extends BaseServiceImpl<TradeRequest, Long> {
         if (TradeReturnStatusEnum.REFUSE == returnStatus) {
 
             StreamEx.of(tradeDetailList).forEach(buyerTd -> {
-                BigDecimal softWeight=buyerTd.getSoftWeight();
+                BigDecimal softWeight = buyerTd.getSoftWeight();
 
                 ProductStock buyerStockItem = this.batchStockService.selectByIdForUpdate(buyerTd.getProductStockId())
                         .orElseThrow(() -> {
@@ -223,7 +225,7 @@ public class TradeRequestService extends BaseServiceImpl<TradeRequest, Long> {
                 tradeDetail.setSoftWeight(BigDecimal.ZERO);
                 this.tradeDetailService.updateSelective(tradeDetail);
 
-                this.productRpcService.release(buyerTd.getThirdPartyStockId(),buyerStockItem.getMarketId(),softWeight);
+                this.productRpcService.release(buyerTd.getThirdPartyStockId(), buyerStockItem.getMarketId(), softWeight);
             });
         } else {
 
@@ -232,7 +234,7 @@ public class TradeRequestService extends BaseServiceImpl<TradeRequest, Long> {
                 return this.tradeDetailService.get(parentId);
             }).forKeyValue((buyerTd, sellertd) -> {
 
-                BigDecimal softWeight=buyerTd.getSoftWeight();
+                BigDecimal softWeight = buyerTd.getSoftWeight();
 
                 ProductStock sellerBatchStockItem = this.batchStockService.selectByIdForUpdate(sellertd.getProductStockId())
                         .orElseThrow(() -> {
@@ -270,10 +272,10 @@ public class TradeRequestService extends BaseServiceImpl<TradeRequest, Long> {
                 this.batchStockService.updateSelective(sellerBatchStock);
                 this.tradeDetailService.updateSelective(sellerTradeDetail);
 
-                this.productRpcService.release(buyerTradeDetail.getThirdPartyStockId(),buyerStockItem.getMarketId(),buyerTradeDetail.getSoftWeight());
-                this.productRpcService.deductRegDetail(buyerTradeDetail.getTradeDetailId(),tradeRequestItem.getBuyerMarketId(),buyerTd.getStockWeight(),Optional.empty());
+                this.productRpcService.release(buyerTradeDetail.getThirdPartyStockId(), buyerStockItem.getMarketId(), buyerTradeDetail.getSoftWeight());
+                this.productRpcService.deductRegDetail(buyerTradeDetail.getTradeDetailId(), tradeRequestItem.getBuyerMarketId(), buyerTd.getStockWeight(), Optional.empty());
 
-                this.productRpcService.increaseRegDetail(sellerTradeDetail.getTradeDetailId(),tradeRequestItem.getSellerMarketId(),buyerTd.getStockWeight(),Optional.empty());
+                this.productRpcService.increaseRegDetail(sellerTradeDetail.getTradeDetailId(), tradeRequestItem.getSellerMarketId(), buyerTd.getStockWeight(), Optional.empty());
 
             });
 
@@ -343,16 +345,19 @@ public class TradeRequestService extends BaseServiceImpl<TradeRequest, Long> {
         List<Long> sellerIds = StreamEx.of(tradeRequests)
                 .map(TradeRequest::getSellerId).nonNull().distinct().toList();
 
-
+        Map<Long, String> marketIdNameMap = StreamEx.of(this.firmRpcService.findAllFirm()).toMap(Firm::getId, Firm::getName);
         return StreamEx.of(tradeRequests).nonNull().filter(tr -> {
             return tr.getSellerId() != null;
         }).map(tr -> {
 
             Long sellerId = tr.getSellerId();
             return this.customerRpcService.findCustomerById(sellerId, tr.getSellerMarketId()).map(cust -> {
+                Long marketId = cust.getCustomerMarket().getMarketId();
                 UserOutput outPutDto = new UserOutput();
                 outPutDto.setUserId(sellerId);
                 outPutDto.setUserName(cust.getName());
+                outPutDto.setMarketName(marketIdNameMap.getOrDefault(marketId, "未知"));
+                outPutDto.setMarketId(marketId);
                 outPutDto.setOrganizationType(cust.getOrganizationType());
                 StreamEx.ofNullable(cust.getAttachmentGroupInfoList()).flatCollection(Function.identity()).nonNull()
                         .filterBy(AttachmentGroupInfo::getCode, CustomerEnum.AttachmentType.营业执照.getCode())
