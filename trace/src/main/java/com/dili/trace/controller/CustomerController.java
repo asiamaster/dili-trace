@@ -78,9 +78,9 @@ public class CustomerController {
         }
         Firm firm = uapRpcService.getCurrentFirm().orElse(DTOUtils.newDTO(Firm.class));
         if (query.getId() != null) {
-            return BaseOutput.success().setData(this.extCustomerService.queryCustomerByCustomerId(query.getId(), firm));
+            return BaseOutput.success().setData(this.extCustomerService.querySellersByCustomerId(query.getId(), firm));
         } else if (StringUtils.isNotBlank(query.getKeyword())) {
-            return BaseOutput.success().setData(this.extCustomerService.queryCustomerByKeyWord(query.getKeyword().trim(), firm));
+            return BaseOutput.success().setData(this.extCustomerService.querySellersByKeyWord(query.getKeyword().trim(), firm));
         } else {
             return BaseOutput.success();
         }

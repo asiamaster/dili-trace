@@ -56,7 +56,6 @@ public class CustomerRpcService {
     private AccountRpcService accountRpcService;
 
 
-
     /**
      * 查询当前登录用户信息
      *
@@ -243,7 +242,7 @@ public class CustomerRpcService {
         }
         try {
             BaseOutput<CustomerExtendDto> out = this.customerRpc.get(customerId, marketId);
-            if (out!=null&&out.isSuccess()) {
+            if (out != null && out.isSuccess()) {
                 return Optional.ofNullable(out.getData());
             }
         } catch (Exception e) {
@@ -273,13 +272,14 @@ public class CustomerRpcService {
         }
         return customer;
     }
+
     /**
      * 查询客户
      *
      * @param customerId
      * @return
      */
-    public CustomerExtendDto findApprovedCustomerByIdOrEx(Long customerId, Long marketId,String errorMsg) {
+    public CustomerExtendDto findApprovedCustomerByIdOrEx(Long customerId, Long marketId, String errorMsg) {
         CustomerExtendDto customer = this.findCustomerByIdOrEx(customerId, marketId);
         if (!CustomerEnum.ApprovalStatus.PASSED.getCode().equals(customer.getCustomerMarket().getApprovalStatus())) {
             throw new TraceBizException(errorMsg);
@@ -288,17 +288,26 @@ public class CustomerRpcService {
     }
 
     /**
-     * return Optional.empty();
-     * }
-     * 分页查询
+     * 查询经营户
      *
      * @param queryInput
+     * @param characterType
      * @return
      */
-    public PageOutput<List<CustomerExtendDto>> listPage(CustomerQueryInput queryInput) {
-        PageOutput<List<CustomerExtendDto>> page = this.customerRpc.listPage(queryInput);
+    private PageOutput<List<CustomerExtendDto>> listNormalPage(CustomerQueryInput queryInput, CustomerEnum.CharacterType characterType) {
+        if (queryInput == null || queryInput.getMarketId() == null) {
+            return PageOutput.failure("参数错误");
+        }
+        CharacterType seller = new CharacterType();
+        seller.setCharacterType(characterType.getCode());
+        queryInput.setCharacterType(seller);
+
+        PageOutput<List<CustomerExtendDto>> page = this.customerRpc.listNormalPage(queryInput);
         return page;
     }
+
+
+
 
     /**
      * 查询经营户
@@ -308,12 +317,8 @@ public class CustomerRpcService {
      * @return
      */
     public PageOutput<List<CustomerExtendDto>> listSeller(CustomerQueryInput queryInput, Long marketId) {
-
-        CharacterType seller = new CharacterType();
-        seller.setCharacterType(CustomerEnum.CharacterType.经营户.getCode());
-        queryInput.setCharacterType(seller);
         queryInput.setMarketId(marketId);
-        PageOutput<List<CustomerExtendDto>> pageOutput = this.listPage(queryInput);
+        PageOutput<List<CustomerExtendDto>> pageOutput = this.listNormalPage(queryInput,CustomerEnum.CharacterType.经营户);
         return pageOutput;
     }
 
@@ -325,13 +330,9 @@ public class CustomerRpcService {
      * @return
      */
     public PageOutput<List<CustomerExtendDto>> listBuyer(CustomerQueryInput queryInput, Long marketId) {
-
-        CharacterType buyer = new CharacterType();
-        buyer.setCharacterType(CustomerEnum.CharacterType.买家.getCode());
-        queryInput.setCharacterType(buyer);
         queryInput.setMarketId(marketId);
         logger.debug("listBuyer:marketId={},queryInput={}", marketId, JSON.toJSONString(queryInput));
-        PageOutput<List<CustomerExtendDto>> pageOutput = this.listPage(queryInput);
+        PageOutput<List<CustomerExtendDto>> pageOutput = this.listNormalPage(queryInput,CustomerEnum.CharacterType.买家);
         return pageOutput;
     }
 
@@ -343,12 +344,8 @@ public class CustomerRpcService {
      * @return
      */
     public PageOutput<List<CustomerExtendDto>> listDriver(CustomerQueryInput queryInput, Long marketId) {
-
-        CharacterType driver = new CharacterType();
-        driver.setCharacterType(CustomerEnum.CharacterType.其他类型.getCode());
-        queryInput.setCharacterType(driver);
         queryInput.setMarketId(marketId);
-        PageOutput<List<CustomerExtendDto>> pageOutput = this.listPage(queryInput);
+        PageOutput<List<CustomerExtendDto>> pageOutput = this.listNormalPage(queryInput,CustomerEnum.CharacterType.其他类型);
         return pageOutput;
     }
 
@@ -402,7 +399,7 @@ public class CustomerRpcService {
      */
     public Optional<AccountGetListResultDto> queryCardInfoByCustomerCode(String customerCode, String cardNo, Long marketId) {
 
-        AccountGetListQueryDto queryDto=new AccountGetListQueryDto();
+        AccountGetListQueryDto queryDto = new AccountGetListQueryDto();
         queryDto.setFirmId(marketId);
         queryDto.setCustomerCode(StringUtils.trimToNull(customerCode));
         if (StringUtils.isNotBlank(cardNo)) {
@@ -421,7 +418,7 @@ public class CustomerRpcService {
         CustomerQueryInput queryInput = new CustomerQueryInput();
         queryInput.setVehicleNumber(plate);
         queryInput.setMarketId(marketId);
-        PageOutput<List<CustomerExtendDto>> pageOutput = this.listPage(queryInput);
+        PageOutput<List<CustomerExtendDto>> pageOutput = this.listNormalPage(queryInput,CustomerEnum.CharacterType.经营户);
 
         return StreamEx.ofNullable(pageOutput).filter(PageOutput::isSuccess)
                 .map(PageOutput::getData).nonNull()
@@ -448,14 +445,13 @@ public class CustomerRpcService {
     }
 
 
-
     /**
      * 查询
      *
      * @param keyword
      * @param firm
      */
-    public List<Long> findCustomerIdListByKeywordFromCustomer(String keyword, Firm firm) {
+    public List<Long> findSellerIdListByKeywordFromCustomer(String keyword, Firm firm) {
         if (StringUtils.isBlank(keyword) || firm == null) {
             return Lists.newArrayList();
         }
@@ -477,7 +473,7 @@ public class CustomerRpcService {
      * @param keyword
      * @param firm
      */
-    public List<Long> findCustomerIdListByKeywordFromAccount(String keyword, Firm firm) {
+    public List<Long> findSellerIdListByKeywordFromAccount(String keyword, Firm firm) {
         if (StringUtils.isBlank(keyword) || firm == null) {
             return Lists.newArrayList();
         }

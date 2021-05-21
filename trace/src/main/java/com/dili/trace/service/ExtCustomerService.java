@@ -73,7 +73,7 @@ public class ExtCustomerService {
      * @param id
      * @param firm
      */
-    public List<TraceCustomer> queryCustomerByCustomerId(Long id, Firm firm) {
+    public List<TraceCustomer> querySellersByCustomerId(Long id, Firm firm) {
         if (id == null || firm == null) {
             return Lists.newArrayList();
         }
@@ -87,11 +87,11 @@ public class ExtCustomerService {
      * @param keyword
      * @param firm
      */
-    public List<TraceCustomer> queryCustomerByKeyWord(String keyword, Firm firm) {
+    public List<TraceCustomer> querySellersByKeyWord(String keyword, Firm firm) {
         if (StringUtils.isBlank(keyword) || firm == null) {
             return Lists.newArrayList();
         }
-        List<Long> customerIdList = this.findCustomerIdListByKeyword(keyword, firm);
+        List<Long> customerIdList = this.findSellerIdListByKeyword(keyword, firm);
         return this.findByCustomerIdList(customerIdList, firm);
     }
 
@@ -102,15 +102,15 @@ public class ExtCustomerService {
      * @param keyword
      * @param firm
      */
-    public List<Long> findCustomerIdListByKeyword(String keyword, Firm firm) {
+    public List<Long> findSellerIdListByKeyword(String keyword, Firm firm) {
         if (StringUtils.isBlank(keyword) || firm == null) {
             return Lists.newArrayList();
         }
         List<Future<List<Long>>> futures = Lists.newArrayList(this.asyncService.executeAsync(() -> {
-                    return this.customerRpcService.findCustomerIdListByKeywordFromCustomer(keyword, firm);
+                    return this.customerRpcService.findSellerIdListByKeywordFromCustomer(keyword, firm);
                 }),
                 this.asyncService.executeAsync(() -> {
-                    return this.customerRpcService.findCustomerIdListByKeywordFromAccount(keyword, firm);
+                    return this.customerRpcService.findSellerIdListByKeywordFromAccount(keyword, firm);
                 })
 
         );

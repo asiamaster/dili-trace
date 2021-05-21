@@ -1,7 +1,14 @@
 package com.dili.trace.domain;
 
+import com.dili.customer.sdk.domain.Attachment;
+import com.dili.customer.sdk.domain.dto.AttachmentGroupInfo;
 import com.dili.customer.sdk.domain.dto.CustomerExtendDto;
+import com.dili.customer.sdk.enums.CustomerEnum;
+import com.dili.trace.dto.VehicleInfoDto;
 import io.swagger.annotations.ApiModelProperty;
+import one.util.streamex.StreamEx;
+
+import java.util.List;
 
 /**
  * 由MyBatis Generator工具自动生成
@@ -31,6 +38,42 @@ public class TraceCustomer {
     private String marketName;
 
     private Long marketId;
+
+    /**
+     * 类型
+     */
+    private Integer clientType;
+
+
+    /**
+     * 组织类型,个人/企业
+     * {@link com.dili.customer.sdk.enums.CustomerEnum.OrganizationType}
+     */
+    private String organizationType;
+
+    /**
+     * 园区卡号
+     */
+    private String tradePrintingCard;
+
+    /**
+     * 车辆信息
+     */
+    private List<VehicleInfoDto> vehicleInfoList;
+
+    private List<AttachmentGroupInfo> attachmentGroupInfoList;
+
+    private Attachment businessLicenseAttachment;
+
+    public void setAttachmentGroupInfoList(List<AttachmentGroupInfo> attachmentGroupInfoList) {
+        this.attachmentGroupInfoList = attachmentGroupInfoList;
+        if (attachmentGroupInfoList != null && attachmentGroupInfoList.size() > 0) {
+            this.businessLicenseAttachment = StreamEx.of(attachmentGroupInfoList).filterBy(AttachmentGroupInfo::getCode, CustomerEnum.AttachmentType.营业执照.getCode())
+                    .flatCollection(AttachmentGroupInfo::getAttachmentList).findFirst().orElse(null);
+
+        }
+    }
+
 
     public String getMarketName() {
         return marketName;

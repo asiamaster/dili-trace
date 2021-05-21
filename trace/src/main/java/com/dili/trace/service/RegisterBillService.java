@@ -1170,12 +1170,17 @@ public class RegisterBillService extends BaseServiceImpl<RegisterBill, Long> {
 
         bill.setReason(StringUtils.trimToEmpty(reason));
         if (BillVerifyStatusEnum.PASSED == toVerifyState) {
-            if (CheckinStatusEnum.ALLOWED.equalsToCode(billItem.getCheckinStatus())) {
-//            if (YesOrNoEnum.YES.getCode().equals(billItem.getIsCheckin())) {
+            if (RegistTypeEnum.SUPPLEMENT.equalsToCode(billItem.getRegistType())) {
                 bill.setVerifyType(VerifyTypeEnum.PASSED_AFTER_CHECKIN.getCode());
             } else {
                 bill.setVerifyType(VerifyTypeEnum.PASSED_BEFORE_CHECKIN.getCode());
             }
+//            if (CheckinStatusEnum.ALLOWED.equalsToCode(billItem.getCheckinStatus())) {
+////            if (YesOrNoEnum.YES.getCode().equals(billItem.getIsCheckin())) {
+//                bill.setVerifyType(VerifyTypeEnum.PASSED_AFTER_CHECKIN.getCode());
+//            } else {
+//                bill.setVerifyType(VerifyTypeEnum.PASSED_BEFORE_CHECKIN.getCode());
+//            }
         }
         bill.setModified(new Date());
         this.updateSelective(bill);

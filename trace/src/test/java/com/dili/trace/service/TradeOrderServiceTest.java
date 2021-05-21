@@ -322,6 +322,7 @@ public class TradeOrderServiceTest extends AutoWiredBaseTest {
     }
 
     @Test
+    @Transactional
     public void testBuyTrade() {
 
         Long marketId = 8L;
