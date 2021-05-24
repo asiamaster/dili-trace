@@ -4,6 +4,7 @@ import com.dili.customer.sdk.domain.query.CustomerQueryInput;
 import com.dili.trace.async.AsyncService;
 import com.dili.trace.domain.TraceCustomer;
 import com.dili.trace.rpc.dto.AccountGetListQueryDto;
+import com.dili.trace.rpc.dto.CustomerQueryDto;
 import com.dili.trace.rpc.service.AccountRpcService;
 import com.dili.trace.rpc.service.CustomerRpcService;
 import com.dili.trace.rpc.service.FirmRpcService;
@@ -159,9 +160,10 @@ public class ExtCustomerService {
             return Lists.newArrayList();
         }
 
-        CustomerQueryInput query = new CustomerQueryInput();
+        CustomerQueryDto query = new CustomerQueryDto();
         query.setCodeList(list);
-        return StreamEx.of(this.customerRpcService.listSeller(query, firm.getId()).getData()).map(customerExtendDto -> {
+        query.setMarketId(firm.getId());
+        return StreamEx.of(this.customerRpcService.listSeller(query).getData()).map(customerExtendDto -> {
             return customerExtendDto.getId();
         }).toList();
 
@@ -179,9 +181,10 @@ public class ExtCustomerService {
             return Lists.newArrayList();
         }
         Future<Map<Long, TraceCustomer>> idCustMapFuture = this.asyncService.executeAsync(() -> {
-            CustomerQueryInput query = new CustomerQueryInput();
+            CustomerQueryDto query = new CustomerQueryDto();
+            query.setMarketId(firm.getId());
             query.setIdSet(Sets.newHashSet(customerIdList));
-            return StreamEx.of(this.customerRpcService.listSeller(query, firm.getId()).getData()).toMap(c -> {
+            return StreamEx.of(this.customerRpcService.listSeller(query).getData()).toMap(c -> {
                 return c.getId();
             }, c -> {
                 TraceCustomer customer = new TraceCustomer();

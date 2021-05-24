@@ -3,6 +3,7 @@ package com.dili.trace.api.client;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Function;
 
 import com.alibaba.fastjson.JSON;
@@ -13,7 +14,10 @@ import com.dili.common.annotation.Role;
 import com.dili.common.entity.LoginSessionContext;
 import com.dili.common.entity.SessionData;
 import com.dili.common.exception.TraceBizException;
+import com.dili.customer.sdk.domain.Attachment;
+import com.dili.customer.sdk.domain.VehicleInfo;
 import com.dili.customer.sdk.domain.dto.CustomerExtendDto;
+import com.dili.customer.sdk.domain.dto.CustomerSimpleExtendDto;
 import com.dili.customer.sdk.domain.query.CustomerQueryInput;
 import com.dili.customer.sdk.enums.CustomerEnum;
 import com.dili.ss.domain.BaseOutput;
@@ -29,10 +33,14 @@ import com.dili.trace.dto.TradeDto;
 import com.dili.trace.dto.CustomerExtendOutPutDto;
 import com.dili.trace.dto.VehicleInfoDto;
 import com.dili.trace.enums.*;
+import com.dili.trace.rpc.dto.CustomerQueryDto;
+import com.dili.trace.rpc.service.AttachmentRpcService;
 import com.dili.trace.rpc.service.CarTypeRpcService;
 import com.dili.trace.rpc.service.CustomerRpcService;
+import com.dili.trace.rpc.service.VehicleRpcService;
 import com.dili.trace.service.*;
 
+import com.google.common.collect.Lists;
 import one.util.streamex.StreamEx;
 import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
@@ -43,6 +51,8 @@ import org.springframework.web.bind.annotation.*;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+
+import javax.swing.text.html.Option;
 
 /**
  * (经营户，买家)用户交易请求接口
@@ -81,6 +91,11 @@ public class ClientTradeRequestApi {
     CarTypeRpcService carTypeRpcService;
     @Autowired
     UserStoreService userStoreService;
+    @Autowired
+    VehicleRpcService vehicleRpcService;
+    @Autowired
+    AttachmentRpcService attachmentRpcService;
+
 
     /**
      * 查询交易请求列表
@@ -93,7 +108,7 @@ public class ClientTradeRequestApi {
     public BaseOutput<BasePage<TradeRequest>> listPage(@RequestBody TradeRequestListInput condition) {
 
         try {
-            SessionData sessionData=this.sessionContext.getSessionData();
+            SessionData sessionData = this.sessionContext.getSessionData();
             Long userId = sessionData.getUserId();
 
             if (condition.getBuyerId() == null && condition.getSellerId() == null) {
@@ -105,8 +120,8 @@ public class ClientTradeRequestApi {
             }
             if (condition.getBuyerId() != null) {
                 condition.setBuyerMarketId(this.sessionContext.getSessionData().getMarketId());
-                String orderTypeStrs=StreamEx.of(TradeOrderTypeEnum.values()).map(TradeOrderTypeEnum::getCode).joining(",");
-                condition.setMetadata(IDTO.AND_CONDITION_EXPR, "  trade_order_id not  in( select id from trade_order  where  order_type not in("+orderTypeStrs+") and `buyer_id` = "+condition.getBuyerId()+" and `buyer_market_id` = "+condition.getBuyerMarketId()+")");
+                String orderTypeStrs = StreamEx.of(TradeOrderTypeEnum.values()).map(TradeOrderTypeEnum::getCode).joining(",");
+                condition.setMetadata(IDTO.AND_CONDITION_EXPR, "  trade_order_id not  in( select id from trade_order  where  order_type not in(" + orderTypeStrs + ") and `buyer_id` = " + condition.getBuyerId() + " and `buyer_market_id` = " + condition.getBuyerMarketId() + ")");
             }
             if (condition.getSellerId() != null) {
                 condition.setSellerMarketId(this.sessionContext.getSessionData().getMarketId());
@@ -173,10 +188,10 @@ public class ClientTradeRequestApi {
     @ApiOperation(value = "创建购买请求")
     @RequestMapping(value = "/createBuyProductRequest.api", method = RequestMethod.POST)
     public BaseOutput<?> createBuyProductRequest(@RequestBody TradeRequestListInput inputDto) {
-        if (inputDto == null||inputDto.getTradeMarketId()==null||inputDto.getBatchStockList()==null) {
+        if (inputDto == null || inputDto.getTradeMarketId() == null || inputDto.getBatchStockList() == null) {
             return BaseOutput.failure("参数错误");
         }
-        List<ProductStockInput> batchStockInputList=StreamEx.of(inputDto.getBatchStockList()).nonNull().toList();
+        List<ProductStockInput> batchStockInputList = StreamEx.of(inputDto.getBatchStockList()).nonNull().toList();
         if (batchStockInputList.isEmpty()) {
             return BaseOutput.failure("参数错误");
         }
@@ -407,13 +422,14 @@ public class ClientTradeRequestApi {
      * @return 卖家列表
      */
     @RequestMapping(value = "/listSeller.api", method = {RequestMethod.POST})
-    public String listSeller(@RequestBody CustomerQueryInput query) {
+    public String listSeller(@RequestBody CustomerQueryDto query) {
         try {
             Long marketId = this.sessionContext.getSessionData().getMarketId();
             query.setPage(1);
             //取100个，再多远程太慢了
             query.setRows(50);
-            PageOutput<List<CustomerExtendDto>> pageOutput = this.customerRpcService.listSeller(query, marketId);
+            query.setMarketId(marketId);
+            PageOutput<List<CustomerSimpleExtendDto>> pageOutput = this.customerRpcService.listSeller(query);
 
             // UAP 内置对象缺少市场名称、园区卡号，只能重新构建返回对象
             List<CustomerExtendOutPutDto> list = getListPageOutput(marketId, pageOutput, ClientTypeEnum.SELLER).getData();
@@ -434,13 +450,17 @@ public class ClientTradeRequestApi {
      * @param pageOutput
      * @return
      */
-    private PageOutput<List<CustomerExtendOutPutDto>> getListPageOutput(Long marketId, PageOutput<List<CustomerExtendDto>> pageOutput, ClientTypeEnum clientTypeEnum) {
+    private PageOutput<List<CustomerExtendOutPutDto>> getListPageOutput(Long marketId, PageOutput<List<CustomerSimpleExtendDto>> pageOutput, ClientTypeEnum clientTypeEnum) {
         PageOutput<List<CustomerExtendOutPutDto>> page = new PageOutput<>();
         if (null != pageOutput) {
             Map<Long, String> carTypeMap = StreamEx.ofNullable(this.carTypeRpcService.listCarType()).flatCollection(Function.identity())
                     .mapToEntry(CarTypeDTO::getId, CarTypeDTO::getName).toMap();
 
-            List<CustomerExtendDto> customerList = pageOutput.getData();
+            List<CustomerSimpleExtendDto> customerList = pageOutput.getData();
+            List<Long> customerIdList = StreamEx.ofNullable(customerList).flatCollection(Function.identity()).nonNull().map(CustomerSimpleExtendDto::getId).toList();
+            Map<Long, List<VehicleInfo>> vehicleInfoMap = this.vehicleRpcService.findVehicleInfoByMarketIdAndCustomerIdList(marketId, customerIdList);
+            Map<Long, Optional<Attachment>> attachmentMap = this.attachmentRpcService.findAttachmentByAttachmentTypeAndCustomerIdList(marketId, customerIdList, CustomerEnum.AttachmentType.营业执照);
+
             List<CustomerExtendOutPutDto> customerOutputList = new ArrayList<>();
             if (CollectionUtils.isNotEmpty(customerList)) {
                 customerList.forEach(c -> {
@@ -450,7 +470,7 @@ public class ClientTradeRequestApi {
                     customerOutput.setId(c.getId());
                     customerOutput.setName(c.getName());
                     customerOutput.setOrganizationType(c.getOrganizationType());
-                    customerOutput.setAttachmentGroupInfoList(c.getAttachmentGroupInfoList());
+                    customerOutput.setBusinessLicenseAttachment(attachmentMap.get(c.getId()).orElse(null));
                     customerOutput.setPhone(c.getContactsPhone());
                     customerOutput.setClientType(clientTypeEnum.getCode());
 
@@ -458,7 +478,7 @@ public class ClientTradeRequestApi {
                         customerOutput.setTradePrintingCard(cardInfo.getCardNo());
                     });
 
-                    List<VehicleInfoDto> vehicleInfoDtoList = StreamEx.ofNullable(c.getVehicleInfoList()).flatCollection(Function.identity()).map(v -> {
+                    List<VehicleInfoDto> vehicleInfoDtoList = StreamEx.of(vehicleInfoMap.getOrDefault(c.getId(), Lists.newArrayList())).map(v -> {
                         VehicleInfoDto vehicleInfoDto = new VehicleInfoDto();
                         vehicleInfoDto.setVehiclePlate(v.getRegistrationNumber());
                         vehicleInfoDto.setVehicleType(v.getTypeNumber());

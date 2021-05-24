@@ -5,15 +5,20 @@ import com.dili.common.annotation.AppAccess;
 import com.dili.common.annotation.Role;
 import com.dili.common.entity.LoginSessionContext;
 import com.dili.common.exception.TraceBizException;
+import com.dili.customer.sdk.domain.VehicleInfo;
 import com.dili.customer.sdk.domain.dto.CustomerExtendDto;
+import com.dili.customer.sdk.domain.dto.CustomerSimpleExtendDto;
 import com.dili.customer.sdk.domain.query.CustomerQueryInput;
 import com.dili.ss.domain.BaseOutput;
 import com.dili.ss.domain.PageOutput;
 import com.dili.trace.dto.*;
 import com.dili.trace.enums.ClientTypeEnum;
 import com.dili.trace.rpc.dto.AccountGetListResultDto;
+import com.dili.trace.rpc.dto.CustomerQueryDto;
 import com.dili.trace.rpc.service.CarTypeRpcService;
 import com.dili.trace.rpc.service.CustomerRpcService;
+import com.dili.trace.rpc.service.VehicleRpcService;
+import com.google.common.collect.Lists;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import one.util.streamex.StreamEx;
@@ -48,6 +53,8 @@ public class ManagerUserApi {
     CustomerRpcService customerRpcService;
     @Autowired
     CarTypeRpcService carTypeRpcService;
+    @Autowired
+    VehicleRpcService vehicleRpcService;
 
 //    /**
 //     * 商户审核统计概览
@@ -146,10 +153,12 @@ public class ManagerUserApi {
      */
     @ApiOperation(value = "查询经营户信息")
     @RequestMapping(value = "/listSeller.api", method = RequestMethod.POST)
-    public PageOutput<List<CustomerExtendOutPutDto>> listSeller(@RequestBody CustomerQueryInput input) {
+    public PageOutput<List<CustomerExtendOutPutDto>> listSeller(@RequestBody CustomerQueryDto input) {
         try {
             Long marketId = this.sessionContext.getSessionData().getMarketId();
-            PageOutput<List<CustomerExtendDto>> pageOutput = this.customerRpcService.listSeller(input, marketId);
+            input.setMarketId(marketId);
+            input.setQueryVehicleInfo(true);
+            PageOutput<List<CustomerSimpleExtendDto>> pageOutput = this.customerRpcService.listSeller(input);
 
             // UAP 内置对象缺少市场名称、园区卡号，只能重新构建返回对象
             return getListPageOutput(marketId, pageOutput, ClientTypeEnum.SELLER);
@@ -169,10 +178,12 @@ public class ManagerUserApi {
      */
     @ApiOperation(value = "查询买家信息")
     @RequestMapping(value = "/listBuyer.api", method = RequestMethod.POST)
-    public PageOutput<List<CustomerExtendOutPutDto>> listBuyer(@RequestBody CustomerQueryInput input) {
+    public PageOutput<List<CustomerExtendOutPutDto>> listBuyer(@RequestBody CustomerQueryDto input) {
         try {
             Long marketId = this.sessionContext.getSessionData().getMarketId();
-            PageOutput<List<CustomerExtendDto>> pageOutput = this.customerRpcService.listBuyer(input, marketId);
+            input.setMarketId(marketId);
+            input.setQueryVehicleInfo(true);
+            PageOutput<List<CustomerSimpleExtendDto>> pageOutput = this.customerRpcService.listBuyer(input);
             // UAP 内置对象缺少市场名称、园区卡号，只能重新构建返回对象
             return getListPageOutput(marketId, pageOutput, ClientTypeEnum.BUYER);
         } catch (TraceBizException e) {
@@ -191,10 +202,11 @@ public class ManagerUserApi {
      */
     @ApiOperation(value = "查询司机信息")
     @RequestMapping(value = "/listDriver.api", method = RequestMethod.POST)
-    public BaseOutput<List<CustomerExtendOutPutDto>> listDriver(@RequestBody CustomerQueryInput input) {
+    public BaseOutput<List<CustomerExtendOutPutDto>> listDriver(@RequestBody CustomerQueryDto input) {
         try {
             Long marketId = this.sessionContext.getSessionData().getMarketId();
-            PageOutput<List<CustomerExtendDto>> pageOutput = this.customerRpcService.listDriver(input, marketId);
+            input.setMarketId(marketId);
+            PageOutput<List<CustomerSimpleExtendDto>> pageOutput = this.customerRpcService.listDriver(input, marketId);
             // UAP 内置对象缺少市场名称、园区卡号，只能重新构建返回对象
             return getListPageOutput(marketId, pageOutput, ClientTypeEnum.DRIVER);
         } catch (TraceBizException e) {
@@ -212,13 +224,15 @@ public class ManagerUserApi {
      * @param pageOutput
      * @return
      */
-    private PageOutput<List<CustomerExtendOutPutDto>> getListPageOutput(Long marketId, PageOutput<List<CustomerExtendDto>> pageOutput, ClientTypeEnum clientTypeEnum) {
+    private PageOutput<List<CustomerExtendOutPutDto>> getListPageOutput(Long marketId, PageOutput<List<CustomerSimpleExtendDto>> pageOutput, ClientTypeEnum clientTypeEnum) {
         PageOutput<List<CustomerExtendOutPutDto>> page = new PageOutput<>();
         if (null != pageOutput) {
             Map<Long, String> carTypeMap = StreamEx.ofNullable(this.carTypeRpcService.listCarType()).flatCollection(Function.identity())
                     .mapToEntry(CarTypeDTO::getId, CarTypeDTO::getName).toMap();
 
-            List<CustomerExtendDto> customerList = pageOutput.getData();
+            List<CustomerSimpleExtendDto> customerList = pageOutput.getData();
+            List<Long> customerIdList = StreamEx.ofNullable(customerList).flatCollection(Function.identity()).nonNull().map(CustomerSimpleExtendDto::getId).toList();
+            Map<Long, List<VehicleInfo>> vehicleInfoMap=  this.vehicleRpcService.findVehicleInfoByMarketIdAndCustomerIdList(marketId,customerIdList);
             List<CustomerExtendOutPutDto> customerOutputList = new ArrayList<>();
             if (CollectionUtils.isNotEmpty(customerList)) {
                 customerList.forEach(c -> {
@@ -236,7 +250,7 @@ public class ManagerUserApi {
                         customerOutput.setTradePrintingCard(cardInfo.getCardNo());
                     });
 
-                    List<VehicleInfoDto> vehicleInfoDtoList = StreamEx.ofNullable(c.getVehicleInfoList()).flatCollection(Function.identity()).map(v -> {
+                    List<VehicleInfoDto> vehicleInfoDtoList = StreamEx.of(vehicleInfoMap.getOrDefault(c.getId(), Lists.newArrayList())).map(v -> {
                         VehicleInfoDto vehicleInfoDto = new VehicleInfoDto();
                         vehicleInfoDto.setVehiclePlate(v.getRegistrationNumber());
                         vehicleInfoDto.setVehicleType(v.getTypeNumber());

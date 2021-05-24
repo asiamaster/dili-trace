@@ -14,18 +14,14 @@ import com.dili.trace.enums.BuyerTypeEnum;
 import com.dili.trace.enums.TradeOrderStatusEnum;
 import com.dili.trace.enums.TradeOrderTypeEnum;
 import com.google.common.collect.Lists;
-import mockit.*;
 import one.util.streamex.StreamEx;
-import org.apache.commons.beanutils.BeanMap;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.platform.commons.util.ReflectionUtils;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
-import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
@@ -493,16 +489,16 @@ public class TradeOrderServiceTest extends AutoWiredBaseTest {
 
         AtomicBoolean fakeDealTradeOrder = new AtomicBoolean(true);
 
-        new MockUp<TradeOrderService>() {
-            @Mock
-            protected void dealTradeOrder(Invocation inv, TradeOrder tradeOrderItem, TradeOrderStatusEnum tradeOrderStatusEnum, List<TradeRequest> tradeRequestList) {
-                if (fakeDealTradeOrder.get()) {
-                    System.out.println("fake dealTradeOrder");
-                } else {
-                    inv.proceed(tradeOrderItem, tradeOrderStatusEnum, tradeRequestList);
-                }
-            }
-        };
+//        new MockUp<TradeOrderService>() {
+//            @Mock
+//            protected void dealTradeOrder(Invocation inv, TradeOrder tradeOrderItem, TradeOrderStatusEnum tradeOrderStatusEnum, List<TradeRequest> tradeRequestList) {
+//                if (fakeDealTradeOrder.get()) {
+//                    System.out.println("fake dealTradeOrder");
+//                } else {
+//                    inv.proceed(tradeOrderItem, tradeOrderStatusEnum, tradeRequestList);
+//                }
+//            }
+//        };
         fakeDealTradeOrder.set(true);
         TradeOrder tradeOrder = this.tradeOrderService.createSellTrade(tradeDto, batchStockInputList);
 

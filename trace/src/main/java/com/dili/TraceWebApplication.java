@@ -1,7 +1,6 @@
 package com.dili;
 
-import com.dili.common.config.BuildConfiguration;
-import com.dili.ss.metadata.provider.DatetimeProvider;
+import com.dili.ss.retrofitful.annotation.RestfulScan;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.SpringApplication;
@@ -20,15 +19,9 @@ import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.context.annotation.Import;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
-
-import com.dili.ss.retrofitful.annotation.RestfulScan;
-
 import org.springframework.web.client.RestTemplate;
-import sun.misc.Unsafe;
 import tk.mybatis.spring.annotation.MapperScan;
 import uk.org.lidalia.sysoutslf4j.context.SysOutOverSLF4J;
-
-import java.lang.reflect.Field;
 
 /**
  * 由MyBatis Generator工具自动生成
@@ -77,19 +70,6 @@ public class TraceWebApplication extends SpringBootServletInitializer {
         logger.info("====================溯源成功启动====================");
     }
 
-    private static void disableWarning() {
-        try {
-            Field theUnsafe = Unsafe.class.getDeclaredField("theUnsafe");
-            theUnsafe.setAccessible(true);
-            Unsafe u = (Unsafe) theUnsafe.get(null);
-
-            Class cls = Class.forName("jdk.internal.module.IllegalAccessLogger");
-            Field logger = cls.getDeclaredField("logger");
-            u.putObjectVolatile(cls, u.staticFieldOffset(logger), null);
-        } catch (Exception e) {
-            // ignore
-        }
-    }
 
 
 }

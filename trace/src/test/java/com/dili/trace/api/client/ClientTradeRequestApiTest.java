@@ -6,6 +6,7 @@ import com.dili.ss.domain.BaseOutput;
 import com.dili.trace.AutoWiredBaseTest;
 import com.dili.trace.api.output.UserOutput;
 import com.dili.trace.dto.CustomerExtendOutPutDto;
+import com.dili.trace.rpc.dto.CustomerQueryDto;
 import com.dili.trace.service.TradeRequestService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,8 +31,9 @@ public class ClientTradeRequestApiTest extends AutoWiredBaseTest {
 
     @Test
     public void listSeller() {
-        CustomerQueryInput input = new CustomerQueryInput();
+        CustomerQueryDto input = new CustomerQueryDto();
         input.setKeyword("成都");
+        input.setMarketId(8L);
         String out = this.tradeRequestApi.listSeller(input);
         System.out.println(out);
 

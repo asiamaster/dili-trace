@@ -450,6 +450,7 @@ public class TradeOrderService extends BaseServiceImpl<TradeOrder, Long> {
         TradeDetail updatableSellerTD = new TradeDetail();
         updatableSellerTD.setId(sellerTD.getId());
         updatableSellerTD.setSoftWeight(sellerTD.getSoftWeight().subtract(trd.getTradeWeight()));
+        LOGGER.info("seller.id={},stockWeight={},softWeight={}",sellerTD.getId(),sellerTD.getStockWeight(),updatableSellerTD.getSoftWeight());
         if (sellerTD.getStockWeight().compareTo(BigDecimal.ZERO) == 0 && updatableSellerTD.getSoftWeight().compareTo(BigDecimal.ZERO) == 0) {
 
             updatableSellerTD.setSaleStatus(SaleStatusEnum.NOT_FOR_SALE.getCode());

@@ -2,6 +2,7 @@ package com.dili.trace.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
 import com.alibaba.fastjson.JSON;
+import com.dili.customer.sdk.domain.dto.CustomerSimpleExtendDto;
 import com.dili.trace.events.RegisterBillMessageEvent;
 import com.dili.common.exception.TraceBizException;
 import com.dili.commons.glossary.YesOrNoEnum;
@@ -148,7 +149,7 @@ public class SgRegisterBillServiceImpl implements SgRegisterBillService {
         }
         if (RegisterSourceEnum.TALLY_AREA.equalsToCode(registerBill.getRegisterSource())) {
             List<Long> userIdList = StreamEx.of(this.customerRpcService.findCustomerByPlate(registerBill.getPlate(), registerBill.getMarketId()))
-                    .map(CustomerExtendDto::getId).distinct().toList();
+                    .map(CustomerSimpleExtendDto::getId).distinct().toList();
             if (!userIdList.isEmpty() && !userIdList.contains(registerBill.getUserId())) {
                 throw new TraceBizException("当前车牌号已经与其他用户绑定,请使用其他牌号");
             }

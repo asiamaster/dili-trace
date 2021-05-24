@@ -4,8 +4,10 @@ import com.alibaba.fastjson.JSON;
 import com.dili.common.annotation.AppAccess;
 import com.dili.common.entity.SessionData;
 import com.dili.common.exception.TraceBizException;
-import com.dili.customer.sdk.domain.CharacterType;
+import com.dili.customer.sdk.domain.*;
 import com.dili.customer.sdk.domain.dto.CustomerExtendDto;
+import com.dili.customer.sdk.domain.dto.CustomerSimpleExtendDto;
+import com.dili.customer.sdk.domain.query.CustomerBaseQueryInput;
 import com.dili.customer.sdk.domain.query.CustomerQueryInput;
 import com.dili.customer.sdk.enums.CustomerEnum;
 import com.dili.customer.sdk.rpc.CustomerMarketRpc;
@@ -15,10 +17,12 @@ import com.dili.ss.domain.PageOutput;
 import com.dili.trace.domain.TraceCustomer;
 import com.dili.trace.rpc.dto.AccountGetListQueryDto;
 import com.dili.trace.rpc.dto.AccountGetListResultDto;
+import com.dili.trace.rpc.dto.CustomerQueryDto;
 import com.dili.trace.service.GlobalVarService;
 import com.dili.trace.util.NumUtils;
 import com.dili.uap.sdk.domain.Firm;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import one.util.streamex.StreamEx;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -32,7 +36,9 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.*;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.function.Function;
 
 /**
@@ -54,6 +60,14 @@ public class CustomerRpcService {
     GlobalVarService globalVarService;
     @Autowired
     private AccountRpcService accountRpcService;
+    @Autowired
+    BusinessCategoryRpcService businessCategoryRpcService;
+    @Autowired
+    VehicleRpcService vehicleRpcService;
+    @Autowired
+    TallyingAreaRpcService tallyingAreaRpcService;
+    @Autowired
+    AttachmentRpcService attachmentRpcService;
 
 
     /**
@@ -203,31 +217,6 @@ public class CustomerRpcService {
         });
     }
 
-    /**
-     * 查询相同市场的用户
-     *
-     * @param custIdList
-     * @param marketId
-     * @return
-     */
-    public Map<Long, CustomerExtendDto> findCustomersByIdList(List<Long> custIdList, Long marketId) {
-        if (marketId == null || custIdList == null || custIdList.isEmpty()) {
-            return new HashMap<>();
-        }
-        Set<Long> idSet = StreamEx.of(custIdList).nonNull().distinct().toSet();
-
-        if (idSet.isEmpty()) {
-            return new HashMap<>();
-        }
-        CustomerQueryInput queyrQueryInput = new CustomerQueryInput();
-        queyrQueryInput.setMarketId(marketId);
-        queyrQueryInput.setIdSet(idSet);
-
-        return StreamEx.ofNullable(this.list(queyrQueryInput)).flatCollection(Function.identity()).nonNull()
-                .mapToEntry(CustomerExtendDto::getId, Function.identity()).toMap();
-
-
-    }
 
     /**
      * 查询客户
@@ -294,7 +283,7 @@ public class CustomerRpcService {
      * @param characterType
      * @return
      */
-    private PageOutput<List<CustomerExtendDto>> listNormalPage(CustomerQueryInput queryInput, CustomerEnum.CharacterType characterType) {
+    private PageOutput<List<CustomerSimpleExtendDto>> queryCustomerByCustomerQueryDto(CustomerQueryDto queryInput, CustomerEnum.CharacterType characterType) {
         if (queryInput == null || queryInput.getMarketId() == null) {
             return PageOutput.failure("参数错误");
         }
@@ -302,23 +291,19 @@ public class CustomerRpcService {
         seller.setCharacterType(characterType.getCode());
         queryInput.setCharacterType(seller);
 
-        PageOutput<List<CustomerExtendDto>> page = this.customerRpc.listNormalPage(queryInput);
+        PageOutput<List<CustomerSimpleExtendDto>> page = this.queryCustomerByCustomerQueryDto(queryInput);
         return page;
     }
-
-
 
 
     /**
      * 查询经营户
      *
      * @param queryInput
-     * @param marketId
      * @return
      */
-    public PageOutput<List<CustomerExtendDto>> listSeller(CustomerQueryInput queryInput, Long marketId) {
-        queryInput.setMarketId(marketId);
-        PageOutput<List<CustomerExtendDto>> pageOutput = this.listNormalPage(queryInput,CustomerEnum.CharacterType.经营户);
+    public PageOutput<List<CustomerSimpleExtendDto>> listSeller(CustomerQueryDto queryInput) {
+        PageOutput<List<CustomerSimpleExtendDto>> pageOutput = this.queryCustomerByCustomerQueryDto(queryInput, CustomerEnum.CharacterType.经营户);
         return pageOutput;
     }
 
@@ -326,13 +311,11 @@ public class CustomerRpcService {
      * 查询买家
      *
      * @param queryInput
-     * @param marketId
      * @return
      */
-    public PageOutput<List<CustomerExtendDto>> listBuyer(CustomerQueryInput queryInput, Long marketId) {
-        queryInput.setMarketId(marketId);
-        logger.debug("listBuyer:marketId={},queryInput={}", marketId, JSON.toJSONString(queryInput));
-        PageOutput<List<CustomerExtendDto>> pageOutput = this.listNormalPage(queryInput,CustomerEnum.CharacterType.买家);
+    public PageOutput<List<CustomerSimpleExtendDto>> listBuyer(CustomerQueryDto queryInput) {
+        logger.debug("listBuyer:marketId={},queryInput={}", queryInput.getMarketId(), JSON.toJSONString(queryInput));
+        PageOutput<List<CustomerSimpleExtendDto>> pageOutput = this.queryCustomerByCustomerQueryDto(queryInput, CustomerEnum.CharacterType.买家);
         return pageOutput;
     }
 
@@ -343,9 +326,9 @@ public class CustomerRpcService {
      * @param marketId
      * @return
      */
-    public PageOutput<List<CustomerExtendDto>> listDriver(CustomerQueryInput queryInput, Long marketId) {
+    public PageOutput<List<CustomerSimpleExtendDto>> listDriver(CustomerQueryDto queryInput, Long marketId) {
         queryInput.setMarketId(marketId);
-        PageOutput<List<CustomerExtendDto>> pageOutput = this.listNormalPage(queryInput,CustomerEnum.CharacterType.其他类型);
+        PageOutput<List<CustomerSimpleExtendDto>> pageOutput = this.queryCustomerByCustomerQueryDto(queryInput, CustomerEnum.CharacterType.其他类型);
         return pageOutput;
     }
 
@@ -414,11 +397,11 @@ public class CustomerRpcService {
      * @param plate
      * @return
      */
-    public List<CustomerExtendDto> findCustomerByPlate(String plate, Long marketId) {
-        CustomerQueryInput queryInput = new CustomerQueryInput();
+    public List<CustomerSimpleExtendDto> findCustomerByPlate(String plate, Long marketId) {
+        CustomerQueryDto queryInput = new CustomerQueryDto();
         queryInput.setVehicleNumber(plate);
         queryInput.setMarketId(marketId);
-        PageOutput<List<CustomerExtendDto>> pageOutput = this.listNormalPage(queryInput,CustomerEnum.CharacterType.经营户);
+        PageOutput<List<CustomerSimpleExtendDto>> pageOutput = this.queryCustomerByCustomerQueryDto(queryInput, CustomerEnum.CharacterType.经营户);
 
         return StreamEx.ofNullable(pageOutput).filter(PageOutput::isSuccess)
                 .map(PageOutput::getData).nonNull()
@@ -456,11 +439,12 @@ public class CustomerRpcService {
             return Lists.newArrayList();
         }
 
-        CustomerQueryInput query = new CustomerQueryInput();
+        CustomerQueryDto query = new CustomerQueryDto();
         query.setKeyword(keyword);
+        query.setMarketId(firm.getId());
         query.setPage(1);
         query.setRows(50);
-        List<Long> customerIdList = StreamEx.of(this.listSeller(query, firm.getId()).getData()).map(customerExtendDto -> {
+        List<Long> customerIdList = StreamEx.of(this.listSeller(query).getData()).map(customerExtendDto -> {
             return customerExtendDto.getId();
         }).toList();
 
@@ -488,4 +472,69 @@ public class CustomerRpcService {
 
         return accountCustomerIdList;
     }
+
+    /**
+     * 查询客户信息
+     *
+     * @param queryDto
+     * @return
+     */
+    public PageOutput<List<CustomerSimpleExtendDto>> queryCustomerByCustomerQueryDto(CustomerQueryDto queryDto) {
+        if (queryDto == null || queryDto.getMarketId() == null) {
+            return PageOutput.success();
+        }
+
+        if (queryDto.getPage() == null || queryDto.getPage() < 1) {
+            queryDto.setPage(1);
+        }
+        if (queryDto.getRows() == null || queryDto.getRows() < 1) {
+            queryDto.setRows(50);
+        }
+        return this.queryCustomer(queryDto);
+    }
+
+    /**
+     * 查询客户信息
+     *
+     * @param queryDto
+     * @return
+     */
+    private PageOutput<List<CustomerSimpleExtendDto>> queryCustomer(CustomerQueryDto queryDto) {
+        if (queryDto == null) {
+            return PageOutput.success();
+        }
+        Long marketId = queryDto.getMarketId();
+        return this.customerRpc.listSimpleNormalPage(queryDto);
+
+//        List<Long> customerIdList = Lists.newLinkedList();
+//
+//
+//        Map<Long, List<BusinessCategory>> businessCategoryMap = StreamEx.ofNullable(queryDto.getQueryBusinessCategory())
+//                .filter(queryBusinessCategory -> queryBusinessCategory)
+//                .map(dto -> {
+//                    return this.businessCategoryRpcService.findBusinessCategoryByMarketIdAndCustomerIdList(marketId, customerIdList);
+//                }).findFirst().orElse(Maps.newHashMap());
+//
+//        Map<Long, List<VehicleInfo>> vehicleInfoMap = StreamEx.ofNullable(queryDto.getQueryVehicleInfo())
+//                .filter(queryVehicleInfo -> queryVehicleInfo)
+//                .map(dto -> {
+//                    return this.vehicleRpcService.findVehicleInfoByMarketIdAndCustomerIdList(marketId, customerIdList);
+//                }).findFirst().orElse(Maps.newHashMap());
+//
+//        Map<Long, List<TallyingArea>> tallyingAreaMap = StreamEx.ofNullable(queryDto.getQueryTallyingArea())
+//                .filter(queryTallyingArea -> queryTallyingArea)
+//                .map(dto -> {
+//                    return this.tallyingAreaRpcService.findTallyingAreaByMarketIdAndCustomerIdList(marketId, customerIdList);
+//                }).findFirst().orElse(Maps.newHashMap());
+//
+//        Map<Long, List<Attachment>> attachmentAreaMap = StreamEx.ofNullable(queryDto.getQueryAttachment())
+//                .filter(queryAttachment -> queryAttachment)
+//                .map(dto -> {
+//                    return this.attachmentRpcService.findAttachmentByMarketIdAndCustomerIdList(marketId, customerIdList);
+//                }).findFirst().orElse(Maps.newHashMap());
+
+
+//        return PageOutput.success();
+    }
+
 }

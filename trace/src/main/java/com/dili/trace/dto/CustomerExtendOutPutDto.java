@@ -59,7 +59,7 @@ public class CustomerExtendOutPutDto {
      */
     private List<VehicleInfoDto> vehicleInfoList;
 
-    private List<AttachmentGroupInfo> attachmentGroupInfoList;
+
     /**
      * 营业执照
      */
@@ -74,18 +74,6 @@ public class CustomerExtendOutPutDto {
         this.businessLicenseAttachment = businessLicenseAttachment;
     }
 
-    public List<AttachmentGroupInfo> getAttachmentGroupInfoList() {
-        return attachmentGroupInfoList;
-    }
-
-    public void setAttachmentGroupInfoList(List<AttachmentGroupInfo> attachmentGroupInfoList) {
-        this.attachmentGroupInfoList = attachmentGroupInfoList;
-        if (attachmentGroupInfoList != null && attachmentGroupInfoList.size() > 0) {
-            this.businessLicenseAttachment = StreamEx.of(attachmentGroupInfoList).filterBy(AttachmentGroupInfo::getCode, CustomerEnum.AttachmentType.营业执照.getCode())
-                    .flatCollection(AttachmentGroupInfo::getAttachmentList).findFirst().orElse(null);
-
-        }
-    }
 
     public Integer getClientType() {
         return clientType;
