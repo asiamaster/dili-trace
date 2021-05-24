@@ -450,16 +450,16 @@ public class TradeOrderService extends BaseServiceImpl<TradeOrder, Long> {
         TradeDetail updatableSellerTD = new TradeDetail();
         updatableSellerTD.setId(sellerTD.getId());
         updatableSellerTD.setSoftWeight(sellerTD.getSoftWeight().subtract(trd.getTradeWeight()));
-        LOGGER.info("seller.id={},stockWeight={},softWeight={}",sellerTD.getId(),sellerTD.getStockWeight(),updatableSellerTD.getSoftWeight());
-        if (sellerTD.getStockWeight().compareTo(BigDecimal.ZERO) == 0 && updatableSellerTD.getSoftWeight().compareTo(BigDecimal.ZERO) == 0) {
-
-            updatableSellerTD.setSaleStatus(SaleStatusEnum.NOT_FOR_SALE.getCode());
-
-            ProductStock updatableSellerPS = new ProductStock();
-            updatableSellerPS.setId(sellerProductStock.getId());
-            updatableSellerPS.setTradeDetailNum(sellerProductStock.getTradeDetailNum() - 1);
-            this.productStockService.updateSelective(updatableSellerPS);
-        }
+        LOGGER.info("seller.id={},stockWeight={},softWeight={}", sellerTD.getId(), sellerTD.getStockWeight(), updatableSellerTD.getSoftWeight());
+//        if (sellerTD.getStockWeight().compareTo(BigDecimal.ZERO) == 0 && updatableSellerTD.getSoftWeight().compareTo(BigDecimal.ZERO) == 0) {
+//
+//            updatableSellerTD.setSaleStatus(SaleStatusEnum.NOT_FOR_SALE.getCode());
+//
+//            ProductStock updatableSellerPS = new ProductStock();
+//            updatableSellerPS.setId(sellerProductStock.getId());
+//            updatableSellerPS.setTradeDetailNum(sellerProductStock.getTradeDetailNum() - 1);
+//            this.productStockService.updateSelective(updatableSellerPS);
+//        }
 
 //                    if (trd.getId() == null) {
 //                        this.tradeRequestDetailService.insertSelective(trd);
@@ -497,16 +497,28 @@ public class TradeOrderService extends BaseServiceImpl<TradeOrder, Long> {
             if (TradeOrderStatusEnum.FINISHED == tradeOrderStatusEnum) {
                 dealTradeRequestDetail(tradeRequest, trd, tradeOrderTypeEnum);
             } else if (TradeOrderStatusEnum.CANCELLED == tradeOrderStatusEnum) {
-                TradeDetail sellerTD = this.tradeDetailService.get(trd.getTradeDetailId());
+                TradeDetail sellerTDItem = this.tradeDetailService.get(trd.getTradeDetailId());
+                ProductStock productStock = this.productStockService.get(sellerTDItem.getProductStockId());
+
+                //还原总库存重量
+                ProductStock sellerPs = new ProductStock();
+                sellerPs.setId(productStock.getId());
+                sellerPs.setStockWeight(productStock.getStockWeight().add(trd.getTradeWeight()));
+
+                //还原批次库存重量
                 TradeDetail td = new TradeDetail();
-                td.setId(sellerTD.getId());
-                td.setStockWeight(sellerTD.getStockWeight().add(trd.getTradeWeight()));
-                td.setSoftWeight(sellerTD.getSoftWeight().subtract(trd.getTradeWeight()));
+                td.setId(sellerTDItem.getId());
+                td.setStockWeight(sellerTDItem.getStockWeight().add(trd.getTradeWeight()));
+                td.setSoftWeight(sellerTDItem.getSoftWeight().subtract(trd.getTradeWeight()));
+                if (sellerTDItem.getStockWeight().compareTo(BigDecimal.ZERO) == 0) {
+                    //对总库存批次数量还原,对批次状态还原
+                    sellerPs.setTradeDetailNum(productStock.getTradeDetailNum() + 1);
+                    td.setSaleStatus(SaleStatusEnum.FOR_SALE.getCode());
+                }
                 this.tradeDetailService.updateSelective(td);
 
-                ProductStock productStock = this.productStockService.get(sellerTD.getProductStockId());
-
-                this.productRpcService.release(sellerTD.getThirdPartyStockId(), productStock.getMarketId(), trd.getTradeWeight());
+                this.productStockService.updateSelective(sellerPs);
+                this.productRpcService.release(sellerTDItem.getThirdPartyStockId(), productStock.getMarketId(), trd.getTradeWeight());
             } else {
 
             }
@@ -626,7 +638,7 @@ public class TradeOrderService extends BaseServiceImpl<TradeOrder, Long> {
         ProductStock productStock = new ProductStock();
         productStock.setId(productStockItem.getId());
         productStock.setStockWeight(productStockItem.getStockWeight().subtract(totalTradeWeight));
-        this.productStockService.updateSelective(productStock);
+
 
         TradeDetailQueryDto tradeDetailQuery = new TradeDetailQueryDto();
         tradeDetailQuery.setSaleStatus(SaleStatusEnum.FOR_SALE.getCode());
@@ -650,10 +662,13 @@ public class TradeOrderService extends BaseServiceImpl<TradeOrder, Long> {
             if (totalTradeWeight.compareTo(tradeDetail.getStockWeight()) >= 0) {
                 tradeRequestDetail.setTradeWeight(tradeDetail.getStockWeight());
                 td.setStockWeight(BigDecimal.ZERO);
+                td.setSaleStatus(SaleStatusEnum.NOT_FOR_SALE.getCode());
+                productStock.setTradeDetailNum(productStockItem.getTradeDetailNum() - 1);
                 totalTradeWeight = totalTradeWeight.subtract(tradeDetail.getStockWeight());
             } else {
                 tradeRequestDetail.setTradeWeight(totalTradeWeight);
                 td.setStockWeight(tradeDetail.getStockWeight().subtract(totalTradeWeight));
+                td.setSaleStatus(SaleStatusEnum.FOR_SALE.getCode());
                 totalTradeWeight = BigDecimal.ZERO;
             }
 
@@ -665,6 +680,8 @@ public class TradeOrderService extends BaseServiceImpl<TradeOrder, Long> {
             this.productRpcService.lock(tradeDetail.getThirdPartyStockId(), productStockItem.getMarketId(), tradeRequestDetail.getTradeWeight());
 
         }
+
+        this.productStockService.updateSelective(productStock);
         return tradeRequestDetailList;
     }
 

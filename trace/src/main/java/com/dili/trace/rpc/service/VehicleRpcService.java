@@ -1,8 +1,6 @@
 package com.dili.trace.rpc.service;
 
-import com.dili.customer.sdk.domain.BusinessCategory;
 import com.dili.customer.sdk.domain.VehicleInfo;
-import com.dili.customer.sdk.rpc.BusinessCategoryRpc;
 import com.dili.customer.sdk.rpc.VehicleRpc;
 import com.dili.ss.domain.BaseOutput;
 import com.google.common.collect.Lists;
@@ -16,6 +14,9 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * 车牌信息
+ */
 @Service
 public class VehicleRpcService {
     private static final Logger logger = LoggerFactory.getLogger(VehicleRpcService.class);
