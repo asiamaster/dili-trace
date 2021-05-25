@@ -470,7 +470,7 @@ public class ClientTradeRequestApi {
                     customerOutput.setId(c.getId());
                     customerOutput.setName(c.getName());
                     customerOutput.setOrganizationType(c.getOrganizationType());
-                    customerOutput.setBusinessLicenseAttachment(attachmentMap.get(c.getId()).orElse(null));
+                    customerOutput.setBusinessLicenseAttachment(attachmentMap.getOrDefault(c.getId(),Optional.empty()).orElse(null));
                     customerOutput.setPhone(c.getContactsPhone());
                     customerOutput.setClientType(clientTypeEnum.getCode());
 
