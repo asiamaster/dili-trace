@@ -1171,9 +1171,9 @@ public class RegisterBillService extends BaseServiceImpl<RegisterBill, Long> {
         bill.setReason(StringUtils.trimToEmpty(reason));
         if (BillVerifyStatusEnum.PASSED == toVerifyState) {
             if (RegistTypeEnum.SUPPLEMENT.equalsToCode(billItem.getRegistType())) {
-                bill.setVerifyType(VerifyTypeEnum.PASSED_AFTER_CHECKIN.getCode());
+                bill.setVerifyType(VerifyTypeEnum.CHECKIN_WITHOUT_VERIFY.getCode());
             } else {
-                bill.setVerifyType(VerifyTypeEnum.PASSED_BEFORE_CHECKIN.getCode());
+                bill.setVerifyType(VerifyTypeEnum.VERIFY_BEFORE_CHECKIN.getCode());
             }
 //            if (CheckinStatusEnum.ALLOWED.equalsToCode(billItem.getCheckinStatus())) {
 ////            if (YesOrNoEnum.YES.getCode().equals(billItem.getIsCheckin())) {
@@ -1412,7 +1412,7 @@ public class RegisterBillService extends BaseServiceImpl<RegisterBill, Long> {
                 + " or regist_type=" + RegistTypeEnum.PARTIAL.getCode() + ")  and (checkin_status=" + CheckinStatusEnum.NONE.getCode()
                 + " OR (checkin_status=" + CheckinStatusEnum.ALLOWED.getCode() + " and verify_status="
                 + BillVerifyStatusEnum.PASSED.getCode() + " and verify_type="
-                + VerifyTypeEnum.PASSED_BEFORE_CHECKIN.getCode() + " ) ) )");
+                + VerifyTypeEnum.VERIFY_BEFORE_CHECKIN.getCode() + " ) ) )");
 
         return StreamEx.of(sqlList).joining(" AND ");
     }
@@ -1431,7 +1431,7 @@ public class RegisterBillService extends BaseServiceImpl<RegisterBill, Long> {
         sqlList.add("( regist_type=" + RegistTypeEnum.SUPPLEMENT.getCode() + " OR  (checkin_status=" + CheckinStatusEnum.ALLOWED.getCode()
                 + " AND verify_status<>" + BillVerifyStatusEnum.PASSED.getCode() + ") OR(verify_status="
                 + BillVerifyStatusEnum.PASSED.getCode() + " and verify_type="
-                + VerifyTypeEnum.PASSED_AFTER_CHECKIN.getCode() + ") )");
+                + VerifyTypeEnum.CHECKIN_WITHOUT_VERIFY.getCode() + ") )");
 
         return StreamEx.of(sqlList).joining(" AND ");
     }

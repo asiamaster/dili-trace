@@ -488,7 +488,7 @@ public class CustomerRpcService {
             queryDto.setPage(1);
         }
         if (queryDto.getRows() == null || queryDto.getRows() < 1) {
-            queryDto.setRows(50);
+            queryDto.setRows(20);
         }
         return this.queryCustomer(queryDto);
     }

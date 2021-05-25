@@ -132,12 +132,18 @@ public class ProcessService {
         } else {
             updatableBill.setCheckinStatus(CheckinStatusEnum.NONE.getCode());
         }
+        RegistTypeEnum registTypeEnum = RegistTypeEnum.fromCode(billItem.getRegistType()).orElse(RegistTypeEnum.NONE);
         if (BillVerifyStatusEnum.PASSED.equalsToCode(billItem.getVerifyStatus())) {
             if (CheckinStatusEnum.ALLOWED == checkinStatusEnum) {
-                updatableBill.setVerifyType(VerifyTypeEnum.PASSED_AFTER_CHECKIN.getCode());
+                if (RegistTypeEnum.SUPPLEMENT == registTypeEnum) {
+                    updatableBill.setVerifyType(VerifyTypeEnum.CHECKIN_WITHOUT_VERIFY.getCode());
+                } else {
+                    updatableBill.setVerifyType(VerifyTypeEnum.VERIFY_BEFORE_CHECKIN.getCode());
+                }
             } else {
-                updatableBill.setVerifyType(VerifyTypeEnum.PASSED_BEFORE_CHECKIN.getCode());
+                updatableBill.setVerifyType(VerifyTypeEnum.NONE.getCode());
             }
+
         }
         this.billService.updateSelective(updatableBill);
         return this.createCheckInRecord(billId, checkinStatusEnum, operatorUser);
@@ -213,7 +219,7 @@ public class ProcessService {
         RegistTypeEnum registTypeEnum = RegistTypeEnum.fromCode(billItem.getRegistType()).orElse(null);
         if (RegistTypeEnum.SUPPLEMENT == registTypeEnum) {
             if (BillVerifyStatusEnum.PASSED == toVerifyStatusEnum) {
-                updatableBill.setVerifyType(VerifyTypeEnum.PASSED_BEFORE_CHECKIN.getCode());
+                updatableBill.setVerifyType(VerifyTypeEnum.CHECKIN_WITHOUT_VERIFY.getCode());
             }
         }
 
