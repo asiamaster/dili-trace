@@ -343,9 +343,9 @@ public class RegisterBill extends BaseDomain {
     /**
      * 经营户卡号
      */
-    @ApiModelProperty(value = "经营户卡号")
-    @Column(name = "`third_party_code`")
-    private String thirdPartyCode;
+//    @ApiModelProperty(value = "经营户卡号")
+//    @Column(name = "`third_party_code`")
+//    private String cardNo;
 
     /**
      * 区号
@@ -672,7 +672,7 @@ public class RegisterBill extends BaseDomain {
      *
      */
     @ApiModelProperty(value = "园区卡号")
-    @Column(name = "`trade_printing_card`")
+    @Column(name = "`card_no`")
     private String cardNo;
 
 
@@ -1302,14 +1302,6 @@ public class RegisterBill extends BaseDomain {
 
     public void setRegisterHeadCode(String registerHeadCode) {
         this.registerHeadCode = registerHeadCode;
-    }
-
-    public String getThirdPartyCode() {
-        return thirdPartyCode;
-    }
-
-    public void setThirdPartyCode(String thirdPartyCode) {
-        this.thirdPartyCode = thirdPartyCode;
     }
 
     public String getArea() {

@@ -115,8 +115,8 @@ public class UserServiceImpl extends BaseServiceImpl<UserInfo, Long> implements 
     @Override
     public EasyuiPageOutput listEasyuiPageByExample(UserQueryDto dto) throws Exception {
         // 经营户卡号查询，不足6位，左边补0
-        if (!StringUtils.isEmpty(dto.getThirdPartyCode())) {
-            dto.setThirdPartyCode(StringUtils.leftPad(dto.getThirdPartyCode(), 6, "0"));
+        if (!StringUtils.isEmpty(dto.getCardNo())) {
+            dto.setCardNo(StringUtils.leftPad(dto.getCardNo(), 6, "0"));
         }
         this.andCondition(dto).ifPresent(str -> {
             dto.mset(IDTO.AND_CONDITION_EXPR, str);

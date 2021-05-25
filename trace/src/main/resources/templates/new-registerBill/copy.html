@@ -86,8 +86,8 @@
                 <div class="form-group" <% if( registerBill.registerSource!=2){%>style="display:none"<%}%>>
                     <label class="label-title text-right">园区卡号</label>
                     <div class="input-group">
-                        <input type="text" class="form-control input-sm" name="b2" <% if( registerBill.tradePrintingCard!=null){%>value="${registerBill.tradePrintingCard}"<%}else{%>value="888880"<%}%> data-value-type="skip"   id="printingCardInput" style="width: 147px;"/>
-                        <input type="hidden"  name="tradePrintingCard" id="tradePrintingCard" value="${registerBill.tradePrintingCard}" style="width: 147px;"/>
+                        <input type="text" class="form-control input-sm" name="b2" <% if( registerBill.cardNo!=null){%>value="${registerBill.cardNo}"<%}else{%>value="888880"<%}%> data-value-type="skip"   id="cardNoInput" style="width: 147px;"/>
+                        <input type="hidden"  name="cardNo" id="cardNo" value="${registerBill.cardNo}" style="width: 147px;"/>
                         <span class="input-group-addon"> <span class="glyphicon" id="queryByCardNoBtn">检索</span> </span>
                     </div>
                 </div>
@@ -181,7 +181,7 @@
        $('input[name="sourceName"]').val(opt.text());
    });
 
-   $('#printingCardInput').on('keyup',function(e){
+   $('#cardNoInput').on('keyup',function(e){
        if (e.keyCode == 13) {
            $('#queryByCardNoBtn').trigger('click')
        }
@@ -189,7 +189,7 @@
 
    $('#queryByCardNoBtn').on('click',async()=>{
        cleanInput();
-       let query=$('#printingCardInput').val();
+       let query=$('#cardNoInput').val();
        if($.trim(query)==''){
            return;
        }
@@ -202,7 +202,7 @@
            }
            var customer = ret.data;
            $("#userId").val(customer.id);
-           $("#tradePrintingCard").val(customer.printingCard).valid();
+           $("#cardNo").val(customer.cardNo).valid();
            $("#idCardNo").val(customer.idNo).valid();
            $("#name").val(customer.name).valid();
            $("#addr").val(customer.address).valid();
@@ -226,7 +226,7 @@
        $("#userId").val("");
        $("#phone").val("");
        $("#tradeAccount").val('')
-       $("#printingCard").val('')
+       $("#cardNo").val('')
    }
 
    $('#querySource #queryTallyAreaNo').on('click',async()=>{

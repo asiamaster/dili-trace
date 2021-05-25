@@ -3,68 +3,68 @@ package com.dili.trace.dto;
 import com.dili.trace.util.MaskUserInfo;
 
 public class UserInfoDto {
-	private String userId;
-	private String name;
-	private String addr;
-	private String phone;
-	private String idCardNo;
-	private String printingCard;
+    private String userId;
+    private String name;
+    private String addr;
+    private String phone;
+    private String idCardNo;
+    private String cardNo;
 
-	public String getPrintingCard() {
-		return printingCard;
-	}
+    public String getCardNo() {
+        return cardNo;
+    }
 
-	public void setPrintingCard(String printingCard) {
-		this.printingCard = printingCard;
-	}
+    public void setCardNo(String cardNo) {
+        this.cardNo = cardNo;
+    }
 
-	public String getIdCardNo() {
-		return idCardNo;
-	}
+    public String getIdCardNo() {
+        return idCardNo;
+    }
 
-	public void setIdCardNo(String idCardNo) {
-		this.idCardNo = idCardNo;
-	}
+    public void setIdCardNo(String idCardNo) {
+        this.idCardNo = idCardNo;
+    }
 
-	public String getUserId() {
-		return userId;
-	}
+    public String getUserId() {
+        return userId;
+    }
 
-	public void setUserId(String userId) {
-		this.userId = userId;
-	}
+    public void setUserId(String userId) {
+        this.userId = userId;
+    }
 
-	public String getName() {
-		return name;
-	}
+    public String getName() {
+        return name;
+    }
 
-	public void setName(String name) {
-		this.name = name;
-	}
+    public void setName(String name) {
+        this.name = name;
+    }
 
-	public String getAddr() {
-		return addr;
-	}
+    public String getAddr() {
+        return addr;
+    }
 
-	public void setAddr(String addr) {
-		this.addr = addr;
-	}
+    public void setAddr(String addr) {
+        this.addr = addr;
+    }
 
-	public String getPhone() {
-		return phone;
-	}
+    public String getPhone() {
+        return phone;
+    }
 
-	public void setPhone(String phone) {
-		this.phone = phone;
-	}
+    public void setPhone(String phone) {
+        this.phone = phone;
+    }
 
-	public UserInfoDto mask(boolean mask) {
-		if (mask) {
+    public UserInfoDto mask(boolean mask) {
+        if (mask) {
 
-			this.setIdCardNo(MaskUserInfo.maskIdNo(this.getIdCardNo()));
-			this.setAddr(MaskUserInfo.maskAddr(this.getAddr()));
-		}
-		return this;
-	}
+            this.setIdCardNo(MaskUserInfo.maskIdNo(this.getIdCardNo()));
+            this.setAddr(MaskUserInfo.maskAddr(this.getAddr()));
+        }
+        return this;
+    }
 
 }

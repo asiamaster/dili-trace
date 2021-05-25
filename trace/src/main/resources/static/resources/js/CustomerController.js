@@ -23,7 +23,7 @@ class CustomerController extends WebConfig {
         try {
             let data = await this.listSeller(query);
             return _.chain(data).map(item => {
-                let cardNo = item.tradePrintingCard;
+                let cardNo = item.cardNo;
                 if (_.isUndefined(cardNo) || $.trim(cardNo) == '') {
                     cardNo = '--';
                 }

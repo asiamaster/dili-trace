@@ -70,11 +70,17 @@ public class RegisterHead extends BaseDomain {
     private String idCardNo;
 
     /**
-     * 经营户卡号
+     * 园区卡号
      */
     @ApiModelProperty(value = "园区卡号")
-    @Column(name = "`third_party_code`")
+    @Column(name = "`card_no`")
     private String cardNo;
+    /**
+     * 外部编号
+     */
+    @ApiModelProperty(value = "外部编号")
+    @Column(name = "`third_party_code`")
+    private String thirdPartyCode;
 
 
     /**
@@ -422,9 +428,6 @@ public class RegisterHead extends BaseDomain {
         this.idCardNo = idCardNo;
     }
 
-    public void setCardNo(String cardNo) {
-        this.cardNo = cardNo;
-    }
 
     public String getAddr() {
         return addr;
@@ -728,5 +731,21 @@ public class RegisterHead extends BaseDomain {
 
     public void setTruckTareWeight(BigDecimal truckTareWeight) {
         this.truckTareWeight = truckTareWeight;
+    }
+
+    public String getThirdPartyCode() {
+        return thirdPartyCode;
+    }
+
+    public void setThirdPartyCode(String thirdPartyCode) {
+        this.thirdPartyCode = thirdPartyCode;
+    }
+
+    public String getCardNo() {
+        return cardNo;
+    }
+
+    public void setCardNo(String cardNo) {
+        this.cardNo = cardNo;
     }
 }

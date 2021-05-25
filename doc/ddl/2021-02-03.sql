@@ -47,7 +47,9 @@ ALTER TABLE dili_trace.quality_trace_trade_bill_syncpoint DROP COLUMN order_vers
 ALTER TABLE dili_trace.quality_trace_trade_bill DROP COLUMN order_version;
 
 ALTER TABLE dili_trace.`register_bill` DROP COLUMN `version`;
-
+ALTER TABLE dili_trace.`register_bill` ADD card_no varchar (50) NULL COMMENT '园区卡号';
+UPDATE dili_trace.`register_bill` set card_no=trade_printing_card;
+ALTER TABLE dili_trace.`register_bill` DROP COLUMN `trade_printing_card`;
 
 
 ALTER TABLE dili_trace.`user_history` DROP COLUMN `password`;
@@ -59,9 +61,10 @@ ALTER TABLE dili_trace.`user_history` DROP COLUMN `business_license_url`;
 ALTER TABLE dili_trace.`register_bill` ADD arrival_datetime datetime NULL COMMENT '预计到场时间';
 ALTER TABLE dili_trace.`register_bill` ADD weighting_bill_id bigint NULL COMMENT '称重单ID';
 
+ALTER TABLE dili_trace.`register_head` ADD card_no varchar (50) NULL COMMENT '园区卡号';
 ALTER TABLE dili_trace.`register_head` ADD arrival_datetime datetime NULL COMMENT '预计到场时间';
 ALTER TABLE dili_trace.`register_head` ADD truck_tare_weight decimal(11, 3) NULL COMMENT '车辆皮重';
-ALTER TABLE dili_trace.register_head DROP COLUMN plate;
+ALTER TABLE dili_trace.`register_head` DROP COLUMN plate;
 
 ALTER TABLE dili_trace.`product_stock` ADD detect_failed_weight decimal(17, 3) NOT NULL DEFAULT 0.000 COMMENT '检测失败重量';
 

@@ -677,7 +677,7 @@ public class RegisterHeadService extends BaseServiceImpl<RegisterHead, Long> {
 		if (StringUtils.isNotBlank(query.getKeyword())) {
 			String keyword = query.getKeyword().trim();
 			sql = "( product_name like '%" + keyword + "%'  OR name like '%"
-					+ keyword + "%' OR id_card_no like '%" + keyword + "%' OR third_party_code like '%" + keyword + "%' OR phone like '%" + keyword + "%' )";
+					+ keyword + "%' OR id_card_no like '%" + keyword + "%' OR card_no like '%" + keyword + "%' OR phone like '%" + keyword + "%' )";
 		}
 		return Optional.ofNullable(sql);
 

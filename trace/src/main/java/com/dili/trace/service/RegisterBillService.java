@@ -168,7 +168,7 @@ public class RegisterBillService extends BaseServiceImpl<RegisterBill, Long> {
         }
         ProcessConfig processConfig = this.processConfigService.findByMarketId(marketId);
         CustomerExtendDto user = this.clientRpcService.findApprovedCustomerByIdOrEx(customerId, marketId);
-        String printingCard = this.findPrintingCard(user, marketId).orElse(null);
+        String cardNo = this.findCardNo(user, marketId).orElse(null);
         List<FieldConfigDetailRetDto> fieldConfigDetailRetDtoList = this.fieldConfigDetailService.findByMarketIdAndModuleType(marketId, FieldConfigModuleTypeEnum.REGISTER);
         Map<String, FieldConfigDetailRetDto> fieldConfigDetailRetDtoMap = StreamEx.of(fieldConfigDetailRetDtoList).nonNull().toMap(item -> item.getDefaultFieldDetail().getFieldName(), Function.identity());
         return StreamEx.of(registerBills).nonNull().map(dto -> {
@@ -183,7 +183,7 @@ public class RegisterBillService extends BaseServiceImpl<RegisterBill, Long> {
             }
 
             registerBill.setCreatorRole(creatorRoleEnum.getCode());
-            registerBill.setThirdPartyCode(printingCard);
+            registerBill.setCardNo(cardNo);
             registerBill.setImageCertList(dto.getImageCertList());
 
 
@@ -225,7 +225,7 @@ public class RegisterBillService extends BaseServiceImpl<RegisterBill, Long> {
      * @param marketId
      * @return
      */
-    private Optional<String> findPrintingCard(CustomerExtendDto user, Long marketId) {
+    private Optional<String> findCardNo(CustomerExtendDto user, Long marketId) {
         TraceCustomer cq = new TraceCustomer();
         cq.setCode(user.getCode());
         return this.clientRpcService.findCustomer(cq, marketId).map(TraceCustomer::getCardNo);
@@ -1484,7 +1484,7 @@ public class RegisterBillService extends BaseServiceImpl<RegisterBill, Long> {
             String keyword = query.getKeyword().trim();
             sql = "( product_name like '%" + keyword + "%'  OR user_id in(select id from `user` u where u.name like '%"
                     + keyword + "%' OR legal_person like '%" + keyword + "%' OR phone like '%"
-                    + keyword + "%') OR third_party_code like '%" + keyword + "%' OR register_head_code LIKE '%" + keyword + "%' )";
+                    + keyword + "%') OR card_no like '%" + keyword + "%' OR register_head_code LIKE '%" + keyword + "%' )";
         }
         return Optional.ofNullable(sql);
     }

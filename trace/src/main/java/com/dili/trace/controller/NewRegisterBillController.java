@@ -1000,7 +1000,7 @@ public class NewRegisterBillController {
                     TraceCustomer cq = new TraceCustomer();
                     cq.setCode(customerExtendDto.getCode());
                     this.customerService.findCustomer(cq, rb.getMarketId()).ifPresent(card -> {
-                        rb.setThirdPartyCode(card.getCardNo());
+                        rb.setCardNo(card.getCardNo());
                     });
 
                     return rb;
@@ -1114,7 +1114,7 @@ public class NewRegisterBillController {
             userInfoDto.setIdCardNo(traceCustomer.getIdNo());
             userInfoDto.setPhone(traceCustomer.getPhone());
             userInfoDto.setAddr(traceCustomer.getAddress());
-            userInfoDto.setPrintingCard(traceCustomer.getCardNo());
+            userInfoDto.setCardNo(traceCustomer.getCardNo());
         }
 
         return userInfoDto;

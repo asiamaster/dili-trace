@@ -13,7 +13,7 @@
     <result column="addr" jdbcType="VARCHAR" property="addr" />
     <result column="phone" jdbcType="VARCHAR" property="phone" />
     <result column="trade_account" jdbcType="VARCHAR" property="tradeAccount" />
-    <result column="trade_printing_card" jdbcType="VARCHAR" property="tradePrintingCard" />
+    <result column="card_no" jdbcType="VARCHAR" property="cardNo" />
     <result column="user_id" jdbcType="BIGINT" property="userId" />
     <result column="plate" jdbcType="VARCHAR" property="plate" />
     <result column="state" jdbcType="TINYINT" property="state" />
@@ -27,7 +27,6 @@
     <result column="latest_detect_record_id" jdbcType="BIGINT" property="latestDetectRecordId" />
     <result column="latest_detect_time" jdbcType="TIMESTAMP" property="latestDetectTime" />
     <result column="exe_machine_no" jdbcType="VARCHAR" property="exeMachineNo" />
-    <result column="version" jdbcType="TINYINT" property="version" />
     <result column="created" jdbcType="TIMESTAMP" property="created" />
     <result column="modified" jdbcType="TIMESTAMP" property="modified" />
     <result column="latest_detect_operator" jdbcType="VARCHAR" property="latestDetectOperator" />
@@ -36,7 +35,7 @@
     <result column="operator_name" jdbcType="VARCHAR" property="operatorName" />
     <result column="market_id" jdbcType="VARCHAR" property="marketId" />
     <result column="register_head_code" jdbcType="VARCHAR" property="registerHeadCode" />
-    <result column="third_party_code" jdbcType="VARCHAR" property="thirdPartyCode" />
+    <result column="card_no" jdbcType="VARCHAR" property="cardNo" />
     <result column="area" jdbcType="VARCHAR" property="area" />
     <result column="measure_type" jdbcType="TINYINT" property="measureType" />
     <result column="piece_num" jdbcType="DECIMAL" property="pieceNum" />
@@ -55,7 +54,7 @@
     plate, state, sales_type, product_name, product_id, origin_id, origin_name, weight,
     detect_state, latest_detect_record_id, latest_detect_time, exe_machine_no, version,
     created, modified,latest_detect_operator,trade_account,operator_id,operator_name,latest_pd_result,
-    market_id, register_head_code, third_party_code, area, measure_type, piece_num, piece_weight,
+    market_id, register_head_code, third_party_code,card_no, area, measure_type, piece_num, piece_weight,
     remark, create_user, delete_user, delete_time, packaging, order_type
   </sql>
   <select id="selectBy" parameterType="java.lang.Long" resultMap="BaseResultMap">

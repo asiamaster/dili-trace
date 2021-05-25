@@ -10,10 +10,9 @@
     <result column="user_id" property="userId" />
     <result column="name" property="name" />
     <result column="id_card_no" property="idCardNo" />
-    <result column="third_party_code" property="thirdPartyCode" />
+    <result column="card_no" property="cardNo" />
     <result column="addr" property="addr" />
     <result column="phone" property="phone" />
-    <result column="plate" property="plate" />
     <result column="product_id" property="productId" />
     <result column="product_name" property="productName" />
     <result column="measure_type" property="measureType" />
@@ -22,7 +21,6 @@
     <result column="weight" property="weight" />
       <result column="remain_weight" property="remainWeight" />
     <result column="weight_unit" property="weightUnit" />
-    <result column="upstream_id" property="upstreamId" />
     <result column="spec_name" property="specName" />
     <result column="origin_id" property="originId" />
     <result column="origin_name" property="originName" />
@@ -41,50 +39,5 @@
     <result column="active" property="active" />
     <result column="market_id" property="marketId" />
   </resultMap>
-
-  <sql id="Base_Column_List">
-                id,
-                code,
-                bill_type,
-                user_id,
-                name,
-                id_card_no,
-                third_party_code,
-                addr,
-                phone,
-                plate,
-                product_id,
-                product_name,
-                measure_type,
-                piece_num,
-                piece_weight,
-                weight,
-                remain_weight,
-                weight_unit,
-                upstream_id,
-                spec_name,
-                origin_id,
-                origin_name,
-                brand_id,
-                brand_name,
-                remark,
-                create_user,
-                created,
-                modify_user,
-                modified,
-                is_deleted,
-                delete_user,
-                delete_time,
-                version,
-                reason,
-                active,
-                market_id
-    </sql>
-
-  <select id="pageList" resultMap="BaseResultMap">
-    SELECT <include refid="Base_Column_List" />
-    FROM register_head
-    LIMIT #{offset}, #{pageSize}
-  </select>
 
 </mapper>
