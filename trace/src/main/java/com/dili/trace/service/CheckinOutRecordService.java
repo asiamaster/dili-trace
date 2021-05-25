@@ -13,10 +13,7 @@ import com.dili.trace.domain.RegisterBill;
 import com.dili.trace.domain.TradeDetail;
 import com.dili.trace.domain.UserInfo;
 import com.dili.trace.dto.OperatorUser;
-import com.dili.trace.enums.CheckinOutTypeEnum;
-import com.dili.trace.enums.CheckinStatusEnum;
-import com.dili.trace.enums.CheckoutStatusEnum;
-import com.dili.trace.enums.SaleStatusEnum;
+import com.dili.trace.enums.*;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -43,6 +40,8 @@ public class CheckinOutRecordService extends BaseServiceImpl<CheckinOutRecord, L
     TradeService tradeService;
     @Autowired
     ProcessService processService;
+    @Autowired
+    BillVerifyHistoryService billVerifyHistoryService;
 
     /**
      * 出门操作
@@ -234,15 +233,94 @@ public class CheckinOutRecordService extends BaseServiceImpl<CheckinOutRecord, L
     }
 
     /**
-     * 查询进门记录
+     * 新的审核方法
+     *
+     * @param billId
+     * @param toVerifyStatusEnum
+     * @param operatorUser
+     */
+    public void doVerify(Long billId, BillVerifyStatusEnum toVerifyStatusEnum, Optional<OperatorUser> operatorUser) {
+
+        RegisterBill billItem = this.registerBillService.get(billId);
+        if (billItem == null) {
+            throw new TraceBizException("报备单不存在");
+        }
+        BillVerifyStatusEnum oldVerifyStatusEnum = BillVerifyStatusEnum.fromCode(billItem.getVerifyStatus()).orElseThrow(() -> {
+            return new TraceBizException("审核状态不能为空");
+        });
+
+        RegisterBill up = new RegisterBill();
+        up.setId(billItem.getId());
+
+        RegistTypeEnum registTypeEnum = RegistTypeEnum.fromCode(billItem.getRegistType()).orElseThrow(() -> {
+            return new TraceBizException("报备类型不能为空");
+        });
+
+        up.setVerifyStatus(toVerifyStatusEnum.getCode());
+        if (BillVerifyStatusEnum.PASSED == toVerifyStatusEnum) {
+            if (RegistTypeEnum.SUPPLEMENT == registTypeEnum) {
+                up.setVerifyType(VerifyTypeEnum.CHECKIN_WITHOUT_VERIFY.getCode());
+            } else {
+                up.setVerifyType(VerifyTypeEnum.VERIFY_BEFORE_CHECKIN.getCode());
+            }
+        }
+        this.registerBillService.updateSelective(up);
+
+        this.billVerifyHistoryService.createVerifyHistory(Optional.of(oldVerifyStatusEnum), billId, operatorUser);
+
+        Optional<CheckinOutRecord> checkinRecordOpt = this.findOrCreateAllowedCheckInRecord(billId);
+
+    }
+
+
+    /**
+     * 查询或创建进门记录
      *
      * @param billId
      * @return
      */
-    public Optional<CheckinOutRecord> findCheckInRecordByBillId(Long billId) {
+    public Optional<CheckinOutRecord> findOrCreateAllowedCheckInRecord(Long billId) {
+        RegisterBill billItem = this.registerBillService.get(billId);
+        if (billItem == null) {
+            throw new TraceBizException("报备单不存在");
+        }
+        CheckinStatusEnum checkinStatusEnum = CheckinStatusEnum.fromCode(billItem.getCheckinStatus());
+        if (CheckinStatusEnum.ALLOWED != checkinStatusEnum) {
+            return Optional.empty();
+        }
         CheckinOutRecord q = new CheckinOutRecord();
         q.setBillId(billId);
+        q.setStatus(CheckinStatusEnum.ALLOWED.getCode());
         q.setInout(CheckinOutTypeEnum.IN.getCode());
-        return StreamEx.of(this.listByExample(q)).findFirst();
+        return Optional.of(StreamEx.of(this.listByExample(q)).findFirst().orElseGet(() -> {
+            return this.createAllowedCheckInRecord(billItem);
+        }));
+
+    }
+
+    /**
+     * 创建允许进门数据
+     *
+     * @param billItem
+     * @return
+     */
+    private CheckinOutRecord createAllowedCheckInRecord(RegisterBill billItem) {
+        CheckinOutRecord item = new CheckinOutRecord();
+
+        item.setStatus(CheckinStatusEnum.ALLOWED.getCode());
+
+        item.setModified(new Date());
+        item.setProductName(billItem.getProductName());
+        item.setInoutWeight(billItem.getWeight());
+        item.setWeightUnit(billItem.getWeightUnit());
+        item.setUserName(billItem.getName());
+        item.setUserId(billItem.getUserId());
+        item.setBillType(billItem.getBillType());
+
+        item.setBillId(billItem.getBillId());
+        item.setInout(CheckinOutTypeEnum.IN.getCode());
+
+        this.insertSelective(item);
+        return item;
     }
 }
