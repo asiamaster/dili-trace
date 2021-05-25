@@ -28,6 +28,7 @@ import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
+import org.springframework.test.util.AopTestUtils;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.ReflectionUtils;
@@ -567,7 +568,8 @@ public class TradeOrderServiceTest extends AutoWiredBaseTest {
 
     @Test
     public void privateTestMethod() throws Exception {
-
+        // ReflectionTestUtils.invokeMethod 会有参数类型转换问题;
+        // ReflectionTestUtils.invokeMethod(AopTestUtils.getTargetObject(this.tradeOrderService), "privateTestMethod", new Object[0]);
         ReflectionTestUtils.invokeMethod(AopProxyUtils.getSingletonTarget(this.tradeOrderService), "privateTestMethod", new Object[0]);
 
     }

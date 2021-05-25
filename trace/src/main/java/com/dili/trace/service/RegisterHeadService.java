@@ -106,7 +106,7 @@ public class RegisterHeadService extends BaseServiceImpl<RegisterHead, Long> {
 			TraceCustomer cq = new TraceCustomer();
 			cq.setCode(customer.getCode());
 			this.clientRpcService.findCustomer(cq, marketId).ifPresent(card -> {
-				registerHead.setThirdPartyCode(card.getCardNo());
+				registerHead.setCardNo(card.getCardNo());
 			});
 
 			registerHead.setMarketId(marketId);

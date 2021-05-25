@@ -1,12 +1,11 @@
 package com.dili.trace.rpc.service;
 
-import com.dili.customer.sdk.domain.BusinessCategory;
 import com.dili.customer.sdk.domain.TallyingArea;
-import com.dili.customer.sdk.rpc.BusinessCategoryRpc;
 import com.dili.customer.sdk.rpc.TallyingAreaRpc;
 import com.dili.ss.domain.BaseOutput;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import one.util.streamex.StreamEx;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -81,12 +80,25 @@ public class TallyingAreaRpcService {
         if (marketId == null || customerIdList == null || customerIdList.isEmpty()) {
             return Maps.newHashMap();
         }
-        return StreamEx.of(customerIdList).nonNull().toMap(customerId -> {
-            return customerId;
-        }, customerId -> {
-            return this.findTallyingAreaByMarketIdAndCustomerId(marketId, customerId);
-        });
+        TallyingArea q = new TallyingArea();
+        q.setMarketId(marketId);
+        q.setCustomerIdSet(Sets.newHashSet(customerIdList));
 
+        try {
+            BaseOutput<List<TallyingArea>> out = this.tallyingAreaRpc.listByExample(q);
+            if (out == null) {
+                logger.error("查询返回BaseOutput为Null");
+                return Maps.newHashMap();
+            }
+            if (!out.isSuccess()) {
+                logger.error("查询返回Message为:{}", out.getMessage());
+                return Maps.newHashMap();
+            }
+            return StreamEx.of(out.getData()).groupingBy(TallyingArea::getCustomerId);
+        } catch (Exception e) {
+            logger.error(e.getMessage(), e);
+            return Maps.newHashMap();
+        }
     }
 
 }

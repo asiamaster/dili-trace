@@ -956,7 +956,7 @@ public class NewRegisterBillController {
                     RegisterBill rb = rbInputDto.build(customer, this.uapRpcService.getCurrentFirm().orElse(null).getId());
 
 
-                    rb.setTradePrintingCard(input.getTradePrintingCard());
+                    rb.setCardNo(input.getCardNo());
                     rb.setName(input.getName());
                     rb.setIdCardNo(input.getIdCardNo());
                     rb.setAddr(input.getAddr());
@@ -1106,7 +1106,7 @@ public class NewRegisterBillController {
 
         TraceCustomer condition = new TraceCustomer();
         condition.setCode(registerBill.getTradeAccount());
-        condition.setCardNo(StringUtils.trimToNull(registerBill.getTradePrintingCard()));
+        condition.setCardNo(StringUtils.trimToNull(registerBill.getCardNo()));
         TraceCustomer traceCustomer = this.customerService.findCustomer(condition, this.uapRpcService.getCurrentFirm().get().getId()).orElse(null);
         if (traceCustomer != null) {
             userInfoDto.setUserId(String.valueOf(traceCustomer.getId()));

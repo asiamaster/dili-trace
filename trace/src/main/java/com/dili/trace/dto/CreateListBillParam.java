@@ -41,7 +41,7 @@ public class CreateListBillParam {
     /**
      * 交易印卡
      */
-    private String tradePrintingCard;
+    private String cardNo;
 
     /**
      * 名称
@@ -157,12 +157,12 @@ public class CreateListBillParam {
         this.tradeAccount = tradeAccount;
     }
 
-    public String getTradePrintingCard() {
-        return tradePrintingCard;
+    public String getCardNo() {
+        return cardNo;
     }
 
-    public void setTradePrintingCard(String tradePrintingCard) {
-        this.tradePrintingCard = tradePrintingCard;
+    public void setCardNo(String cardNo) {
+        this.cardNo = cardNo;
     }
 
     public String getName() {

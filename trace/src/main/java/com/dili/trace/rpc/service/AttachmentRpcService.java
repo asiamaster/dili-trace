@@ -1,13 +1,12 @@
 package com.dili.trace.rpc.service;
 
 import com.dili.customer.sdk.domain.Attachment;
-import com.dili.customer.sdk.domain.BusinessCategory;
-import com.dili.customer.sdk.domain.dto.AttachmentGroupInfo;
 import com.dili.customer.sdk.enums.CustomerEnum;
 import com.dili.customer.sdk.rpc.AttachmentRpc;
 import com.dili.ss.domain.BaseOutput;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import one.util.streamex.EntryStream;
 import one.util.streamex.StreamEx;
 import org.slf4j.Logger;
@@ -18,8 +17,10 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.function.Function;
 
+/**
+ * 查询附件接口
+ */
 @Service
 public class AttachmentRpcService {
     private static final Logger logger = LoggerFactory.getLogger(AttachmentRpcService.class);
@@ -66,11 +67,25 @@ public class AttachmentRpcService {
         if (marketId == null || customerIdList == null || customerIdList.isEmpty()) {
             return Maps.newHashMap();
         }
-        return StreamEx.of(customerIdList).nonNull().toMap(customerId -> {
-            return customerId;
-        }, customerId -> {
-            return this.findAttachmentByMarketIdAndCustomerId(marketId, customerId);
-        });
+        Attachment q = new Attachment();
+        q.setMarketId(marketId);
+        q.setCustomerIdSet(Sets.newHashSet(customerIdList));
+        try {
+            BaseOutput<List<Attachment>> out = this.attachmentRpc.listByExample(q);
+            if (out == null) {
+                logger.error("查询返回BaseOutput为Null");
+                return Maps.newHashMap();
+            }
+            if (!out.isSuccess()) {
+                logger.error("查询返回Message为:{}", out.getMessage());
+                return Maps.newHashMap();
+            }
+            return StreamEx.of(out.getData()).groupingBy(Attachment::getCustomerId);
+        } catch (Exception e) {
+            logger.error(e.getMessage(), e);
+            return Maps.newHashMap();
+        }
+
 
     }
 
@@ -87,22 +102,11 @@ public class AttachmentRpcService {
         }
         return EntryStream.of(this.findAttachmentByMarketIdAndCustomerIdList(marketId, customerIdList)).mapValues(list -> {
             return StreamEx.of(list).filter(attachment -> {
-                return CustomerEnum.AttachmentType.营业执照.getCode().equals(attachment.getFileType());
-
+                return (attachmentType == null) ? true : attachmentType.getCode().equals(attachment.getFileType());
             }).findFirst();
 
         }).toMap();
 
     }
-
-    //    public void setAttachmentGroupInfoList(List<AttachmentGroupInfo> attachmentGroupInfoList) {
-    //        this.attachmentGroupInfoList = attachmentGroupInfoList;
-    //        if (attachmentGroupInfoList != null && attachmentGroupInfoList.size() > 0) {
-    //            this.businessLicenseAttachment = StreamEx.of(attachmentGroupInfoList).filterBy(AttachmentGroupInfo::getCode, CustomerEnum.AttachmentType.营业执照.getCode())
-    //                    .flatCollection(AttachmentGroupInfo::getAttachmentList).findFirst().orElse(null);
-    //
-    //        }
-    //    }
-
 
 }

@@ -140,7 +140,7 @@ public class CustomerController {
             item.setName(temp.getName());
             item.setPhone(StrUtil.isBlank(temp.getContactsPhone()) ? " " : StrUtil.replace(temp.getContactsPhone(), 3, 7, '*'));
             AccountGetListResultDto cardResultDto = this.customerRpcService.queryCardInfoByCustomerCode(temp.getCode(), null, firm.getId()).orElse(null);
-            item.setTradePrintingCard(cardResultDto == null ? " " : cardResultDto.getCardNo());
+            item.setCardNo(cardResultDto == null ? " " : cardResultDto.getCardNo());
             items.add(item);
         });
         return items;

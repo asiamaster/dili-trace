@@ -157,7 +157,6 @@ public class ManagerUserApi {
         try {
             Long marketId = this.sessionContext.getSessionData().getMarketId();
             input.setMarketId(marketId);
-            input.setQueryVehicleInfo(true);
             PageOutput<List<CustomerSimpleExtendDto>> pageOutput = this.customerRpcService.listSeller(input);
 
             // UAP 内置对象缺少市场名称、园区卡号，只能重新构建返回对象
@@ -182,7 +181,6 @@ public class ManagerUserApi {
         try {
             Long marketId = this.sessionContext.getSessionData().getMarketId();
             input.setMarketId(marketId);
-            input.setQueryVehicleInfo(true);
             PageOutput<List<CustomerSimpleExtendDto>> pageOutput = this.customerRpcService.listBuyer(input);
             // UAP 内置对象缺少市场名称、园区卡号，只能重新构建返回对象
             return getListPageOutput(marketId, pageOutput, ClientTypeEnum.BUYER);
@@ -208,7 +206,25 @@ public class ManagerUserApi {
             input.setMarketId(marketId);
             PageOutput<List<CustomerSimpleExtendDto>> pageOutput = this.customerRpcService.listDriver(input, marketId);
             // UAP 内置对象缺少市场名称、园区卡号，只能重新构建返回对象
-            return getListPageOutput(marketId, pageOutput, ClientTypeEnum.DRIVER);
+            PageOutput<List<CustomerExtendOutPutDto>> pgData = getListPageOutput(marketId, pageOutput, ClientTypeEnum.DRIVER);
+
+            List<Long> customerIdList = StreamEx.of(pgData.getData()).nonNull().map(CustomerExtendOutPutDto::getId).toList();
+            Map<Long, List<VehicleInfo>> vehicleInfoMap = this.vehicleRpcService.findVehicleInfoByMarketIdAndCustomerIdList(marketId, customerIdList);
+
+            Map<Long, String> carTypeMap = StreamEx.ofNullable(this.carTypeRpcService.listCarType()).flatCollection(Function.identity())
+                    .mapToEntry(CarTypeDTO::getId, CarTypeDTO::getName).toMap();
+            List<CustomerExtendOutPutDto> dataList = StreamEx.of(pgData.getData()).map(o -> {
+                List<VehicleInfoDto> vehicleInfoList = StreamEx.of(vehicleInfoMap.getOrDefault(o.getId(), Lists.newArrayList())).map(v -> {
+                    String carType = carTypeMap.getOrDefault(v.getTypeNumber(), "");
+                    return VehicleInfoDto.build(v, carType);
+
+                }).toList();
+                o.setVehicleInfoList(vehicleInfoList);
+                return o;
+
+            }).toList();
+            pgData.setData(dataList);
+            return pgData;
         } catch (TraceBizException e) {
             return PageOutput.failure(e.getMessage());
         } catch (Exception e) {
@@ -227,12 +243,8 @@ public class ManagerUserApi {
     private PageOutput<List<CustomerExtendOutPutDto>> getListPageOutput(Long marketId, PageOutput<List<CustomerSimpleExtendDto>> pageOutput, ClientTypeEnum clientTypeEnum) {
         PageOutput<List<CustomerExtendOutPutDto>> page = new PageOutput<>();
         if (null != pageOutput) {
-            Map<Long, String> carTypeMap = StreamEx.ofNullable(this.carTypeRpcService.listCarType()).flatCollection(Function.identity())
-                    .mapToEntry(CarTypeDTO::getId, CarTypeDTO::getName).toMap();
 
             List<CustomerSimpleExtendDto> customerList = pageOutput.getData();
-            List<Long> customerIdList = StreamEx.ofNullable(customerList).flatCollection(Function.identity()).nonNull().map(CustomerSimpleExtendDto::getId).toList();
-            Map<Long, List<VehicleInfo>> vehicleInfoMap=  this.vehicleRpcService.findVehicleInfoByMarketIdAndCustomerIdList(marketId,customerIdList);
             List<CustomerExtendOutPutDto> customerOutputList = new ArrayList<>();
             if (CollectionUtils.isNotEmpty(customerList)) {
                 customerList.forEach(c -> {
@@ -247,18 +259,8 @@ public class ManagerUserApi {
 
                     Optional<AccountGetListResultDto> cardResultDto = this.customerRpcService.queryCardInfoByCustomerCode(c.getCode(), null, marketId);
                     cardResultDto.ifPresent(cardInfo -> {
-                        customerOutput.setTradePrintingCard(cardInfo.getCardNo());
+                        customerOutput.setCardNo(cardInfo.getCardNo());
                     });
-
-                    List<VehicleInfoDto> vehicleInfoDtoList = StreamEx.of(vehicleInfoMap.getOrDefault(c.getId(), Lists.newArrayList())).map(v -> {
-                        VehicleInfoDto vehicleInfoDto = new VehicleInfoDto();
-                        vehicleInfoDto.setVehiclePlate(v.getRegistrationNumber());
-                        vehicleInfoDto.setVehicleType(v.getTypeNumber());
-                        vehicleInfoDto.setVehicleTypeName(carTypeMap.getOrDefault(v.getTypeNumber(), ""));
-                        return vehicleInfoDto;
-                    }).toList();
-                    customerOutput.setVehicleInfoList(vehicleInfoDtoList);
-
                     customerOutputList.add(customerOutput);
                 });
             }

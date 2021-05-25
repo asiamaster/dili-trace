@@ -52,11 +52,6 @@ public class TraceCustomer {
     private String organizationType;
 
     /**
-     * 园区卡号
-     */
-    private String tradePrintingCard;
-
-    /**
      * 车辆信息
      */
     private List<VehicleInfoDto> vehicleInfoList;

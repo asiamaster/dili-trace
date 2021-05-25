@@ -673,7 +673,7 @@ public class RegisterBill extends BaseDomain {
      */
     @ApiModelProperty(value = "园区卡号")
     @Column(name = "`trade_printing_card`")
-    private String tradePrintingCard;
+    private String cardNo;
 
 
     /**
@@ -1434,12 +1434,12 @@ public class RegisterBill extends BaseDomain {
         this.tradeAccount = tradeAccount;
     }
 
-    public String getTradePrintingCard() {
-        return tradePrintingCard;
+    public String getCardNo() {
+        return cardNo;
     }
 
-    public void setTradePrintingCard(String tradePrintingCard) {
-        this.tradePrintingCard = tradePrintingCard;
+    public void setCardNo(String cardNo) {
+        this.cardNo = cardNo;
     }
 
 //    public String getTradeTypeId() {

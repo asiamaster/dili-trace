@@ -500,41 +500,11 @@ public class CustomerRpcService {
      * @return
      */
     private PageOutput<List<CustomerSimpleExtendDto>> queryCustomer(CustomerQueryDto queryDto) {
-        if (queryDto == null) {
+        if (queryDto == null||queryDto.getMarketId()==null) {
             return PageOutput.success();
         }
-        Long marketId = queryDto.getMarketId();
         return this.customerRpc.listSimpleNormalPage(queryDto);
 
-//        List<Long> customerIdList = Lists.newLinkedList();
-//
-//
-//        Map<Long, List<BusinessCategory>> businessCategoryMap = StreamEx.ofNullable(queryDto.getQueryBusinessCategory())
-//                .filter(queryBusinessCategory -> queryBusinessCategory)
-//                .map(dto -> {
-//                    return this.businessCategoryRpcService.findBusinessCategoryByMarketIdAndCustomerIdList(marketId, customerIdList);
-//                }).findFirst().orElse(Maps.newHashMap());
-//
-//        Map<Long, List<VehicleInfo>> vehicleInfoMap = StreamEx.ofNullable(queryDto.getQueryVehicleInfo())
-//                .filter(queryVehicleInfo -> queryVehicleInfo)
-//                .map(dto -> {
-//                    return this.vehicleRpcService.findVehicleInfoByMarketIdAndCustomerIdList(marketId, customerIdList);
-//                }).findFirst().orElse(Maps.newHashMap());
-//
-//        Map<Long, List<TallyingArea>> tallyingAreaMap = StreamEx.ofNullable(queryDto.getQueryTallyingArea())
-//                .filter(queryTallyingArea -> queryTallyingArea)
-//                .map(dto -> {
-//                    return this.tallyingAreaRpcService.findTallyingAreaByMarketIdAndCustomerIdList(marketId, customerIdList);
-//                }).findFirst().orElse(Maps.newHashMap());
-//
-//        Map<Long, List<Attachment>> attachmentAreaMap = StreamEx.ofNullable(queryDto.getQueryAttachment())
-//                .filter(queryAttachment -> queryAttachment)
-//                .map(dto -> {
-//                    return this.attachmentRpcService.findAttachmentByMarketIdAndCustomerIdList(marketId, customerIdList);
-//                }).findFirst().orElse(Maps.newHashMap());
-
-
-//        return PageOutput.success();
     }
 
 }

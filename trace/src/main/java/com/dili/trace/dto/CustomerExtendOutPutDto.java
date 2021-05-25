@@ -47,7 +47,7 @@ public class CustomerExtendOutPutDto {
     /**
      * 园区卡号
      */
-    private String tradePrintingCard;
+    private String cardNo;
 
     /**
      * 手机
@@ -118,12 +118,12 @@ public class CustomerExtendOutPutDto {
         this.marketName = marketName;
     }
 
-    public String getTradePrintingCard() {
-        return tradePrintingCard;
+    public String getCardNo() {
+        return cardNo;
     }
 
-    public void setTradePrintingCard(String tradePrintingCard) {
-        this.tradePrintingCard = tradePrintingCard;
+    public void setCardNo(String cardNo) {
+        this.cardNo = cardNo;
     }
 
     public Long getId() {

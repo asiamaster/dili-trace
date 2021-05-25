@@ -5,6 +5,7 @@ import com.dili.customer.sdk.rpc.VehicleRpc;
 import com.dili.ss.domain.BaseOutput;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import one.util.streamex.StreamEx;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -63,11 +64,22 @@ public class VehicleRpcService {
         if (marketId == null || customerIdList == null || customerIdList.isEmpty()) {
             return Maps.newHashMap();
         }
-        return StreamEx.of(customerIdList).nonNull().toMap(customerId -> {
-            return customerId;
-        }, customerId -> {
-            return this.findVehicleInfoByMarketIdAndCustomerId(marketId, customerId);
-        });
+
+        try {
+            BaseOutput<Map<Long, List<VehicleInfo>>> out = this.vehicleRpc.batchQuery(Sets.newHashSet(customerIdList), marketId);
+            if (out == null) {
+                logger.error("查询返回BaseOutput为Null");
+                return Maps.newHashMap();
+            }
+            if (!out.isSuccess()) {
+                logger.error("查询返回Message为:{}", out.getMessage());
+                return Maps.newHashMap();
+            }
+            return out.getData();
+        } catch (Exception e) {
+            logger.error(e.getMessage(), e);
+            return Maps.newHashMap();
+        }
 
     }
 }

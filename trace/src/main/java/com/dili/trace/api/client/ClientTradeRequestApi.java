@@ -475,7 +475,7 @@ public class ClientTradeRequestApi {
                     customerOutput.setClientType(clientTypeEnum.getCode());
 
                     this.customerRpcService.queryCardInfoByCustomerCode(c.getCode(), null, marketId).ifPresent(cardInfo -> {
-                        customerOutput.setTradePrintingCard(cardInfo.getCardNo());
+                        customerOutput.setCardNo(cardInfo.getCardNo());
                     });
 
                     List<VehicleInfoDto> vehicleInfoDtoList = StreamEx.of(vehicleInfoMap.getOrDefault(c.getId(), Lists.newArrayList())).map(v -> {
