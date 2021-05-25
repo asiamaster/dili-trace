@@ -50,7 +50,7 @@
             </div>
         </form>
         <div class="text-center mt30">
-            <button class="btn-main2 btn-sm" onclick="create()">提交</button>&nbsp;&nbsp;
+            <button class="btn-main2 btn-sm" id="submit-btn" onclick="submitForm()">提交</button>&nbsp;&nbsp;
             <button style="word-break: keep-all" class="btn-greyweak btn-sm" onclick="parent.bs4pop.removeAll()">取消</button>
         </div>
     </div>
@@ -168,13 +168,8 @@
             }
         });
     }
-
-    var resubmit = 0;
-    function create(){
-        if(resubmit==0){
-            resubmit=1;
-        }else{
-            resubmit=0;
+    function submitForm(){
+        if($('#submit-btn').prop("disabled")==true){
             swal(
                 '错误',
                 '重复提交',
@@ -182,12 +177,22 @@
             );
             return;
         }
+
+        try{
+            $('#submit-btn').prop("disabled",true);
+            create();
+        }catch (e) {
+            $('#submit-btn').prop("disabled",false);
+        }
+
+    }
+
+    function create(){
         if($('#updateForm').validate().form() != true){
             resubmit = 0;
             return;
         }
         let driverId = $("[name='driverId']").val();
-
         if(null==driverId||undefined==driverId||""==driverId){
             parent.bs4pop.alert("请选择下拉框中的司机");
             resubmit = 0;
@@ -195,12 +200,13 @@
         }
         var data=$('#updateForm').serializeJSON({useIntKeysAsArrayIndex:true});
         data.truckTypeName=$("[name='truckTypeId']").find("option:selected").text();
+
         $.ajax({
             type: "POST",
             url: "${contextPath}/truckEnterRecord/save.action",
             data :  JSON.stringify(data),
             dataType: "json",
-            async : true,
+            async : false,
             contentType: "application/json; charset=utf-8",
             success: function (ret) {
                 if (ret.success) {
@@ -209,7 +215,6 @@
                     });
 
                 } else {
-                    resubmit=0;
                     swal(
                         '错误',
                         ret.result,
@@ -218,7 +223,6 @@
                 }
             },
             error: function(){
-                resubmit=0;
                 swal(
                     '错误',
                     '远程访问失败',

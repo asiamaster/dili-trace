@@ -147,7 +147,7 @@
                                 if (this.editMode) {
                                     const list = await axios.post('/customer/listSeller.action', {'id': data.userId});
                                     return $.map(list.data.data, function (obj) {
-                                        obj.text = $.makeArray([obj.name, obj.phone, obj.cardNo, obj.marketName]).join("|")
+                                        obj.text = $.makeArray([obj.name, obj.phone, obj.cardNo, obj.marketName]).filter(v=>v).join("|")
                                         return obj;
                                     });
                                 }
@@ -160,7 +160,7 @@
                                     axios.post('/customer/listSeller.action', {'keyword': query})
                                         .then((res) => {
                                             const data = $.map(res.data.data, function (obj) {
-                                                obj.text = $.makeArray([obj.name, obj.phone, obj.cardNo, obj.marketName]).join("|")
+                                                obj.text = $.makeArray([obj.name, obj.phone, obj.cardNo, obj.marketName]).filter(v=>v).join("|")
                                                 return obj;
                                             });
                                             callback(data);

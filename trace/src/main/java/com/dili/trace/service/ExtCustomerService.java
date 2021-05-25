@@ -19,6 +19,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
@@ -195,25 +196,26 @@ public class ExtCustomerService {
                 return customer;
             });
         });
-        Future<List<TraceCustomer>> custListFuture =
+        Future<Map<Long, TraceCustomer>> custListFuture =
                 this.asyncService.executeAsync(() -> {
 
                     AccountGetListQueryDto accountGetListQueryDto = new AccountGetListQueryDto();
                     accountGetListQueryDto.setCustomerIds(customerIdList);
                     accountGetListQueryDto.setFirmId(firm.getId());
-                    return StreamEx.of(this.accountRpcService.getList(accountGetListQueryDto)).map(accountGetListResultDto -> {
-                        TraceCustomer customer = new TraceCustomer();
-                        customer.setId(accountGetListResultDto.getCustomerId());
-                        customer.setCode(accountGetListResultDto.getCustomerCode());
-                        customer.setCardNo(accountGetListResultDto.getCardNo());
-                        customer.setName(accountGetListResultDto.getCustomerName());
-                        return customer;
+                    return StreamEx.of(this.accountRpcService.getList(accountGetListQueryDto)).toMap(accountGetListResultDto -> accountGetListResultDto.getCustomerId(),
+                            accountGetListResultDto -> {
+                                TraceCustomer customer = new TraceCustomer();
+                                customer.setId(accountGetListResultDto.getCustomerId());
+                                customer.setCode(accountGetListResultDto.getCustomerCode());
+                                customer.setCardNo(accountGetListResultDto.getCardNo());
+                                customer.setName(accountGetListResultDto.getCustomerName());
+                                return customer;
 
-                    }).toList();
+                            });
                 });
 
         Map<Long, TraceCustomer> idCustMap = Maps.newHashMap();
-        List<TraceCustomer> customerList = Lists.newArrayList();
+        Map<Long, TraceCustomer> customerListWithCardNo = Maps.newHashMap();
 
         try {
             idCustMap.putAll(idCustMapFuture.get());
@@ -221,20 +223,21 @@ public class ExtCustomerService {
             logger.error(e.getMessage(), e);
         }
         try {
-            customerList.addAll(custListFuture.get());
+            customerListWithCardNo.putAll(custListFuture.get());
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
         }
-        return StreamEx.of(customerList).filter(customer -> {
-            //过滤非经营户
-            return idCustMap.containsKey(customer.getId());
-        }).map(customer -> {
-            customer.setPhone(idCustMap.getOrDefault(customer.getId(), customer).getPhone());
-            customer.setName(idCustMap.getOrDefault(customer.getId(), customer).getName());
-            customer.setMarketId(firm.getId());
-            customer.setMarketName(firm.getName());
-            return customer;
+        return StreamEx.of(customerIdList).filter(custId -> {
+            return idCustMap.containsKey(custId);
+        }).map(custId -> {
+            TraceCustomer traceCustomer = idCustMap.get(custId);
+            TraceCustomer cust = customerListWithCardNo.getOrDefault(custId, traceCustomer);
+
+            traceCustomer.setCardNo(cust.getCardNo());
+            traceCustomer.setMarketName(firm.getName());
+            return traceCustomer;
 
         }).toList();
+
     }
 }
