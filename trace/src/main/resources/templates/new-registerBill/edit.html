@@ -4,13 +4,14 @@
     <ele-form
             v-bind="formConfig"
             v-model="formData"
-            ref="myForm"
             v-loading="loading"
+            :rules="rules"
+            ref="myForm"
             :request-fn="handleRequest"
     >
         <template v-slot:weight="{ desc, data, field, formData }">
-            <el-input placeholder="请输入内容" v-model.number="formData.weight" class="input-with-select">
-                <el-select v-model="formData.weightUnit" slot="append">
+            <el-input placeholder="请输入内容" v-model="formData.weight">
+                <el-select v-model="formData.weightUnit" slot="append" @change="weightUnitChange" :v-if="demo">
                     <el-option
                             v-for="item in unitOptions"
                             :key="item.value"
@@ -20,10 +21,10 @@
                 </el-select>
             </el-input>
         </template>
-        <template v-slot:pieceweight="{ desc, data, field, formData }">
-            <el-input placeholder="请输入内容" v-model.number="formData.pieceweight" class="input-with-select"
+        <template v-slot:pieceweight="{ desc, data, field, formData }" >
+            <el-input placeholder="请输入内容" v-model="formData.pieceWeight"
                       @input="changePieceWeight">
-                <el-select v-model="formData.pieceweightUnit" slot="append">
+                <el-select v-model="formData.weightUnit" slot="append" @change="weightUnitChange">
                     <el-option
                             v-for="item in unitOptions"
                             :key="item.value"

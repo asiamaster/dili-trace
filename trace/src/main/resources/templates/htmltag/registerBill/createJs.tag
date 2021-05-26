@@ -13,6 +13,7 @@
             }
         })
     }
+    let defaultMeasureType=measureTypeOptions.length > 0 ? measureTypeOptions[measureTypeOptions.length - 1]:null
 
     let truckTypeOptions = [];
     if (filedNameRetMap.truckType && filedNameRetMap.truckType.displayed === 1 && filedNameRetMap.truckType.availableValueList) {
@@ -27,6 +28,7 @@
             }
         })
     }
+    let defaultruckTypeValue=truckTypeOptions.length > 0 ? truckTypeOptions[0].value : '';
 
     var app = new Vue({
         el: '#app',
@@ -68,15 +70,11 @@
             })
             init(this);
             let formDataRef = this.formData;
-            if(this.formData.measureType=='10'){
-                if(isNaN(formDataRef.pieceWeight)||isNaN(formDataRef.pieceNum)){
-                    formDataReftotal = 0;
-                }else{
-                    formDataRef.total = formDataRef.pieceWeight * formDataRef.pieceNum;
-                }
-            }else{
-                formDataRef.total = '';
+            if(formDataRef.pieceWeight){
+                formDataRef.pieceweight=formDataRef.pieceWeight;
             }
+
+
         },
         data() {
             return {
@@ -92,31 +90,28 @@
                 imageCertList: [],
                 registerHeadCodeTemp: [],
                 weightUnit: "",
-                pieceweightUnit: "",
                 productOptionsTemp: [],
                 rules: {
-                    plate: {required: false, type: 'string', message: '必须填写车牌'},
+                    plate: {required: defaultruckTypeValue=='20', type: 'string', message: '必须填写车牌'},
                     plateList: {required: true, type: 'string', message: '必须填写车牌'},
                     registerHeadCode: {required: false, type: 'string', message: '必须选择台账'},
 
                 },
                 formData: {
-                    total: 0,
                     pieceNum: "",
-                    pieceWeight: "",
-                    measureType: measureTypeOptions.length > 0 ? measureTypeOptions[measureTypeOptions.length - 1].value : '',
+                    pieceweight: "",
+                    measureType: defaultMeasureType!=null ? defaultMeasureType.value : '',
                     registType: 10,
                     userId: "",
                     registerHeadCode: "",
                     arrivalTallynos: "",
                     plateList: [],
-                    truckType: truckTypeOptions.length > 0 ? truckTypeOptions[0].value : '',
+                    truckType: defaultruckTypeValue,
                     weight: "",
                     weightUnit: 1,
                     productName: "",
                     originName: "",
                     unitPrice: "",
-                    pieceweightUnit: 1,
                     originId:'',
                 },
                 formConfig: {
@@ -222,7 +217,7 @@
                         registerHeadCode: {
                             type: "select",
                             label: "台账",
-                            optionsLinkageFields: ['userId'],
+                            optionsLinkageFields: ['userId','registType'],
                             prop: {text: 'text', value: 'code'},
                             options: async data => {
                                 const list = await axios.post(
@@ -405,19 +400,57 @@
                             required: filedNameRetMap.measureType.required === 1,
                             vif: function () {
                                 return filedNameRetMap.measureType.displayed === 1;
-                            }
+                            } ,on:{
+                                change:function (val){
+                                    //el-input-group
+                                    let weightUnit=$('label[for="weight"]').parent().parent().find('.el-input-group__append')
+                                    let pieceWeightUnit=$('label[for="pieceweight"]').parent().parent().find('.el-input-group__append')
+
+                                    app.formConfig.formDesc.weight.rules[1].required=(val === 20);
+                                    if(val===20){
+                                        pieceWeightUnit.data('value-type','skip');
+                                        pieceWeightUnit.hide();
+
+                                        weightUnit.show();
+                                        app.formConfig.formDesc.weight.rules[1].required=true;
+                                    }else{
+
+                                        weightUnit.data('value-type','skip');
+                                        weightUnit.hide();
+
+                                        pieceWeightUnit.show();
+                                        app.formConfig.formDesc.weight.rules[1].required=false;
+                                    }
+
+                                }
+                            },
                         },
                         weight: {
-                            type: "input",
-                            label: "商品重量",
-                            required: $.inArray('20',filedNameRetMap.measureType.availableValueList)>-1,
-                            rules: [{
-                                pattern: /^([1-9][0-9]{0,7})$/,
-                                message: "请输入1-99999999之间的数字"
-                            }],
-                            vif: function (form) {
-                                return form.measureType === 20;
+                            type: function(formData) {
+                                if(formData.measureType=='20'){
+                                    return 'input';
+                                }else{
+                                    return 'text'
+                                }
                             },
+                            rules: [{
+                                pattern: /^(\s{0,0}|([1-9][0-9]{0,7}))$/,
+                                message: "请输入1-99999999之间的数字"
+                            },{ required:(defaultMeasureType!=null?defaultMeasureType.value==20 : false),message:"商品重量不能为空"}],
+                            label: function(){
+                                let checkedMeasureType='10';
+                                if(app?.formData){
+                                    checkedMeasureType= app.formData.measureType;
+                                }else{
+                                    checkedMeasureType=defaultMeasureType!=null?defaultMeasureType.value : '10'
+                                }
+                                if(checkedMeasureType=='20'){
+                                    return '商品重量';
+                                }else{
+                                    return '合计'
+                                }
+                            }
+
                         },
                         pieceNum: {
                             type: "input",
@@ -432,16 +465,20 @@
                             },
                             on: {
                                 input: function (value) {
+
                                     let formDataRef = app.formData;
-                                    if(isNaN(formDataRef.pieceWeight)||isNaN(value)){
-                                        formDataRef.total = 0;
-                                    }else{
-                                        formDataRef.total = formDataRef.pieceWeight * value;
+                                    if(formDataRef?.pieceweight!=''){
+                                        if(!isNaN(formDataRef.pieceweight)&&!isNaN(value)){
+                                            formDataRef.weight = formDataRef.pieceweight * value;
+                                            return;
+                                        }
                                     }
+                                    formDataRef.weight = '';
+
                                 }
                             }
                         },
-                        pieceWeight: {
+                        "pieceweight": {
                             type: "input",
                             label: "件重",
                             required: $.inArray('10',filedNameRetMap.measureType.availableValueList)>-1,
@@ -452,29 +489,9 @@
                             vif: function (form) {
                                 return form.measureType !== 20;
 
-                            },
-                            on: {
-                                input: function (value) {
-                                    let formDataRef = app.formData;
-                                    if(isNaN(formDataRef.pieceNum)||isNaN(value)){
-                                        formDataRef.total = 0;
-                                    }else{
-                                        formDataRef.total = formDataRef.pieceNum * value;
-                                    }
-                                }
                             }
                         },
-                        total: {
-                            isOptions: true,
-                            default: "0",
-                            type: "text",
-                            label: "合计",
-                            attrs: {},
-                            vif: function (form) {
-                                return form.measureType !== 20;
 
-                            },
-                        },
                         specName: {
                             type: "input",
                             label: "商品规格",
@@ -688,10 +705,10 @@
                         "plateList",
                         "productId",
                         "measureType",
-                        "weight",
+
                         "pieceNum",
-                        "pieceWeight",
-                        "total",
+                        'pieceweight',
+                        "weight",
                         "specName",
                         "brandName",
                         "originId",
@@ -704,11 +721,9 @@
             };
         },
         methods: {
+
             handleRequest(registerBill) {
                 app.loading=true;
-                if (registerBill.measureType == 10) {
-                    registerBill.weight = registerBill.total;
-                }
                 registerBill.imageCertList = this.imageCertList;
 
                 let data = registerBill;
@@ -735,11 +750,21 @@
                     });
             },
             changePieceWeight: function (value) {
-                if (!value || !this.formData.pieceNum) {
-                    this.formData.total = 0;
-                } else {
-                    this.formData.total = this.formData.pieceNum * value;
+                this.formData.pieceweight=value;
+                this.formData['pieceweight']=value;
+                if(this.formData.pieceNum!=''&&value!=''){
+                    if(!isNaN(this.formData.pieceNum)&&!isNaN(value)){
+                        this.formData.weight = this.formData.pieceNum * value;
+                        return;
+                    }
                 }
+                this.formData.weight = '';
+            },
+            weightUnitChange:function(value){
+                this.formData.weightUnit = value;
+            }
+            ,demo:function(){
+                debugger
             }
         }
     });
