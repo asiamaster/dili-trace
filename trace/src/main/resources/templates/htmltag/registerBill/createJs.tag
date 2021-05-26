@@ -238,38 +238,51 @@
                                 change: function (val) {
                                     let registerHeadCodeTempRef = app.registerHeadCodeTemp;
                                     let formDataRef = app.formData;
-                                    for (let i = 0; i < registerHeadCodeTempRef.length; i++) {
-                                        let obj = registerHeadCodeTempRef[i];
-                                        if (obj.code === val) {
-                                            formDataRef.registerHeadWeight = obj.weight;
-                                            formDataRef.registerHeadRemainWeight = obj.remainWeight;
+                                    //
+                                    let selectedList=registerHeadCodeTempRef.filter(item=>item.code===val);
+                                    let obj=selectedList.length>0?selectedList[selectedList.length-1]:null;
 
-                                            formDataRef.measureType = obj.measureType;
-                                            formDataRef.truckType = obj.truckType;
-                                            formDataRef.specName = obj.specName;
-                                            formDataRef.brandName = obj.brandName;
-                                            formDataRef.truckTareWeight = obj.truckTareWeight;
-                                            formDataRef.arrivalDatetime = obj.arrivalDatetime;
-                                            formDataRef.originId = obj.originId;
-                                            formDataRef.originName = obj.originName;
-                                            formDataRef.productId = obj.productId;
-                                            formDataRef.productName = obj.productName;
-                                            formDataRef.upStreamId = obj.upStreamId;
-                                            formDataRef.unitPrice = obj.unitPrice;
-
-                                            formDataRef.arrivalTallynos=obj.arrivalTallynos;
-                                            formDataRef.remark=obj.remark;
-
-                                            $.makeArray(obj.uniqueCertTypeNameList).forEach(ct=>{
-                                                if(obj[ct]){
-                                                    formDataRef[ct]=  obj[ct];
-                                                }else{
-                                                    formDataRef[ct]=  [];
-                                                }
-                                            });
-
-                                        }
+                                    if(obj==null){
+                                        return;
                                     }
+                                    app.formConfig.formDesc.truckType.options=truckTypeOptions.filter(item=>item.value==obj.truckType);
+                                    if(app.formConfig.formDesc.truckType.options.length==0){
+                                        debugger
+                                        //bs4pop.alert('是否拼车配置错误,请联系管理员', {type: 'error'});
+                                        //return;
+                                    }
+                                    app.formConfig.formDesc.measureType.options=measureTypeOptions.filter(item=>item.value==obj.measureType)
+                                    if(app.formConfig.formDesc.measureType.options.length==0){
+                                        debugger
+                                        bs4pop.alert('计重方式配置错误,请联系管理员', {type: 'error'});
+                                        return;
+                                    }
+                                    formDataRef.registerHeadWeight = obj.weight;
+                                    formDataRef.registerHeadRemainWeight = obj.remainWeight;
+
+                                    formDataRef.measureType = obj.measureType;
+                                    formDataRef.truckType = obj.truckType;
+                                    formDataRef.specName = obj.specName;
+                                    formDataRef.brandName = obj.brandName;
+                                    formDataRef.truckTareWeight = obj.truckTareWeight;
+                                    formDataRef.arrivalDatetime = obj.arrivalDatetime;
+                                    formDataRef.originId = obj.originId;
+                                    formDataRef.originName = obj.originName;
+                                    formDataRef.productId = obj.productId;
+                                    formDataRef.productName = obj.productName;
+                                    formDataRef.upStreamId = obj.upStreamId;
+                                    formDataRef.unitPrice = obj.unitPrice;
+
+                                    formDataRef.arrivalTallynos=obj.arrivalTallynos;
+                                    formDataRef.remark=obj.remark;
+
+                                    $.makeArray(obj.uniqueCertTypeNameList).forEach(ct=>{
+                                        if(obj[ct]){
+                                            formDataRef[ct]=  obj[ct];
+                                        }else{
+                                            formDataRef[ct]=  [];
+                                        }
+                                    });
                                 }
                             }
                         },
