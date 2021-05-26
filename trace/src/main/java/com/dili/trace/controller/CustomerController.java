@@ -31,6 +31,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 客户
@@ -132,6 +133,8 @@ public class CustomerController {
             return new ArrayList<>(0);
         }
         List<CustomerExtendOutPutDto> items = new ArrayList<>(tempList.size());
+        Map<Long, AccountGetListResultDto> cardUserMap = this.extCustomerService.findCardInfoByCustomerIdList(firm.getId(), StreamEx.of(tempList).map(CustomerExtendDto::getId).toList());
+
         tempList.forEach(temp -> {
             CustomerExtendOutPutDto item = new CustomerExtendOutPutDto();
             item.setId(temp.getId());
@@ -139,8 +142,7 @@ public class CustomerController {
             item.setMarketName(firm.getName());
             item.setName(temp.getName());
             item.setPhone(StrUtil.isBlank(temp.getContactsPhone()) ? " " : StrUtil.replace(temp.getContactsPhone(), 3, 7, '*'));
-            AccountGetListResultDto cardResultDto = this.customerRpcService.queryCardInfoByCustomerCode(temp.getCode(), null, firm.getId()).orElse(null);
-            item.setCardNo(cardResultDto == null ? " " : cardResultDto.getCardNo());
+            item.setCardNo(cardUserMap.getOrDefault(item.getId(),new AccountGetListResultDto()).getCardNo());
             items.add(item);
         });
         return items;

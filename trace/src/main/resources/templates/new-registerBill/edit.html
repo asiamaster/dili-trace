@@ -5,6 +5,7 @@
             v-bind="formConfig"
             v-model="formData"
             ref="myForm"
+            v-loading="loading"
             :request-fn="handleRequest"
     >
         <template v-slot:weight="{ desc, data, field, formData }">

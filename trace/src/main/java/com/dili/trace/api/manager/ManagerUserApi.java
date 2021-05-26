@@ -11,6 +11,7 @@ import com.dili.customer.sdk.domain.dto.CustomerSimpleExtendDto;
 import com.dili.customer.sdk.domain.query.CustomerQueryInput;
 import com.dili.ss.domain.BaseOutput;
 import com.dili.ss.domain.PageOutput;
+import com.dili.trace.domain.TraceCustomer;
 import com.dili.trace.dto.*;
 import com.dili.trace.enums.ClientTypeEnum;
 import com.dili.trace.rpc.dto.AccountGetListResultDto;
@@ -18,6 +19,7 @@ import com.dili.trace.rpc.dto.CustomerQueryDto;
 import com.dili.trace.rpc.service.CarTypeRpcService;
 import com.dili.trace.rpc.service.CustomerRpcService;
 import com.dili.trace.rpc.service.VehicleRpcService;
+import com.dili.trace.service.ExtCustomerService;
 import com.google.common.collect.Lists;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -55,6 +57,8 @@ public class ManagerUserApi {
     CarTypeRpcService carTypeRpcService;
     @Autowired
     VehicleRpcService vehicleRpcService;
+    @Autowired
+    ExtCustomerService extCustomerService;
 
 //    /**
 //     * 商户审核统计概览
@@ -247,6 +251,7 @@ public class ManagerUserApi {
             List<CustomerSimpleExtendDto> customerList = pageOutput.getData();
             List<CustomerExtendOutPutDto> customerOutputList = new ArrayList<>();
             if (CollectionUtils.isNotEmpty(customerList)) {
+                Map<Long, AccountGetListResultDto> cardUserMap = this.extCustomerService.findCardInfoByCustomerIdList(marketId, StreamEx.of(customerList).map(CustomerSimpleExtendDto::getId).toList());
                 customerList.forEach(c -> {
                     CustomerExtendOutPutDto customerOutput = new CustomerExtendOutPutDto();
                     customerOutput.setMarketId(marketId);
@@ -257,10 +262,8 @@ public class ManagerUserApi {
                     customerOutput.setPhone(c.getContactsPhone());
                     customerOutput.setClientType(clientTypeEnum.getCode());
 
-                    Optional<AccountGetListResultDto> cardResultDto = this.customerRpcService.queryCardInfoByCustomerCode(c.getCode(), null, marketId);
-                    cardResultDto.ifPresent(cardInfo -> {
-                        customerOutput.setCardNo(cardInfo.getCardNo());
-                    });
+
+                    customerOutput.setCardNo(cardUserMap.getOrDefault(c.getId(), new AccountGetListResultDto()).getCardNo());
                     customerOutputList.add(customerOutput);
                 });
             }

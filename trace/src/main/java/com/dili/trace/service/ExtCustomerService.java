@@ -4,6 +4,7 @@ import com.dili.customer.sdk.domain.query.CustomerQueryInput;
 import com.dili.trace.async.AsyncService;
 import com.dili.trace.domain.TraceCustomer;
 import com.dili.trace.rpc.dto.AccountGetListQueryDto;
+import com.dili.trace.rpc.dto.AccountGetListResultDto;
 import com.dili.trace.rpc.dto.CustomerQueryDto;
 import com.dili.trace.rpc.service.AccountRpcService;
 import com.dili.trace.rpc.service.CustomerRpcService;
@@ -40,6 +41,26 @@ public class ExtCustomerService {
     FirmRpcService firmRpcService;
     @Autowired
     AsyncService asyncService;
+
+    /**
+     * 根据客户idlist查询卡号
+     *
+     * @param marketId
+     * @param customerIdList
+     * @return
+     */
+    public Map<Long, AccountGetListResultDto> findCardInfoByCustomerIdList(Long marketId, List<Long> customerIdList) {
+
+        AccountGetListQueryDto accountGetListQueryDto = new AccountGetListQueryDto();
+        accountGetListQueryDto.setCustomerIds(customerIdList);
+        accountGetListQueryDto.setFirmId(marketId);
+        return StreamEx.of(this.accountRpcService.getList(accountGetListQueryDto)).toMap(accountGetListResultDto -> accountGetListResultDto.getCustomerId(),
+                accountGetListResultDto -> {
+                    return accountGetListResultDto;
+                });
+
+
+    }
 
     /**
      * 根据卡号查询信息

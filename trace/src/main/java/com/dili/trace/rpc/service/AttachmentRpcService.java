@@ -80,7 +80,12 @@ public class AttachmentRpcService {
                 logger.error("查询返回Message为:{}", out.getMessage());
                 return Maps.newHashMap();
             }
-            return StreamEx.of(out.getData()).groupingBy(Attachment::getCustomerId);
+            Map<Long, List<Attachment>> map = StreamEx.of(out.getData()).groupingBy(Attachment::getCustomerId);
+            return StreamEx.of(customerIdList).toMap(cid -> {
+                return cid;
+            }, cid -> {
+                return map.getOrDefault(cid, Lists.newArrayList());
+            });
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
             return Maps.newHashMap();
@@ -96,17 +101,17 @@ public class AttachmentRpcService {
      * @param customerIdList
      * @return
      */
-    public Map<Long, Optional<Attachment>> findAttachmentByAttachmentTypeAndCustomerIdList(Long marketId, List<Long> customerIdList, CustomerEnum.AttachmentType attachmentType) {
+    public Map<Long, Attachment> findAttachmentByAttachmentTypeAndCustomerIdList(Long marketId, List<Long> customerIdList, CustomerEnum.AttachmentType attachmentType) {
         if (marketId == null || customerIdList == null || customerIdList.isEmpty()) {
             return Maps.newHashMap();
         }
-        return EntryStream.of(this.findAttachmentByMarketIdAndCustomerIdList(marketId, customerIdList)).mapValues(list -> {
-            return StreamEx.of(list).filter(attachment -> {
-                return (attachmentType == null) ? true : attachmentType.getCode().equals(attachment.getFileType());
-            }).findFirst();
 
-        }).toMap();
-
+        return EntryStream.of(this.findAttachmentByMarketIdAndCustomerIdList(marketId, customerIdList))
+                .mapValues(list -> {
+                    return StreamEx.of(list).filter(attachment -> {
+                        return (attachmentType == null) ? true : attachmentType.getCode().equals(attachment.getFileType());
+                    }).toList();
+                }).filterValues(list -> list.size() > 0).mapValues(list -> list.get(0)).toMap();
     }
 
 }

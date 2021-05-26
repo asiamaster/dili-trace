@@ -22,6 +22,7 @@ import com.dili.trace.dto.ret.FieldConfigDetailRetDto;
 import com.dili.trace.enums.*;
 import com.dili.trace.glossary.BizNumberType;
 import com.dili.trace.glossary.RegisterSourceEnum;
+import com.dili.trace.rpc.dto.AccountGetListResultDto;
 import com.dili.trace.rpc.service.CustomerRpcService;
 import com.dili.trace.rpc.service.UidRestfulRpcService;
 import com.dili.trace.util.JsonPathUtil;
@@ -88,6 +89,8 @@ public class RegisterBillService extends BaseServiceImpl<RegisterBill, Long> {
     RegisterHeadService registerHeadService;
     @Autowired
     CustomerRpcService clientRpcService;
+    @Autowired
+    ExtCustomerService extCustomerService;
     @Autowired
     BillService billService;
     @Autowired
@@ -168,7 +171,7 @@ public class RegisterBillService extends BaseServiceImpl<RegisterBill, Long> {
         }
         ProcessConfig processConfig = this.processConfigService.findByMarketId(marketId);
         CustomerExtendDto user = this.clientRpcService.findApprovedCustomerByIdOrEx(customerId, marketId);
-        String cardNo = this.findCardNo(user, marketId).orElse(null);
+        String cardNo = this.extCustomerService.findCardInfoByCustomerIdList(marketId,Lists.newArrayList(customerId)).getOrDefault(customerId,new AccountGetListResultDto()).getCardNo();
         List<FieldConfigDetailRetDto> fieldConfigDetailRetDtoList = this.fieldConfigDetailService.findByMarketIdAndModuleType(marketId, FieldConfigModuleTypeEnum.REGISTER);
         Map<String, FieldConfigDetailRetDto> fieldConfigDetailRetDtoMap = StreamEx.of(fieldConfigDetailRetDtoList).nonNull().toMap(item -> item.getDefaultFieldDetail().getFieldName(), Function.identity());
         return StreamEx.of(registerBills).nonNull().map(dto -> {

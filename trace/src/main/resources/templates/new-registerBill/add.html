@@ -4,6 +4,7 @@
     <ele-form
             v-bind="formConfig"
             v-model="formData"
+            v-loading="loading"
             :rules="rules"
             ref="myForm"
             :request-fn="handleRequest"

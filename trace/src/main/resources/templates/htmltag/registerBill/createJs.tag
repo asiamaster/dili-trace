@@ -80,7 +80,7 @@
                     value: 2,
                     label: '公斤'
                 }],
-
+                loading:false,
                 editMode: false,
                 imageCertList: [],
                 registerHeadCodeTemp: [],
@@ -435,7 +435,7 @@
                             }
                         },
                         pieceWeight: {
-                            type: "number",
+                            type: "input",
                             label: "件重",
                             required: $.inArray('10',filedNameRetMap.measureType.availableValueList)>-1,
                             rules: [{
@@ -445,6 +445,16 @@
                             vif: function (form) {
                                 return form.measureType !== 20;
 
+                            },
+                            on: {
+                                input: function (value) {
+                                    let formDataRef = app.formData;
+                                    if(isNaN(formDataRef.pieceNum)||isNaN(value)){
+                                        formDataRef.total = 0;
+                                    }else{
+                                        formDataRef.total = formDataRef.pieceNum * value;
+                                    }
+                                }
                             }
                         },
                         total: {
@@ -685,6 +695,7 @@
         },
         methods: {
             handleRequest(registerBill) {
+                app.loading=true;
                 if (registerBill.measureType == 10) {
                     registerBill.weight = registerBill.total;
                 }
@@ -698,6 +709,7 @@
                 console.log(data);
                 axios.post(url, data)
                     .then((res) => {
+                        app.loading=false;
                         if (!res.data.success) {
                             bs4pop.alert(res.data.message, {type: 'error'});
                             return;
@@ -709,6 +721,7 @@
                         }
                     })
                     .catch(function (error) {
+                        app.loading=false;
                         bs4pop.alert('远程访问失败', {type: 'error'});
                     });
             },

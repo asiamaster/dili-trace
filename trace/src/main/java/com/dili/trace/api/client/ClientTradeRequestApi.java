@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.Future;
 import java.util.function.Function;
 
 import com.alibaba.fastjson.JSON;
@@ -28,11 +29,13 @@ import com.dili.trace.api.input.*;
 import com.dili.trace.api.output.CheckInApiDetailOutput;
 import com.dili.trace.api.output.TradeRequestOutputDto;
 import com.dili.trace.api.output.UserOutput;
+import com.dili.trace.async.AsyncService;
 import com.dili.trace.domain.*;
 import com.dili.trace.dto.TradeDto;
 import com.dili.trace.dto.CustomerExtendOutPutDto;
 import com.dili.trace.dto.VehicleInfoDto;
 import com.dili.trace.enums.*;
+import com.dili.trace.rpc.dto.AccountGetListResultDto;
 import com.dili.trace.rpc.dto.CustomerQueryDto;
 import com.dili.trace.rpc.service.AttachmentRpcService;
 import com.dili.trace.rpc.service.CarTypeRpcService;
@@ -41,6 +44,8 @@ import com.dili.trace.rpc.service.VehicleRpcService;
 import com.dili.trace.service.*;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import one.util.streamex.EntryStream;
 import one.util.streamex.StreamEx;
 import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
@@ -95,6 +100,10 @@ public class ClientTradeRequestApi {
     VehicleRpcService vehicleRpcService;
     @Autowired
     AttachmentRpcService attachmentRpcService;
+    @Autowired
+    ExtCustomerService extCustomerService;
+    @Autowired
+    AsyncService asyncService;
 
 
     /**
@@ -458,9 +467,46 @@ public class ClientTradeRequestApi {
 
             List<CustomerSimpleExtendDto> customerList = pageOutput.getData();
             List<Long> customerIdList = StreamEx.ofNullable(customerList).flatCollection(Function.identity()).nonNull().map(CustomerSimpleExtendDto::getId).toList();
-            Map<Long, List<VehicleInfo>> vehicleInfoMap = this.vehicleRpcService.findVehicleInfoByMarketIdAndCustomerIdList(marketId, customerIdList);
-            Map<Long, Optional<Attachment>> attachmentMap = this.attachmentRpcService.findAttachmentByAttachmentTypeAndCustomerIdList(marketId, customerIdList, CustomerEnum.AttachmentType.营业执照);
 
+            Future<Map<Long, List<VehicleInfoDto>>> vehicleInfoMapFuture = this.asyncService.executeAsync(() -> {
+                Map<Long, List<VehicleInfo>> retMap = this.vehicleRpcService.findVehicleInfoByMarketIdAndCustomerIdList(marketId, customerIdList);
+
+                return EntryStream.of(retMap).mapValues(list -> {
+                    return StreamEx.of(list).map(v -> {
+                        VehicleInfoDto vehicleInfoDto = new VehicleInfoDto();
+                        vehicleInfoDto.setVehiclePlate(v.getRegistrationNumber());
+                        vehicleInfoDto.setVehicleType(v.getTypeNumber());
+                        vehicleInfoDto.setVehicleTypeName(carTypeMap.getOrDefault(v.getTypeNumber(), ""));
+                        return vehicleInfoDto;
+                    }).toList();
+                }).toMap();
+
+            });
+            Future<Map<Long, Attachment>> attachmentMapFuture = this.asyncService.executeAsync(() -> {
+                return this.attachmentRpcService.findAttachmentByAttachmentTypeAndCustomerIdList(marketId, customerIdList, CustomerEnum.AttachmentType.营业执照);
+            });
+            Future<Map<Long, AccountGetListResultDto>> cardNoTraceCustomerMapFuture = this.asyncService.executeAsync(() -> {
+                return this.extCustomerService.findCardInfoByCustomerIdList(marketId, customerIdList);
+            });
+
+            Map<Long, List<VehicleInfoDto>> vehicleInfoMap = Maps.newHashMap();
+            Map<Long, Attachment> attachmentMap = Maps.newHashMap();
+            Map<Long, AccountGetListResultDto> cardNoTraceCustomerMap = Maps.newHashMap();
+            try {
+                vehicleInfoMap.putAll(vehicleInfoMapFuture.get());
+            } catch (Exception e) {
+                logger.error(e.getMessage(), e);
+            }
+            try {
+                attachmentMap.putAll(attachmentMapFuture.get());
+            } catch (Exception e) {
+                logger.error(e.getMessage(), e);
+            }
+            try {
+                cardNoTraceCustomerMap.putAll(cardNoTraceCustomerMapFuture.get());
+            } catch (Exception e) {
+                logger.error(e.getMessage(), e);
+            }
             List<CustomerExtendOutPutDto> customerOutputList = new ArrayList<>();
             if (CollectionUtils.isNotEmpty(customerList)) {
                 customerList.forEach(c -> {
@@ -470,21 +516,11 @@ public class ClientTradeRequestApi {
                     customerOutput.setId(c.getId());
                     customerOutput.setName(c.getName());
                     customerOutput.setOrganizationType(c.getOrganizationType());
-                    customerOutput.setBusinessLicenseAttachment(attachmentMap.getOrDefault(c.getId(),Optional.empty()).orElse(null));
+                    customerOutput.setBusinessLicenseAttachment(attachmentMap.get(c.getId()));
                     customerOutput.setPhone(c.getContactsPhone());
                     customerOutput.setClientType(clientTypeEnum.getCode());
-
-                    this.customerRpcService.queryCardInfoByCustomerCode(c.getCode(), null, marketId).ifPresent(cardInfo -> {
-                        customerOutput.setCardNo(cardInfo.getCardNo());
-                    });
-
-                    List<VehicleInfoDto> vehicleInfoDtoList = StreamEx.of(vehicleInfoMap.getOrDefault(c.getId(), Lists.newArrayList())).map(v -> {
-                        VehicleInfoDto vehicleInfoDto = new VehicleInfoDto();
-                        vehicleInfoDto.setVehiclePlate(v.getRegistrationNumber());
-                        vehicleInfoDto.setVehicleType(v.getTypeNumber());
-                        vehicleInfoDto.setVehicleTypeName(carTypeMap.getOrDefault(v.getTypeNumber(), ""));
-                        return vehicleInfoDto;
-                    }).toList();
+                    customerOutput.setCardNo(cardNoTraceCustomerMap.getOrDefault(c.getId(), new AccountGetListResultDto()).getCardNo());
+                    List<VehicleInfoDto> vehicleInfoDtoList = vehicleInfoMap.getOrDefault(c.getId(), Lists.newArrayList());
                     customerOutput.setVehicleInfoList(vehicleInfoDtoList);
 
                     customerOutputList.add(customerOutput);
