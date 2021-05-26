@@ -634,6 +634,9 @@
                         arrivalDatetime: {
                             type: "datetime",
                             label: "到场时间",
+                            attrs: {
+                                valueFormat:'yyyy-MM-dd HH:mm:ss'
+                            },
                             disabled: function (data) {
                                 return data.registType === 30
                             },

@@ -177,8 +177,8 @@
                 <input type="hidden" name="fieldConfigDetailList[${defaultFiledNameIndexMap['measureType']}][jsonPath]" value="$.measureType">
                 <input type="hidden" name="fieldConfigDetailList[${defaultFiledNameIndexMap['measureType']}][defaultId]" value="${defaultFieldNameIdMap['measureType']}">
                 <div class="form-group col-2">
-                    <input type="hidden" name="fieldConfigDetailList[${defaultFiledNameIndexMap['measureType']}][displayed]" value="0">
-                    <input type="checkbox" name="fieldConfigDetailList[${defaultFiledNameIndexMap['measureType']}][displayed]" value="1" <%if(filedNameRetMap['measureType'].displayed!1==1){%>checked<%}%>>
+                    <input type="hidden" name="fieldConfigDetailList[${defaultFiledNameIndexMap['measureType']}][displayed]" value="1">
+                    <input type="checkbox"   checked="checked" readonly="readonly" disabled="disabled">
                     <label>计重方式</label>
                 </div>
                 <input type="hidden"  name="fieldConfigDetailList[${defaultFiledNameIndexMap['measureType']}][required]" value="1" >
