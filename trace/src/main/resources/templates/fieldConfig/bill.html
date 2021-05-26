@@ -49,7 +49,7 @@
                     <div class="form-group col-6">
                         <select class="form-control" <%if(filedNameRetMap['truckType'].displayed!1==1){%>required<%}%> multiple="multiple"  name="fieldConfigDetailList[${defaultFiledNameIndexMap['truckType']}][availableValues][]">
                         <%for(truckType in truckTypeEnumList){%>
-                        <option value="${truckType.code}" <%if(@filedNameRetMap.get('truckType').getAvailableValueList().contains(truckType.code+'')){%>selected<%}%>>${truckType.name}</option>
+                        <option value="${truckType.code}" <%if(@filedNameRetMap.get('truckType').getAvailableValueList().contains(truckType.code+'')){%>selected<%}%>>${truckType.nameExt}</option>
                         <%}%>
                         </select>
                     </div>

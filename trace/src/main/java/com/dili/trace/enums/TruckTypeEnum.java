@@ -50,4 +50,12 @@ public enum TruckTypeEnum {
 	public String getStringCode() {
 		return String.valueOf(this.code);
 	}
+	public String getNameExt() {
+		if(this==TruckTypeEnum.FULL){
+
+			return  "否";
+		}else{
+			return  "是";
+		}
+	}
 }

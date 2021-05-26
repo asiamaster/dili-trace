@@ -1,7 +1,9 @@
 <script type="text/javascript">
     let filedNameRetMap = JSON.parse('${filedNameRetMap}');
     let measureTypeEnumList = JSON.parse('${measureTypeEnumList}');
-    let truckTypeEnumEnumList=JSON.parse('${truckTypeEnumEnumList}');
+    let truckTypeEnumEnumList=JSON.parse('${truckTypeEnumEnumList}').sort(function(a,b){
+        return b-a;
+    });
 
     let measureTypeOptions = [];
     if (filedNameRetMap.measureType && filedNameRetMap.measureType.displayed === 1 && filedNameRetMap.measureType.availableValueList) {
@@ -16,7 +18,12 @@
     if (filedNameRetMap.truckType && filedNameRetMap.truckType.displayed === 1 && filedNameRetMap.truckType.availableValueList) {
         truckTypeEnumEnumList.forEach(mt => {
             if ($.inArray(new String(mt.code).toString(), filedNameRetMap.truckType.availableValueList) > -1) {
-                truckTypeOptions.push({text: mt.name, value: mt.code})
+                if(mt.code===10){
+                    truckTypeOptions.push({text: '否', value: mt.code})
+                }else{
+                    truckTypeOptions.push({text: '是', value: mt.code})
+                }
+
             }
         })
     }
@@ -103,7 +110,7 @@
                     registerHeadCode: "",
                     arrivalTallynos: "",
                     plateList: [],
-                    truckType: truckTypeOptions.length > 0 ? truckTypeOptions[truckTypeOptions.length - 1].value : '',
+                    truckType: truckTypeOptions.length > 0 ? truckTypeOptions[0].value : '',
                     weight: "",
                     weightUnit: 1,
                     productName: "",
@@ -706,7 +713,6 @@
                 if (app.editMode) {
                     url = '/newRegisterBill/doEdit.action'
                 }
-                console.log(data);
                 axios.post(url, data)
                     .then((res) => {
                         app.loading=false;
