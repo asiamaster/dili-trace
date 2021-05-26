@@ -4,7 +4,6 @@
     let truckTypeEnumEnumList=JSON.parse('${truckTypeEnumEnumList}').sort(function(a,b){
         return b-a;
     });
-    var count=0;
     let measureTypeOptions = [];
     if (filedNameRetMap.measureType && filedNameRetMap.measureType.displayed === 1 && filedNameRetMap.measureType.availableValueList) {
         measureTypeEnumList.forEach(mt => {
@@ -160,10 +159,6 @@
                                     newFormData[ct]=  [];
                                 }
                             });
-                            count=count+1;
-                            if(count>100){
-                                return ;
-                            }
                             $.extend(app.formData,newFormData);
                             console.info('after update')
                         }
