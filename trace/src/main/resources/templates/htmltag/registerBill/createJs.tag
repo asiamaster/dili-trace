@@ -4,7 +4,7 @@
     let truckTypeEnumEnumList=JSON.parse('${truckTypeEnumEnumList}').sort(function(a,b){
         return b-a;
     });
-
+    var count=0;
     let measureTypeOptions = [];
     if (filedNameRetMap.measureType && filedNameRetMap.measureType.displayed === 1 && filedNameRetMap.measureType.availableValueList) {
         measureTypeEnumList.forEach(mt => {
@@ -73,8 +73,105 @@
             if(formDataRef.pieceWeight){
                 formDataRef.pieceweight=formDataRef.pieceWeight;
             }
+        },
+        watch:{
+            'formData':{
+                deep:true,
+                handler:function (value,oldValue) {
+
+                    console.info('measureType='+value.measureType)
+                    console.info('truckType='+value.truckType)
 
 
+                    var measureType=value.measureType;
+                    app.formConfig.formDesc.weight.rules[1].required=(measureType === 20);
+
+
+                    //el-input-group
+                    let weightUnit=$('label[for="weight"]').parent().parent().find('.el-input-group__append')
+                    let pieceWeightUnit=$('label[for="pieceweight"]').parent().parent().find('.el-input-group__append')
+
+                    if(measureType===20){
+                        pieceWeightUnit.data('value-type','skip');
+                        pieceWeightUnit.hide();
+                        weightUnit.show();
+                    }else{
+                        weightUnit.data('value-type','skip');
+                        weightUnit.hide();
+                        pieceWeightUnit.show();
+
+                        let pieceNum=app.formData.pieceNum;
+                        let pieceWeight=app.formData.pieceWeight;
+
+                        if(pieceNum!=''&&pieceWeight!=''){
+                            if(!isNaN(pieceNum)&&!isNaN(pieceWeight)&&app.formData.weight!=pieceNum * pieceWeight){
+                                app.formData.weight = pieceNum * pieceWeight;
+                            }
+                        }
+                    }
+                    let registerHeadCode=value.registerHeadCode;
+                    console.info('registerHeadCode='+value.registerHeadCode)
+                    console.info('registerHeadList.length='+app.registerHeadList.length)
+                    if(app.registerHeadList&&app.registerHeadList.length>0){
+                        let registerHeadListRef = app.registerHeadList;
+                        let selectedList=registerHeadListRef.filter(item=>item.code===registerHeadCode);
+                        let obj=selectedList.length>0?selectedList[selectedList.length-1]:null;
+
+                        if(obj!=null){
+
+                            app.formConfig.formDesc.truckType.options=truckTypeOptions.filter(item=>item.value==obj.truckType);
+                            if(app.formConfig.formDesc.truckType.options.length==0){
+                                debugger
+                                //bs4pop.alert('是否拼车配置错误,请联系管理员', {type: 'error'});
+                                //return;
+                            }
+                            app.formConfig.formDesc.measureType.options=measureTypeOptions.filter(item=>item.value==obj.measureType)
+                            if(app.formConfig.formDesc.measureType.options.length==0){
+                                debugger
+                                bs4pop.alert('计重方式配置错误,请联系管理员', {type: 'error'});
+                                return;
+                            }
+                            let newFormData={};
+                            newFormData.registerHeadWeight = obj.weight;
+                            newFormData.registerHeadRemainWeight = obj.remainWeight;
+                            console.info('obj.measureType='+obj.measureType)
+                            console.info('obj.truckType='+obj.truckType)
+                            app.formData.measureType = obj.measureType;
+                            app.formData.truckType = obj.truckType;
+                            newFormData.specName = obj.specName;
+                            newFormData.brandName = obj.brandName;
+                            newFormData.truckTareWeight = obj.truckTareWeight;
+                            newFormData.arrivalDatetime = obj.arrivalDatetime;
+                            newFormData.originId = obj.originId;
+                            newFormData.originName = obj.originName;
+                            newFormData.productId = obj.productId;
+                            newFormData.productName = obj.productName;
+                            newFormData.upStreamId = obj.upStreamId;
+                            newFormData.unitPrice = obj.unitPrice;
+
+                            newFormData.arrivalTallynos=obj.arrivalTallynos;
+                            newFormData.remark=obj.remark;
+
+
+                            $.makeArray(obj.uniqueCertTypeNameList).forEach(ct=>{
+                                if(obj[ct]){
+                                    newFormData[ct]=  obj[ct];
+                                }else{
+                                    newFormData[ct]=  [];
+                                }
+                            });
+                            count=count+1;
+                            if(count>100){
+                                return ;
+                            }
+                            $.extend(app.formData,newFormData);
+                            console.info('after update')
+                        }
+                    }
+                    app.rules.plate.required = (app.formData.truckType===20);
+                    app.rules.plateList.required = (app.formData.truckType===20);
+                }
+            }
         },
         data() {
             return {
@@ -88,7 +185,7 @@
                 loading:false,
                 editMode: false,
                 imageCertList: [],
-                registerHeadCodeTemp: [],
+                registerHeadList: JSON.parse('${registerHeadList}'),
                 weightUnit: "",
                 productOptionsTemp: [],
                 rules: {
@@ -136,7 +233,7 @@
                             required: true,
                             on:{
                                 change:function (val){
-                                    app.rules.registerHeadCode.required = (val === 30);
+                                   // app.rules.registerHeadCode.required = (val === 30);
                                 }
                             },
                         },
@@ -193,9 +290,9 @@
                                         return {text: obj};
                                     });
                                 } else {
-                                    let registerHeadCodeTemp = this.registerHeadCodeTemp;
-                                    for (let i = 0; i < registerHeadCodeTemp.length; i++) {
-                                        let obj = registerHeadCodeTemp[i];
+                                    let registerHeadList = this.registerHeadList;
+                                    for (let i = 0; i < registerHeadList.length; i++) {
+                                        let obj = registerHeadList[i];
                                         if (obj.code === registerHeadCode) {
                                             return $.map(obj.arrivalTallynos, function (obj) {
                                                 return {text: obj}
@@ -224,7 +321,7 @@
                                     '/registerHead/listRegisterHead.action',
                                     {userId: data.userId, minRemainWeight: 0}
                                 )
-                                this.registerHeadCodeTemp = list.data.data;
+                                this.registerHeadList = list.data.data;
                                 return $.map(list.data.data, function (obj) {
                                     obj.text = obj.productName + ' | ' + obj.weight + obj.weightUnitName + ' | ' + obj.created;
                                     return obj;
@@ -236,10 +333,11 @@
                             },
                             on: {
                                 change: function (val) {
-                                    let registerHeadCodeTempRef = app.registerHeadCodeTemp;
+                                    let registerHeadListRef = app.registerHeadList;
                                     let formDataRef = app.formData;
+                                    return;
                                     //
-                                    let selectedList=registerHeadCodeTempRef.filter(item=>item.code===val);
+                                    let selectedList=registerHeadListRef.filter(item=>item.code===val);
                                     let obj=selectedList.length>0?selectedList[selectedList.length-1]:null;
 
                                     if(obj==null){
@@ -312,12 +410,6 @@
                             label: "是否拼车",
                             vif: function () {
                                 return filedNameRetMap.truckType.displayed === 1;
-                            },
-                            on: {
-                                change: function (val) {
-                                    app.rules['plate'].required = val === 20;
-                                    app.rules['plateList'].required = val === 20;
-                                }
                             }
                         },
                         plate: {
@@ -334,12 +426,11 @@
                             type: "select",
                             label: "车牌号",
                             prop: {text: 'text', value: 'text'},
-                            required: true,
                             optionsLinkageFields: ['registerHeadCode'],
                             options: data => {
-                                let registerHeadCodeTemp = this.registerHeadCodeTemp;
-                                for (let i = 0; i < registerHeadCodeTemp.length; i++) {
-                                    let obj = registerHeadCodeTemp[i];
+                                let registerHeadList = this.registerHeadList;
+                                for (let i = 0; i < registerHeadList.length; i++) {
+                                    let obj = registerHeadList[i];
                                     if (obj.code === data.registerHeadCode) {
                                         return $.map(obj.plateList, function (obj) {
                                             return {text: obj};
@@ -366,9 +457,9 @@
                             optionsLinkageFields: ['registerHeadCode'],
                             options: data => {
                                 if (this !== undefined) {
-                                    let registerHeadCodeTemp = this.registerHeadCodeTemp;
-                                    for (let i = 0; i < registerHeadCodeTemp.length; i++) {
-                                        let obj = registerHeadCodeTemp[i];
+                                    let registerHeadList = this.registerHeadList;
+                                    for (let i = 0; i < registerHeadList.length; i++) {
+                                        let obj = registerHeadList[i];
                                         if (obj.code === data.registerHeadCode) {
                                             return [{name: obj.productName, id: obj.productId}]
                                         }
@@ -413,7 +504,7 @@
                             required: filedNameRetMap.measureType.required === 1,
                             vif: function () {
                                 return filedNameRetMap.measureType.displayed === 1;
-                            } ,on:{
+                            } /*,on:{
                                 change:function (val){
                                     //el-input-group
                                     let weightUnit=$('label[for="weight"]').parent().parent().find('.el-input-group__append')
@@ -436,7 +527,7 @@
                                     }
 
                                 }
-                            },
+                            },*/
                         },
                         weight: {
                             type: function(formData) {
@@ -558,9 +649,9 @@
                             optionsLinkageFields: ['registerHeadCode'],
                             options: data => {
                                 if (this != undefined) {
-                                    let registerHeadCodeTemp = this.registerHeadCodeTemp;
-                                    for (let i = 0; i < registerHeadCodeTemp.length; i++) {
-                                        let obj = registerHeadCodeTemp[i];
+                                    let registerHeadList = this.registerHeadList;
+                                    for (let i = 0; i < registerHeadList.length; i++) {
+                                        let obj = registerHeadList[i];
                                         if (obj.code === data.registerHeadCode) {
                                             return [{mergerName: obj.originName, id: obj.originId}]
                                         }
@@ -612,9 +703,9 @@
                             optionsLinkageFields: ['registerHeadCode'],
                             options: data => {
                                 if (this !== undefined) {
-                                    let registerHeadCodeTemp = this.registerHeadCodeTemp;
-                                    for (let i = 0; i < registerHeadCodeTemp.length; i++) {
-                                        let obj = registerHeadCodeTemp[i];
+                                    let registerHeadList = this.registerHeadList;
+                                    for (let i = 0; i < registerHeadList.length; i++) {
+                                        let obj = registerHeadList[i];
                                         if (obj.code === data.registerHeadCode) {
                                             return [{name: obj.upStreamName, id: obj.upStreamId}]
                                         }
@@ -763,15 +854,15 @@
                     });
             },
             changePieceWeight: function (value) {
-                this.formData.pieceweight=value;
+                // this.formData.pieceweight=value;
                 this.formData['pieceweight']=value;
-                if(this.formData.pieceNum!=''&&value!=''){
-                    if(!isNaN(this.formData.pieceNum)&&!isNaN(value)){
-                        this.formData.weight = this.formData.pieceNum * value;
-                        return;
-                    }
-                }
-                this.formData.weight = '';
+                // if(this.formData.pieceNum!=''&&value!=''){
+                //     if(!isNaN(this.formData.pieceNum)&&!isNaN(value)){
+                //         this.formData.weight = this.formData.pieceNum * value;
+                //         return;
+                //     }
+                // }
+                // this.formData.weight = '';
             },
             weightUnitChange:function(value){
                 this.formData.weightUnit = value;

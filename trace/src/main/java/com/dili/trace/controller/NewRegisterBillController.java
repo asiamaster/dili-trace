@@ -205,6 +205,8 @@ public class NewRegisterBillController {
         item.setWeightUnit(WeightUnitEnum.JIN.getCode());
         modelMap.put("item", JSON.toJSONString(item));
 
+        modelMap.put("registerHeadList",  JSON.toJSONString(Lists.newArrayList()));
+
         return "new-registerBill/add";
     }
 
@@ -341,6 +343,14 @@ public class NewRegisterBillController {
         List<RegisterTallyAreaNo> arrivalTallynos = this.registerTallyAreaNoService.findTallyAreaNoByBillIdAndType(registerBill.getBillId(), BillTypeEnum.REGISTER_BILL);
         registerBill.setArrivalTallynos(StreamEx.of(arrivalTallynos).map(RegisterTallyAreaNo::getTallyareaNo).toList());
 
+        RegisterHead queryInput=new RegisterHead();
+        queryInput.setUserId(registerBill.getUserId());
+        queryInput.setMarketId(this.uapRpcService.getCurrentFirm().get().getId());
+        queryInput.setIsDeleted(YesOrNoEnum.NO.getCode());
+        queryInput.setActive(YesOrNoEnum.YES.getCode());
+        List<RegisterHead> list = this.registerHeadService.listByExample(queryInput);
+
+        modelMap.put("registerHeadList",  JSON.toJSONString(list));
 
         UserInfoDto userInfoDto = this.findUserInfoDto(registerBill, firstTallyAreaNo);
         modelMap.put("userInfo", this.maskUserInfoDto(userInfoDto));
