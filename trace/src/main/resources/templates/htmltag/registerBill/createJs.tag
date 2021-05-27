@@ -42,6 +42,7 @@
         userId: "",
         registerHeadCode: "",
         arrivalTallynos: "",
+        arrivalDatetime:'',
         plateList: [],
         truckType: defaultruckTypeValue,
         weight: "",

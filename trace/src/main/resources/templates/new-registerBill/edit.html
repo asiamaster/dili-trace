@@ -10,8 +10,8 @@
             :request-fn="handleRequest"
     >
         <template v-slot:weight="{ desc, data, field, formData }">
-            <el-input placeholder="请输入内容" v-model="formData.weight">
-                <el-select v-model="formData.weightUnit" slot="append" @change="weightUnitChange" :v-if="demo">
+            <el-input placeholder="请输入内容" v-model="formData.weight" :disabled="formData.measureType!='20'">
+                <el-select v-model="formData.weightUnit" slot="append" v-if="formData.measureType=='20'"  :disabled="formData.registType=='30'">
                     <el-option
                             v-for="item in unitOptions"
                             :key="item.value"
@@ -24,7 +24,7 @@
         <template v-slot:pieceweight="{ desc, data, field, formData }" >
             <el-input placeholder="请输入内容" v-model="formData.pieceWeight"
                       @input="changePieceWeight">
-                <el-select v-model="formData.weightUnit" slot="append" @change="weightUnitChange">
+                <el-select v-model="formData.weightUnit" slot="append" v-if="formData.measureType!='20'" :disabled="formData.registType=='30'">
                     <el-option
                             v-for="item in unitOptions"
                             :key="item.value"

@@ -73,21 +73,21 @@ public class DetectRequestOutDto extends DetectRequest {
      * 报备时间
      */
     @Transient
-    @JSONField(format ="yyyy-MM-dd HH-mm-ss" )
+    @JSONField(format ="yyyy-MM-dd HH:mm:ss" )
     private Date billCreated;
 
     /**
      * 审核时间
      */
     @Transient
-    @JSONField(format ="yyyy-MM-dd HH-mm-ss" )
+    @JSONField(format ="yyyy-MM-dd HH:mm:ss" )
     private Date billOperationTime;
 
     /**
      * 报备单修改时间
      */
     @Transient
-    @JSONField(format ="yyyy-MM-dd HH-mm-ss" )
+    @JSONField(format ="yyyy-MM-dd HH:mm:ss" )
     private Date billModified;
 
     /**
@@ -154,7 +154,7 @@ public class DetectRequestOutDto extends DetectRequest {
      * 审核时间
      */
     @Transient
-    @JSONField(format ="yyyy-MM-dd HH-mm-ss" )
+    @JSONField(format ="yyyy-MM-dd HH:mm:ss" )
     private Date verifyDateTime;
     /**
      * 审核人

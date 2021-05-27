@@ -86,21 +86,21 @@ public class DetectRequest extends BaseDomain {
      * 检测请求创建时间
      */
     @Column(name = "`created`")
-    @JSONField(format ="yyyy-MM-dd HH-mm-ss" )
+    @JSONField(format ="yyyy-MM-dd HH:mm:ss" )
     private Date created;
 
     /**
      * 检测请求修改时间
      */
     @Column(name = "`modified`")
-    @JSONField(format ="yyyy-MM-dd HH-mm-ss" )
+    @JSONField(format ="yyyy-MM-dd HH:mm:ss" )
     private Date modified;
 
     /**
      * 检测请求预约时间
      */
     @Column(name = "`detect_reservation_time`")
-    @JSONField(format ="yyyy-MM-dd HH-mm-ss" )
+    @JSONField(format ="yyyy-MM-dd HH:mm:ss" )
     private Date detectReservationTime;
 
 
@@ -108,14 +108,14 @@ public class DetectRequest extends BaseDomain {
      * 检测指定时间
      */
     @Column(name = "`scheduled_detect_time`")
-    @JSONField(format ="yyyy-MM-dd HH-mm-ss" )
+    @JSONField(format ="yyyy-MM-dd HH:mm:ss" )
     private Date scheduledDetectTime;
 
     /**
      * 检测时间
      */
     @Column(name = "`detect_time`")
-    @JSONField(format ="yyyy-MM-dd HH-mm-ss" )
+    @JSONField(format ="yyyy-MM-dd HH:mm:ss" )
     private Date detectTime;
 
     /**
@@ -128,14 +128,14 @@ public class DetectRequest extends BaseDomain {
      * 接单时间
      */
     @Column(name = "`confirm_time`")
-    @JSONField(format ="yyyy-MM-dd HH-mm-ss" )
+    @JSONField(format ="yyyy-MM-dd HH:mm:ss" )
     private Date confirmTime;
 
     /**
      * 采样时间
      */
     @Column(name = "`sample_time`")
-    @JSONField(format ="yyyy-MM-dd HH-mm-ss" )
+    @JSONField(format ="yyyy-MM-dd HH:mm:ss" )
     private Date sampleTime;
 
     /**
