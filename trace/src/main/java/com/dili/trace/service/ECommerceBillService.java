@@ -460,7 +460,7 @@ public class ECommerceBillService {
 
         bill.setMarketId(MarketUtil.returnMarket());
         this.billService.insertSelective(bill);
-        this.billService.updateHasImage(bill.getBillId(), bill.getImageCertList());
+        this.billService.updateHasImage(bill.getBillId(), bill.getImageCertList(),BillTypeEnum.E_COMMERCE_BILL);
         //同步uap商品、经营户
         this.syncCategoryService.saveAndSyncGoodInfo(bill.getProductId(), bill.getMarketId());
         this.syncUserInfoService.saveAndSyncUserInfo(bill.getUserId(), bill.getMarketId());

@@ -1,6 +1,9 @@
 <script type="text/javascript">
     let filedNameRetMap = JSON.parse('${filedNameRetMap}');
+    let prefix = "${imageViewPathPrefix}/";
+
     let measureTypeEnumList = JSON.parse('${measureTypeEnumList}');
+    let imageCertTypeEnumList=JSON.parse('${imageCertTypeEnumList}');
     let truckTypeEnumEnumList=JSON.parse('${truckTypeEnumEnumList}').sort(function(a,b){
         return b-a;
     });
@@ -32,11 +35,11 @@
     var app = new Vue({
         el: '#app',
         created: function () {
-            let imageCertTypeEnumMap = JSON.parse('${imageCertTypeEnumMap}');
-            let prefix = "${imageViewPathPrefix}/";
             let vm = this;
-            imageCertTypeEnumMap.forEach(it => {
-                let uniqueCertTypeName="certType" + it  .certType;
+            $.each(imageCertTypeEnumList,function(){
+                let certTypeCode=this.code;
+                let uniqueCertTypeName="certType"+certTypeCode;
+                let label=this.name;
                 vm.formConfig.formDesc[uniqueCertTypeName] = {
                     type: function(formData) {
                         if(formData.registType=='30'){
@@ -45,18 +48,22 @@
                             return 'image-uploader'
                         }
                     },//"image-uploader",
-                    label: it.certTypeName,
+                    label: label,
                     attrs: {
                         name: "file",
                         multiple: true,
                         action: "/imageController/upload.action",
                         responseFn(response, file) {
-                            vm.imageCertList.push({certType: it.certType, uid: response.data})
+                            let imageCertList=app.formData.imageCertList
+                            imageCertList.push({certType: certTypeCode, uid: response.data});
+
+                            app.formData.imageCertList=imageCertList
                             return prefix + response.data;
                         },
                         beforeRemove: function (file, c) {
-                            vm.imageCertList.splice(vm.imageCertList.findIndex(item => item.uid === file.replace(prefix, "")), 1);
-                            this._data.fileList = this._data.fileList.splice(this._data.fileList.findIndex(item => item.uid === file.replace(prefix, "")), 1);
+                            let imageCertList=app.formData.imageCertList
+                            app.formData.imageCertList=  imageCertList.splice(imageCertList.findIndex(item => item.uid === file.replace(prefix, "")), 1);
+
                         },
 
                         fileType: ["jpg", "png", "bmp"],
@@ -66,7 +73,8 @@
                         return filedNameRetMap.imageCertList.displayed === 1;
                     }
                 }
-            })
+            });
+
             init(this);
             let formDataRef = this.formData;
             if(formDataRef.pieceWeight){
@@ -74,6 +82,27 @@
             }
         },
         watch:{
+            'formData.imageCertList': {
+                deep: true,
+                handler: function (imageCertList, oldValue) {
+                    let certTypeMap={};
+                    $.each(imageCertTypeEnumList,function(){
+                        certTypeMap[this.code.toString()]="certType"+this.code;
+                    });
+                    let groupedImageList={};
+                    $.each(imageCertList,function(k,v){
+                        let certType=this.certType.toString();
+                        let key=certTypeMap[certType];
+                        if(!$.hasOwnProperty(groupedImageList,key)){
+                            groupedImageList[key]=[];
+                        }
+                        groupedImageList[key].push(this);
+                    });
+                    $.each(groupedImageList,function(k,v){
+                        app.formData[k]=v.map(img=>prefix+img.uid);
+                    });
+                }
+            },
             'formData.truckType': {
                 deep: true,
                 handler: function (truckType, oldValue) {
@@ -121,6 +150,7 @@
                         bs4pop.alert('计重方式配置错误,请联系管理员', {type: 'error'});
                         return;
                     }
+                    let registerHeadId=obj.id;
 
                     let newFormData={};
                     newFormData.registerHeadWeight = obj.weight;
@@ -141,14 +171,8 @@
 
                     newFormData.arrivalTallynos=obj.arrivalTallynos;
                     newFormData.remark=obj.remark;
+                    newFormData.imageCertList=obj.imageCertList;
 
-                    $.makeArray(obj.uniqueCertTypeNameList).forEach(ct=>{
-                        if(obj[ct]){
-                            newFormData[ct]=  obj[ct];
-                        }else{
-                            newFormData[ct]=  [];
-                        }
-                    });
                     $.extend(app.formData,newFormData);
                 }
             }
@@ -175,6 +199,7 @@
 
                 },
                 formData: {
+                    imageCertList:[],
                     pieceNum: "",
                     pieceweight: "",
                     measureType: defaultMeasureType!=null ? defaultMeasureType.value : '',
@@ -809,7 +834,7 @@
 
             handleRequest(registerBill) {
                 app.loading=true;
-                registerBill.imageCertList = this.imageCertList;
+                //registerBill.imageCertList = this.imageCertList;
 
                 let data = registerBill;
                 let url = '/newRegisterBill/doAdd.action'

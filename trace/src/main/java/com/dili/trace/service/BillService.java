@@ -218,20 +218,23 @@ public class BillService extends TraceBaseService<RegisterBill, Long> {
      * @param imageList
      * @return
      */
-    public Long updateHasImage(Long billId, List<ImageCert> imageList) {
-        List<ImageCert> imageCertList = this.imageCertService.insertImageCert(imageList, billId);
+    public Long updateHasImage(Long billId, List<ImageCert> imageList,BillTypeEnum billTypeEnum) {
+        List<ImageCert> imageCertList = this.imageCertService.insertImageCert(imageList, billId,billTypeEnum);
         Map<Integer, List<ImageCert>> imageCertMap = StreamEx.of(imageCertList).groupingBy(ImageCert::getCertType);
         Integer hasDetectReport = Optional.ofNullable(imageCertMap.get(ImageCertTypeEnum.DETECT_REPORT.getCode())).map(List::size).orElse(0) > 0 ? 1 : 0;
         Integer hasOriginCertify = Optional.ofNullable(imageCertMap.get(ImageCertTypeEnum.ORIGIN_CERTIFIY.getCode())).map(List::size).orElse(0) > 0 ? 1 : 0;
         Integer hasHandleResult = Optional.ofNullable(imageCertMap.get(ImageCertTypeEnum.Handle_Result.getCode())).map(List::size).orElse(0) > 0 ? 1 : 0;
-
-        RegisterBill item = new RegisterBill();
-        item.setId(billId);
-        item.setHasDetectReport(hasDetectReport);
-        item.setHasOriginCertifiy(hasOriginCertify);
-        item.setHasHandleResult(hasHandleResult);
-        this.updateSelective(item);
+        if(BillTypeEnum.REGISTER_BILL==billTypeEnum){
+            RegisterBill item = new RegisterBill();
+            item.setId(billId);
+            item.setHasDetectReport(hasDetectReport);
+            item.setHasOriginCertifiy(hasOriginCertify);
+            item.setHasHandleResult(hasHandleResult);
+            this.updateSelective(item);
+            return billId;
+        }
         return billId;
+
     }
 
 
@@ -263,7 +266,7 @@ public class BillService extends TraceBaseService<RegisterBill, Long> {
                     return !ImageCertTypeEnum.DETECT_REPORT.equalsToCode(img.getCertType());
                 }).append(imageCertList).toList();
 
-        this.updateHasImage(item.getBillId(), imageCerts);
+        this.updateHasImage(item.getBillId(), imageCerts,BillTypeEnum.REGISTER_BILL);
         return item.getId();
     }
 

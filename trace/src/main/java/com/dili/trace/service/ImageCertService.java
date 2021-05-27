@@ -1,6 +1,7 @@
 package com.dili.trace.service;
 
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 import java.util.function.Function;
 
@@ -43,34 +44,7 @@ public class ImageCertService extends BaseServiceImpl<ImageCert, Long> {
                 }).toList();
     }
 
-    /**
-     * 保存图片
-     *
-     * @param imageCertList
-     * @param billId
-     * @return
-     */
-    public List<ImageCert> insertImageCert(List<ImageCert> imageCertList, Long billId) {
-        if (billId != null) {
-            // 先删除全部原有图片
-            ImageCert deleteConditon = new ImageCert();
-            deleteConditon.setBillId(billId);
-            deleteConditon.setBillType(BillTypeEnum.REGISTER_BILL.getCode());
-            this.deleteByExample(deleteConditon);
 
-            // 增加新的图片
-            return StreamEx.ofNullable(imageCertList).flatCollection(Function.identity()).nonNull()
-                    .filter(cert -> cert.getCertType() != null)
-                    .filter(cert -> StringUtils.isNotBlank(cert.getUid())).map(cert -> {
-                        cert.setBillId(billId);
-                        cert.setId(null);
-                        cert.setBillType(BillTypeEnum.REGISTER_BILL.getCode());
-                        this.insertSelective(cert);
-                        return cert;
-                    }).toList();
-        }
-        return Lists.newArrayList();
-    }
 
     /**
      * 保存图片
@@ -80,19 +54,21 @@ public class ImageCertService extends BaseServiceImpl<ImageCert, Long> {
      * @param billType
      * @return
      */
-    public List<ImageCert> insertImageCert(List<ImageCert> imageCertList, Long billId, Integer billType) {
+    public List<ImageCert> insertImageCert(List<ImageCert> imageCertList, Long billId, BillTypeEnum billType) {
         if (billId != null) {
             // 先删除全部原有图片
             ImageCert deleteConditon = new ImageCert();
             deleteConditon.setBillId(billId);
-            deleteConditon.setBillType(billType);
+            deleteConditon.setBillType(billType.getCode());
             this.deleteByExample(deleteConditon);
 
             // 增加新的图片
             return StreamEx.of(imageCertList).nonNull().map(cert -> {
                 cert.setBillId(billId);
                 cert.setId(null);
-                cert.setBillType(billType);
+                cert.setBillType(billType.getCode());
+                cert.setCreated(new Date());
+                cert.setModified(new Date());
                 this.insertSelective(cert);
                 return cert;
             }).toList();

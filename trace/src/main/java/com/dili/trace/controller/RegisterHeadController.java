@@ -195,11 +195,11 @@ public class RegisterHeadController {
         List<Long> registerHeadIdList = StreamEx.of(list).map(RegisterHead::getId).toList();
 
 
-        UpStreamDto upStreamQ=new UpStreamDto();
+        UpStreamDto upStreamQ = new UpStreamDto();
         upStreamQ.setIds(StreamEx.of(list).map(RegisterHead::getUpStreamId).nonNull().distinct().toList());
-        Map<Long,String>upStreamIdNameMap=StreamEx.of(upStreamQ).filter(q->{
+        Map<Long, String> upStreamIdNameMap = StreamEx.of(upStreamQ).filter(q -> {
             return !q.getIds().isEmpty();
-        }).flatCollection(q->{
+        }).flatCollection(q -> {
             return this.upStreamService.listByExample(q);
         }).toMap(UpStream::getId, UpStream::getName);
 
@@ -210,23 +210,27 @@ public class RegisterHeadController {
         Firm currentFirm = this.uapRpcService.getCurrentFirm().orElse(DTOUtils.newDTO(Firm.class));
         FieldConfigModuleTypeEnum moduleType = FieldConfigModuleTypeEnum.REGISTER;
         List<ImageCertTypeEnum> imageCertTypeEnumList = this.enumService.listImageCertType(currentFirm.getId(), moduleType);
-        List<Map<Object,Object>> dataList = StreamEx.of(list).map(rh -> {
+        List<Map<Object, Object>> dataList = StreamEx.of(list).map(rh -> {
             List<String> plateList = plateListMap.getOrDefault(rh.getId(), Lists.newArrayList());
             rh.setPlateList(plateList);
 
             List<String> registerTallyAreaNoList = tallyAreaNoListMap.getOrDefault(rh.getId(), Lists.newArrayList());
             rh.setArrivalTallynos(registerTallyAreaNoList);
-            rh.setUpStreamName(upStreamIdNameMap.getOrDefault(rh.getUpStreamId(),""));
+            rh.setUpStreamName(upStreamIdNameMap.getOrDefault(rh.getUpStreamId(), ""));
 
-
-            Map<Object,Object>   item= Maps.newHashMap(new BeanMap(rh));
-
-            List<ImageCert> imageCertList=this.imageCertService.findImageCertListByBillId(rh.getId(), BillTypeEnum.MASTER_BILL);
-            Map<ImageCertTypeEnum, List<ImageCert>>groupedImageList=ImageCertUtil.groupedImageCertList(imageCertList);
-            List<String>uniqueCertTypeNameList=StreamEx.of(imageCertTypeEnumList).map(e->{
-                List<String>imageUidList=StreamEx.of(groupedImageList.get(e)).nonNull().map(ImageCert::getUid).nonNull().map(uid->this.globalVarService.getDfsImageViewPathPrefix()+"/"+uid).toList();
-                String uniqueCertTypeName="certType"+e.getCode();
-                item.put(uniqueCertTypeName,imageUidList);
+            List<ImageCert> imageCertList = StreamEx.of(this.imageCertService.findImageCertListByBillId(rh.getId(), BillTypeEnum.MASTER_BILL))
+                    .filter(img -> {
+                        ImageCertTypeEnum certType = ImageCertTypeEnum.fromCode(img.getCertType()).orElse(null);
+                        return imageCertTypeEnumList.contains(certType);
+                    })
+                    .toList();
+            rh.setImageCertList(imageCertList);
+            Map<Object, Object> item = Maps.newHashMap(new BeanMap(rh));
+            Map<ImageCertTypeEnum, List<ImageCert>> groupedImageList = ImageCertUtil.groupedImageCertList(imageCertList);
+            List<String> uniqueCertTypeNameList = StreamEx.of(imageCertTypeEnumList).map(e -> {
+                List<String> imageUidList = StreamEx.of(groupedImageList.get(e)).nonNull().map(ImageCert::getUid).nonNull().map(uid -> this.globalVarService.getDfsImageViewPathPrefix() + "/" + uid).toList();
+                String uniqueCertTypeName = "certType" + e.getCode();
+                item.put(uniqueCertTypeName, imageUidList);
                 return uniqueCertTypeName;
             }).toList();
             item.put("uniqueCertTypeNameList", uniqueCertTypeNameList);

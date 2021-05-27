@@ -1056,7 +1056,7 @@ public class DetectRequestService extends TraceBaseService<DetectRequest, Long> 
         if (CollectionUtils.isEmpty(imageCerts)) {
             throw new TraceBizException("请上传报告");
         }
-        imageCertService.insertImageCert(imageCerts, bill.getId());
+        imageCertService.insertImageCert(imageCerts, bill.getId(),BillTypeEnum.REGISTER_BILL);
         if (bill.getHandleResult().trim().length() > 1000) {
             throw new TraceBizException("处理结果不能超过1000");
         }
@@ -1067,7 +1067,7 @@ public class DetectRequestService extends TraceBaseService<DetectRequest, Long> 
         example.setId(item.getId());
         example.setHandleResult(bill.getHandleResult());
         this.billService.updateSelective(example);
-        this.billService.updateHasImage(item.getBillId(), imageCerts);
+        this.billService.updateHasImage(item.getBillId(), imageCerts, BillTypeEnum.MASTER_BILL);
 
         //抽检类型处置销毁库存
         if (DetectTypeEnum.SPOT_CHECK.equalsToCode(bill.getDetectType())) {

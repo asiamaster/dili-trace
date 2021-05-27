@@ -193,10 +193,9 @@ public class RegisterHeadService extends BaseServiceImpl<RegisterHead, Long> {
 //        if (imageCertList.isEmpty()) {
 //            throw new TraceBusinessException("请上传凭证");
 //        }
-        imageCertService.insertImageCert(imageCertList, registerHead.getId(), BillTypeEnum.MASTER_BILL.getCode());
 
         //更新报备单上图片标志位
-        this.billService.updateHasImage(registerHead.getId(), imageCertList);
+        this.imageCertService.insertImageCert(imageCertList, registerHead.getId(), BillTypeEnum.MASTER_BILL);
         // 创建/更新品牌信息并更新brandId字段值
         this.brandService.createOrUpdateBrand(registerHead.getBrandName(), registerHead.getUserId(), registerHead.getMarketId())
                 .ifPresent(brandId -> {
@@ -555,7 +554,7 @@ public class RegisterHeadService extends BaseServiceImpl<RegisterHead, Long> {
 //            throw new TraceBusinessException("请上传凭证");
 //        }
         // 保存图片
-        imageCertService.insertImageCert(imageCertList, headItem.getId(), BillTypeEnum.MASTER_BILL.getCode());
+        imageCertService.insertImageCert(imageCertList, headItem.getId(), BillTypeEnum.MASTER_BILL);
 
         this.brandService.createOrUpdateBrand(headItem.getBrandName(), headItem.getUserId(), headItem.getMarketId());
         this.registerTallyAreaNoService.insertTallyAreaNoList(input.getArrivalTallynos(), headItem.getId(), BillTypeEnum.MASTER_BILL);
