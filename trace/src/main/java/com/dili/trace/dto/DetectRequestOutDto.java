@@ -6,10 +6,7 @@ import com.dili.ss.domain.annotation.Operator;
 import com.dili.trace.domain.DetectRecord;
 import com.dili.trace.domain.DetectRequest;
 import com.dili.trace.domain.ImageCert;
-import com.dili.trace.enums.BillTypeEnum;
-import com.dili.trace.enums.BillVerifyStatusEnum;
-import com.dili.trace.enums.DetectStatusEnum;
-import com.dili.trace.enums.WeightUnitEnum;
+import com.dili.trace.enums.*;
 import io.swagger.annotations.ApiModelProperty;
 
 import javax.persistence.Column;
@@ -73,18 +70,21 @@ public class DetectRequestOutDto extends DetectRequest {
      * 报备时间
      */
     @Transient
+    @JSONField(format = "yyyy-MM-dd HH-mm-ss")
     private Date billCreated;
 
     /**
      * 审核时间
      */
     @Transient
+    @JSONField(format = "yyyy-MM-dd HH-mm-ss")
     private Date billOperationTime;
 
     /**
      * 报备单修改时间
      */
     @Transient
+    @JSONField(format = "yyyy-MM-dd HH-mm-ss")
     private Date billModified;
 
     /**
@@ -450,6 +450,11 @@ public class DetectRequestOutDto extends DetectRequest {
     @Transient
     public String getVerifyStatusName() {
         return BillVerifyStatusEnum.fromCode(this.verifyStatus).map(BillVerifyStatusEnum::getName).orElse("");
+    }
+
+    @Transient
+    public String getDetectResultName() {
+        return DetectResultEnum.name(this.getDetectResult());
     }
 }
 
