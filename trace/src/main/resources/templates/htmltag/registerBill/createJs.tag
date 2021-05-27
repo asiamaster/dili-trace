@@ -31,7 +31,28 @@
         })
     }
     let defaultruckTypeValue=truckTypeOptions.length > 0 ? truckTypeOptions[0].value : '';
-
+    let defaultFormData={
+        registerHeadWeight :'',
+        registerHeadRemainWeight :'',
+        imageCertList:[],
+        pieceNum: "",
+        pieceweight: "",
+        measureType: defaultMeasureType!=null ? defaultMeasureType.value : '',
+        registType: 10,
+        userId: "",
+        registerHeadCode: "",
+        arrivalTallynos: "",
+        plateList: [],
+        truckType: defaultruckTypeValue,
+        weight: "",
+        weightUnit: 1,
+        productName: "",
+        originName: "",
+        unitPrice: '',
+        originId:'',
+        truckTareWeight:'0',
+        remark:'',
+    }
     var app = new Vue({
         el: '#app',
         created: function () {
@@ -87,13 +108,17 @@
                 handler: function (imageCertList, oldValue) {
                     let certTypeMap={};
                     $.each(imageCertTypeEnumList,function(){
-                        certTypeMap[this.code.toString()]="certType"+this.code;
+                        let certTypeName="certType"+this.code;
+                        certTypeMap[this.code.toString()]=certTypeName;
+                        console.info(certTypeName)
+                        app.formData[certTypeName]=[];
                     });
+
                     let groupedImageList={};
                     $.each(imageCertList,function(k,v){
                         let certType=this.certType.toString();
                         let key=certTypeMap[certType];
-                        if(!$.hasOwnProperty(groupedImageList,key)){
+                        if(!groupedImageList[key]){
                             groupedImageList[key]=[];
                         }
                         groupedImageList[key].push(this);
@@ -129,51 +154,69 @@
             'formData.registerHeadCode': {
                 deep: true,
                 handler: function (registerHeadCode, oldValue) {
-                    if(!app?.registerHeadList||app.registerHeadList.length==0){
+                    if(typeof(oldValue)=='undefined'){
+                        oldValue=''
+                    }
+                    if(typeof(registerHeadCode)=='undefined'){
+                        registerHeadCode='';
+                    }
+
+                    if(oldValue===registerHeadCode){
                         return;
                     }
-                    let registerHeadListRef = app.registerHeadList;
-                    let selectedList=registerHeadListRef.filter(item=>item.code===registerHeadCode);
-                    let obj=selectedList.length>0?selectedList[selectedList.length-1]:null;
+
+                    var newFormData = $.extend(true,{}, defaultFormData);
+
+                    let obj=null;
+                    if(app?.registerHeadList&&app.registerHeadList.length>0){
+                        let registerHeadListRef = app.registerHeadList;
+                        let selectedList=registerHeadListRef.filter(item=>item.code===registerHeadCode);
+                        obj=selectedList.length>0?selectedList[selectedList.length-1]:null;
+                    }
                     if(obj==null){
+                        $.extend(app.formData,newFormData);
                         return;
                     }
                     app.formConfig.formDesc.truckType.options=truckTypeOptions.filter(item=>item.value==obj.truckType);
                     if(app.formConfig.formDesc.truckType.options.length==0){
-                        debugger
                         bs4pop.alert('是否拼车配置错误,请联系管理员', {type: 'error'});
                         return;
                     }
                     app.formConfig.formDesc.measureType.options=measureTypeOptions.filter(item=>item.value==obj.measureType)
                     if(app.formConfig.formDesc.measureType.options.length==0){
-                        debugger
                         bs4pop.alert('计重方式配置错误,请联系管理员', {type: 'error'});
                         return;
                     }
                     let registerHeadId=obj.id;
+                    let data={};
+                    data.registerHeadWeight = obj.weight;
+                    data.registerHeadRemainWeight = obj.remainWeight;
+                    data.measureType = obj.measureType;
+                    data.truckType = obj.truckType;
+                    data.specName = obj.specName;
+                    data.brandName = obj.brandName;
+                    data.truckTareWeight = obj.truckTareWeight;
+                    data.arrivalDatetime = obj.arrivalDatetime;
+                    data.originId = obj.originId;
+                    data.originName = obj.originName;
+                    data.productId = obj.productId;
+                    data.productName = obj.productName;
+                    data.upStreamId = obj.upStreamId;
+                    data.unitPrice = obj.unitPrice;
+                    data.weightUnit=obj.weightUnit;
 
-                    let newFormData={};
-                    newFormData.registerHeadWeight = obj.weight;
-                    newFormData.registerHeadRemainWeight = obj.remainWeight;
-                    newFormData.measureType = obj.measureType;
-                    newFormData.truckType = obj.truckType;
-                    newFormData.specName = obj.specName;
-                    newFormData.brandName = obj.brandName;
-                    newFormData.truckTareWeight = obj.truckTareWeight;
-                    newFormData.arrivalDatetime = obj.arrivalDatetime;
-                    newFormData.originId = obj.originId;
-                    newFormData.originName = obj.originName;
-                    newFormData.productId = obj.productId;
-                    newFormData.productName = obj.productName;
-                    newFormData.upStreamId = obj.upStreamId;
-                    newFormData.unitPrice = obj.unitPrice;
-                    newFormData.weightUnit=obj.weightUnit;
+                    data.arrivalTallynos=obj.arrivalTallynos;
+                    data.remark=obj.remark;
 
-                    newFormData.arrivalTallynos=obj.arrivalTallynos;
-                    newFormData.remark=obj.remark;
-                    newFormData.imageCertList=obj.imageCertList;
+                    data.imageCertList=obj.imageCertList;
+                    $.each(data,function(k,v){
+                        if(typeof (v)=='undefined'){
+                            data[k]=defaultFormData[k];
+                        }
+                    })
+                    let formData=$.extend(true,{},app.formData,data);
+                    app.formData=formData;
 
-                    $.extend(app.formData,newFormData);
                 }
             }
         },
@@ -198,24 +241,7 @@
                     registerHeadCode: {required: false, type: 'string', message: '必须选择台账'},
 
                 },
-                formData: {
-                    imageCertList:[],
-                    pieceNum: "",
-                    pieceweight: "",
-                    measureType: defaultMeasureType!=null ? defaultMeasureType.value : '',
-                    registType: 10,
-                    userId: "",
-                    registerHeadCode: "",
-                    arrivalTallynos: "",
-                    plateList: [],
-                    truckType: defaultruckTypeValue,
-                    weight: "",
-                    weightUnit: 1,
-                    productName: "",
-                    originName: "",
-                    unitPrice: "",
-                    originId:'',
-                },
+                formData: $.extend(true,{},defaultFormData),
                 formConfig: {
                     formBtnSize: 'small',
                     formAttrs: {size: 'small'},
@@ -235,12 +261,7 @@
                             options: loadProvider({provider: 'registTypeProvider', queryParams: {required: true}}),
                             type: "select",
                             label: "单据类型",
-                            required: true,
-                            on:{
-                                change:function (val){
-                                   // app.rules.registerHeadCode.required = (val === 30);
-                                }
-                            },
+                            required: true
                         },
                         userId: {
                             type: "select",
@@ -287,6 +308,9 @@
                             options: async data => {
                                 let registerHeadCode = data.registerHeadCode;
                                 if (registerHeadCode == undefined || registerHeadCode == '' || registerHeadCode == null) {
+                                    if(!data||!data.userId||data.userId==''){
+                                        return [];
+                                    }
                                     const list = await axios.post(
                                         '/leaseOrderRpc/findLease.action',
                                         {customerId: data.userId}
@@ -322,6 +346,9 @@
                             optionsLinkageFields: ['userId','registType'],
                             prop: {text: 'text', value: 'code'},
                             options: async data => {
+                                if(!data||!data.userId||data.userId==''){
+                                    return
+                                }
                                 const list = await axios.post(
                                     '/registerHead/listRegisterHead.action',
                                     {userId: data.userId, minRemainWeight: 0}
@@ -335,58 +362,6 @@
                             vif: function (form) {
                                 return form.registType === 30;
 
-                            },
-                            on: {
-                                change: function (val) {
-                                    let registerHeadListRef = app.registerHeadList;
-                                    let formDataRef = app.formData;
-                                    return;
-                                    // //
-                                    // let selectedList=registerHeadListRef.filter(item=>item.code===val);
-                                    // let obj=selectedList.length>0?selectedList[selectedList.length-1]:null;
-                                    //
-                                    // if(obj==null){
-                                    //     return;
-                                    // }
-                                    // app.formConfig.formDesc.truckType.options=truckTypeOptions.filter(item=>item.value==obj.truckType);
-                                    // if(app.formConfig.formDesc.truckType.options.length==0){
-                                    //     debugger
-                                    //     //bs4pop.alert('是否拼车配置错误,请联系管理员', {type: 'error'});
-                                    //     //return;
-                                    // }
-                                    // app.formConfig.formDesc.measureType.options=measureTypeOptions.filter(item=>item.value==obj.measureType)
-                                    // if(app.formConfig.formDesc.measureType.options.length==0){
-                                    //     debugger
-                                    //     bs4pop.alert('计重方式配置错误,请联系管理员', {type: 'error'});
-                                    //     return;
-                                    // }
-                                    // formDataRef.registerHeadWeight = obj.weight;
-                                    // formDataRef.registerHeadRemainWeight = obj.remainWeight;
-                                    //
-                                    // formDataRef.measureType = obj.measureType;
-                                    // formDataRef.truckType = obj.truckType;
-                                    // formDataRef.specName = obj.specName;
-                                    // formDataRef.brandName = obj.brandName;
-                                    // formDataRef.truckTareWeight = obj.truckTareWeight;
-                                    // formDataRef.arrivalDatetime = obj.arrivalDatetime;
-                                    // formDataRef.originId = obj.originId;
-                                    // formDataRef.originName = obj.originName;
-                                    // formDataRef.productId = obj.productId;
-                                    // formDataRef.productName = obj.productName;
-                                    // formDataRef.upStreamId = obj.upStreamId;
-                                    // formDataRef.unitPrice = obj.unitPrice;
-                                    //
-                                    // formDataRef.arrivalTallynos=obj.arrivalTallynos;
-                                    // formDataRef.remark=obj.remark;
-                                    //
-                                    // $.makeArray(obj.uniqueCertTypeNameList).forEach(ct=>{
-                                    //     if(obj[ct]){
-                                    //         formDataRef[ct]=  obj[ct];
-                                    //     }else{
-                                    //         formDataRef[ct]=  [];
-                                    //     }
-                                    // });
-                                }
                             }
                         },
                         registerHeadWeight: {

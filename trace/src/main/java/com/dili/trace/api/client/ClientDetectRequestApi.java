@@ -45,6 +45,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -220,28 +221,44 @@ public class ClientDetectRequestApi {
      */
     @RequestMapping(value = "/getDetectRequestDetail.api", method = RequestMethod.GET)
     public String getDetectRequestDetail(Long id) {
-        BaseOutput<DetectRequestOutDto>output=null;
+        BaseOutput<DetectRequestOutDto> output = null;
         try {
             DetectRequestQueryDto detectRequest = new DetectRequestQueryDto();
             detectRequest.setId(id);
             DetectRequestOutDto detail = detectRequestService.getDetectRequestDetail(detectRequest);
 
 
-            List<String> arrivalTallynos=StreamEx.ofNullable(detail.getBillCode()).filter(StringUtils::isNotBlank).map(this.billService::findByCode)
-                    .nonNull().flatCollection(bill->
-                    this.registerTallyAreaNoService.findTallyAreaNoByBillIdAndType(bill.getBillId(), BillTypeEnum.REGISTER_BILL)
-            ).nonNull().map(RegisterTallyAreaNo::getTallyareaNo).toList();
+            List<String> arrivalTallynos = StreamEx.ofNullable(detail.getBillCode()).filter(StringUtils::isNotBlank).map(this.billService::findByCode)
+                    .nonNull().flatCollection(bill ->
+                            this.registerTallyAreaNoService.findTallyAreaNoByBillIdAndType(bill.getBillId(), BillTypeEnum.REGISTER_BILL)
+                    ).nonNull().map(RegisterTallyAreaNo::getTallyareaNo).toList();
 
             detail.setArrivalTallynos(arrivalTallynos);
 
-            output= BaseOutput.successData(detail);
+            output = BaseOutput.successData(detail);
         } catch (TraceBizException e) {
-            output= BaseOutput.failure(e.getMessage());
+            output = BaseOutput.failure(e.getMessage());
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
-            output= BaseOutput.failure("服务端出错");
+            output = BaseOutput.failure("服务端出错");
         }
         return JSONObject.toJSONString(output, SerializerFeature.DisableCircularReferenceDetect);
+    }
+
+    /**
+     * main
+     *
+     * @param args
+     */
+    public static void main(String[] args) {
+        DetectRequestOutDto detail = new DetectRequestOutDto();
+        detail.setArrivalDatetime(LocalDateTime.now());
+        detail.setVerifyDateTime(new Date());
+        detail.setDetectReservationTime(new Date());
+        BaseOutput output = BaseOutput.successData(detail);
+        String str = JSONObject.toJSONString(output, SerializerFeature.DisableCircularReferenceDetect);
+        System.out.println(str);
+
     }
 
     /**
