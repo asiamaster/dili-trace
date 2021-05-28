@@ -82,8 +82,8 @@ public class ClientTradePushApi {
                 registerBill.setTradeRequestCode(tradeRequest.getCode());
             }
             Long upStreamId = registerBill.getUpStreamId();
-            UpStream upStream = upStreamService.get(upStreamId);
-            registerBill.setUpStreamName(upStream.getName());
+            String upStreamName = StreamEx.ofNullable(upStreamService.get(upStreamId)).map(UpStream::getName).findFirst().orElse("");
+            registerBill.setUpStreamName(upStreamName);
             if (pushType.equals(PushTypeEnum.DOWN.getCode())) {
                 registerBill.setWeight(tradeDetail.getStockWeight());
             } else {

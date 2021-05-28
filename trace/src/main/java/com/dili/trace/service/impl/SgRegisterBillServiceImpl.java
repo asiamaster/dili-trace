@@ -80,6 +80,8 @@ public class SgRegisterBillServiceImpl implements SgRegisterBillService {
     RegisterBillService registerBillService;
     @Autowired
     UapRpcService uapRpcService;
+    @Autowired
+    UserQrHistoryService userQrHistoryService;
 
     @Autowired
     CheckinOutRecordService checkinOutRecordService;
@@ -308,7 +310,10 @@ public class SgRegisterBillServiceImpl implements SgRegisterBillService {
             } else {
                 registerBill.setVerifyStatus(verifyStatusEnum.getCode());
             }
-            return this.billService.update(registerBill);
+
+            int v= this.billService.update(registerBill);
+            this.userQrHistoryService.createUserQrHistoryForVerifyBill(registerBill.getBillId());
+            return v;
         } else {
             throw new TraceBizException("操作失败，数据状态已改变");
         }
