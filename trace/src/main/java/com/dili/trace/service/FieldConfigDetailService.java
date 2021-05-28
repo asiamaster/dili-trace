@@ -9,6 +9,8 @@ import com.dili.trace.domain.FieldConfigDetail;
 import com.dili.trace.dto.input.FieldConfigInputDto;
 import com.dili.trace.dto.ret.FieldConfigDetailRetDto;
 import com.dili.trace.enums.FieldConfigModuleTypeEnum;
+import com.dili.trace.enums.MeasureTypeEnum;
+import com.dili.trace.enums.TruckTypeEnum;
 import com.jayway.jsonpath.Configuration;
 import com.jayway.jsonpath.JsonPath;
 import one.util.streamex.StreamEx;
@@ -114,62 +116,7 @@ public class FieldConfigDetailService extends TraceBaseService<FieldConfigDetail
         return false;
     }
 
-    /**
-     * 检查并设置默认值到object
-     *
-     * @param object
-     * @param marketId
-     * @param moduleType
-     * @param <T>
-     * @return
-     */
-    public <T> T checkAndSetValues(T object, Long marketId, FieldConfigModuleTypeEnum moduleType) {
-        if (object == null) {
-            return object;
-        }
-        String json = this.toJsonString(object);
-        Object document = Configuration.defaultConfiguration().jsonProvider().parse(json);
 
-        List<FieldConfigDetailRetDto> fieldConfigDetailRetDtoList = this.findByMarketIdAndModuleType(marketId, moduleType);
-
-
-        StreamEx.of(fieldConfigDetailRetDtoList).forEach(fcd -> {
-            DefaultFieldDetail defaultFieldDetail = fcd.getDefaultFieldDetail();
-            String jsonPath = defaultFieldDetail.getJsonPath();
-            Integer xpathType = defaultFieldDetail.getJsonPathType();
-
-            boolean isRequired = true;
-            boolean isDisplayed = true;
-            String defaultValue = defaultFieldDetail.getDefaultValue();
-            String fieldLabel = defaultFieldDetail.getFieldLabel();
-            List<String> availableValues = StreamEx.ofNullable(StringUtils.split("", ","))
-                    .flatArray(Function.identity()).nonNull().map(String::valueOf).toList();
-            if (fcd.getId() != null) {
-                isRequired = YesOrNoEnum.YES.getCode().equals(fcd.getRequired());
-                isDisplayed = YesOrNoEnum.YES.getCode().equals(fcd.getDisplayed());
-            }
-
-            if (xpathType == 0) {
-                Object value = JsonPath.read(document, jsonPath);
-                this.checkValueAvailable(value, fieldLabel, availableValues);
-                if (this.checkAndIsSetDefaultValue(value, fieldLabel, isDisplayed, isRequired)) {
-                    JsonPath.parse(json).set(jsonPath, defaultValue);
-                }
-            } else {
-                Iterator ite = JsonPath.read(document, jsonPath);
-                while (ite.hasNext()) {
-                    Object value = ite.next();
-                    this.checkValueAvailable(value, fieldLabel, availableValues);
-                    if (this.checkAndIsSetDefaultValue(value, fieldLabel, isDisplayed, isRequired)) {
-                        JsonPath.parse(json).set(jsonPath, defaultValue);
-                    }
-                }
-            }
-
-        });
-
-        return object;
-    }
 
     /**
      * 保存或更新字段配置信息
@@ -250,6 +197,14 @@ public class FieldConfigDetailService extends TraceBaseService<FieldConfigDetail
                 ret.setDefaultId(df.getId());
                 ret.setIsValid(YesOrNoEnum.YES.getCode());
             }
+//            if(df.getFieldName().equals("truckType")&&ret.getAvailableValueList().isEmpty()){
+//                String values=JSON.toJSONString(StreamEx.of(TruckTypeEnum.values()).map(TruckTypeEnum::getCode).map(String::valueOf).toList());
+//                ret.setAvailableValues(values);
+//            }
+//            if(df.getFieldName().equals("measureType")&&ret.getAvailableValueList().isEmpty()){
+//                String values=JSON.toJSONString(StreamEx.of(MeasureTypeEnum.values()).map(MeasureTypeEnum::getCode).map(String::valueOf).toList());
+//                ret.setAvailableValues(values);
+//            }
             ret.setDefaultFieldDetail(df);
             return ret;
         }).toList();
