@@ -89,9 +89,9 @@
                             return prefix + response.data;
                         },
                         beforeRemove: function (file, c) {
-                            let imageCertList=app.formData.imageCertList
-                            app.formData.imageCertList=  imageCertList.splice(imageCertList.findIndex(item => item.uid === file.replace(prefix, "")), 1);
-
+                            let imageCertList=app.formData.imageCertList;
+                            let uid=file.replace(prefix, "");
+                            app.formData.imageCertList=  imageCertList.filter(item=>item.uid!=uid);
                         },
 
                         fileType: ["jpg", "png", "bmp"],
