@@ -39,7 +39,13 @@ public enum RegisterBillMessageEvent {
     /**
      * 修改图片
      */
-    updateImage("update-img-btn");
+    updateImage("update-img-btn"),
+
+
+    /**
+     * 进门
+     */
+    checkin("btn_checkin");
 
     private RegisterBillMessageEvent(String code) {
         this.code = code;

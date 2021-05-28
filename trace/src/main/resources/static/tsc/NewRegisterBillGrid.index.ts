@@ -49,6 +49,7 @@ class NewRegisterBillGrid extends ListPage {
         $('#audit-withoutDetect-btn').on('click',async ()=>await this.doAuditWithoutDetect());
         $('#review-btn').on('click',async ()=>await this.doReviewCheck());
         $('#update-img-btn').on('click',async ()=>await this.doUpdateImg());
+        $('#btn_checkin').on('click',async ()=>await this.openCheckinPage())
 
         $('select[name="detectResultSelect"]').on('change',async (o,n)=>{
             var data=JSON.parse($('select[name="detectResultSelect"]').val().toString());
@@ -602,6 +603,37 @@ class NewRegisterBillGrid extends ListPage {
             height: '98%',
             btns: []
         });
+    }
+    private async openCheckinPage() {
+        let url = this.toUrl("/newRegisterBill/add.html");
+        let sure=await popwrapper.confirm('确认要进门当前报备单吗?',undefined);
+        if(!sure){
+            return;
+        }
+        var cthis = this;
+        try{
+            //@ts-ignore
+            bs4pop.removeAll();
+            
+            var row=this.rows[0]
+            let url=this.toUrl("/newRegisterBill/doCheckIn.action");
+            var resp=   await jq.postJsonWithProcessing(url, {id:row.id}, {});
+
+            if(!resp.success){
+                //@ts-ignore
+                bs4pop.alert(resp.message, {type: 'error'});
+                return;
+            }
+            await cthis.queryGridData();
+            //@ts-ignore
+            bs4pop.removeAll();
+            //@ts-ignore
+            bs4pop.alert('操作成功', {type: 'info',autoClose: 600});
+        }catch (e){
+            //@ts-ignore
+            bs4pop.alert('远程访问失败', {type: 'error'});
+        }
+
     }
     private openCreatePage() {
         let url = this.toUrl("/newRegisterBill/add.html");

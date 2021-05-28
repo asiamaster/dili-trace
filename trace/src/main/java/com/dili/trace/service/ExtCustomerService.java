@@ -23,6 +23,7 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.function.Function;
@@ -54,10 +55,19 @@ public class ExtCustomerService {
         AccountGetListQueryDto accountGetListQueryDto = new AccountGetListQueryDto();
         accountGetListQueryDto.setCustomerIds(customerIdList);
         accountGetListQueryDto.setFirmId(marketId);
-        return StreamEx.of(this.accountRpcService.getList(accountGetListQueryDto)).toMap(accountGetListResultDto -> accountGetListResultDto.getCustomerId(),
-                accountGetListResultDto -> {
-                    return accountGetListResultDto;
-                });
+        Map<Long, AccountGetListResultDto> map = StreamEx.of(this.accountRpcService.getList(accountGetListQueryDto))
+                .mapToEntry(AccountGetListResultDto::getCustomerId, Function.identity())
+                .collapseKeys()
+                .mapValues(list -> {
+                    return StreamEx.of(list).nonNull().toList();
+                })
+                .filterValues(list -> list.size() > 0)
+                .mapValues(list -> {
+                    return list.get(0);
+                }).toMap();
+
+
+        return map;
 
 
     }

@@ -1,6 +1,7 @@
 package com.dili.trace.controller;
 
 import com.alibaba.fastjson.JSON;
+import com.dili.common.entity.SessionData;
 import com.dili.common.exception.TraceBizException;
 import com.dili.commons.glossary.YesOrNoEnum;
 import com.dili.customer.sdk.domain.dto.CustomerExtendDto;
@@ -102,6 +103,8 @@ public class NewRegisterBillController {
     RegisterTallyAreaNoService registerTallyAreaNoService;
     @Autowired
     GlobalVarService globalVarService;
+    @Autowired
+    CheckinOutRecordService checkinOutRecordService;
 
 
     /**
@@ -1094,6 +1097,45 @@ public class NewRegisterBillController {
         }
     }
 
+    /**
+     * 进门审核
+     *
+     * @param registerBill
+     * @return
+     * @throws Exception
+     */
+    @RequestMapping(value = "/doCheckIn.action", method = {RequestMethod.POST})
+    public @ResponseBody
+    BaseOutput doCheckIn(@RequestBody RegisterBill registerBill) {
+        if (registerBill == null || registerBill.getBillId() == null) {
+            return BaseOutput.failure("参数错误");
+        }
+
+        try {
+            List<Long> billIdList = Lists.newArrayList(registerBill.getBillId());
+
+            Optional<OperatorUser> operatorUser = this.uapRpcService.getCurrentOperator();
+
+            RegisterBillDto query = new RegisterBillDto();
+            query.setIdList(billIdList);
+            query.setIsDeleted(YesOrNoEnum.NO.getCode());
+            StreamEx.of(this.registerBillService.listByExample(query)).forEach(billItem -> {
+                if (!BillVerifyStatusEnum.PASSED.equalsToCode(billItem.getVerifyStatus())
+                        && !BillVerifyStatusEnum.RETURNED.equalsToCode(billItem.getVerifyStatus())) {
+                    throw new TraceBizException("当前状态不能进行进门操作");
+                }
+            });
+
+            List<CheckinOutRecord> checkinRecordList = this.processService
+                    .doCheckIn(operatorUser, billIdList, CheckinStatusEnum.ALLOWED);
+            return BaseOutput.success();
+        } catch (TraceBizException e) {
+            return BaseOutput.failure(e.getMessage());
+        } catch (Exception e) {
+            logger.error(e.getMessage(), e);
+            return BaseOutput.failure("服务端出错");
+        }
+    }
 
     /**
      * 查询城市

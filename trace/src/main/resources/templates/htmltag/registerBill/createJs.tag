@@ -48,11 +48,15 @@
         weight: "",
         weightUnit: 1,
         productName: "",
+        productId: "",
         originName: "",
-        unitPrice: '',
         originId:'',
+        unitPrice: '',
         truckTareWeight:'0',
         remark:'',
+        specName:'',
+        brandName: '',
+
     }
     var app = new Vue({
         el: '#app',
@@ -71,8 +75,10 @@
                         }
                     },//"image-uploader",
                     label: label,
+
                     attrs: {
                         name: "file",
+                        size:80,
                         multiple: true,
                         action: "/imageController/upload.action",
                         responseFn(response, file) {
@@ -104,6 +110,22 @@
             }
         },
         watch:{
+            'formData.registType': {
+                deep: true,
+                handler: function (registType, oldValue) {
+                    if(oldValue===30){
+                        if(registType===10||registType===20){
+                            app.formConfig.formDesc.truckType.options=truckTypeOptions;
+                            app.formConfig.formDesc.measureType.options=measureTypeOptions;
+                            var newFormData = $.extend(true,{}, defaultFormData,{registType:app.formData.registType,userId:app.formData.userId});
+                            $.extend(app.formData,newFormData);
+                        }else{
+
+                        }
+                    }
+
+                }
+            },
             'formData.imageCertList': {
                 deep: true,
                 handler: function (imageCertList, oldValue) {
@@ -111,7 +133,6 @@
                     $.each(imageCertTypeEnumList,function(){
                         let certTypeName="certType"+this.code;
                         certTypeMap[this.code.toString()]=certTypeName;
-                        console.info(certTypeName)
                         app.formData[certTypeName]=[];
                     });
 
@@ -165,9 +186,7 @@
                     if(oldValue===registerHeadCode){
                         return;
                     }
-
-                    var newFormData = $.extend(true,{}, defaultFormData);
-
+                    var newFormData = $.extend(true,{}, defaultFormData,{registType:app.formData.registType,userId:app.formData.userId});
                     let obj=null;
                     if(app?.registerHeadList&&app.registerHeadList.length>0){
                         let registerHeadListRef = app.registerHeadList;
@@ -263,6 +282,7 @@
                             type: "select",
                             label: "单据类型",
                             required: true
+
                         },
                         userId: {
                             type: "select",

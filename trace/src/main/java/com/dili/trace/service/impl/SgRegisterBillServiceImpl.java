@@ -81,6 +81,8 @@ public class SgRegisterBillServiceImpl implements SgRegisterBillService {
     @Autowired
     UapRpcService uapRpcService;
 
+    @Autowired
+    CheckinOutRecordService checkinOutRecordService;
     @Transactional
     @Override
     public Long createRegisterBill(RegisterBill inputBill, OperatorUser operatorUser) {
@@ -1245,6 +1247,10 @@ public class SgRegisterBillServiceImpl implements SgRegisterBillService {
             }
         }
 
+        boolean noCheckinRecord=this.checkinOutRecordService.findAllowedCheckInRecord(item.getBillId()).isEmpty();
+        if(noCheckinRecord){
+            msgStream.add(RegisterBillMessageEvent.checkin);
+        }
 
         return msgStream;
     }

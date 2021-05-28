@@ -171,7 +171,7 @@ public class RegisterBillService extends BaseServiceImpl<RegisterBill, Long> {
         }
         ProcessConfig processConfig = this.processConfigService.findByMarketId(marketId);
         CustomerExtendDto user = this.clientRpcService.findApprovedCustomerByIdOrEx(customerId, marketId);
-        String cardNo = this.extCustomerService.findCardInfoByCustomerIdList(marketId,Lists.newArrayList(customerId)).getOrDefault(customerId,new AccountGetListResultDto()).getCardNo();
+        String cardNo = this.extCustomerService.findCardInfoByCustomerIdList(marketId, Lists.newArrayList(customerId)).getOrDefault(customerId, new AccountGetListResultDto()).getCardNo();
         List<FieldConfigDetailRetDto> fieldConfigDetailRetDtoList = this.fieldConfigDetailService.findByMarketIdAndModuleType(marketId, FieldConfigModuleTypeEnum.REGISTER);
         Map<String, FieldConfigDetailRetDto> fieldConfigDetailRetDtoMap = StreamEx.of(fieldConfigDetailRetDtoList).nonNull().toMap(item -> item.getDefaultFieldDetail().getFieldName(), Function.identity());
         return StreamEx.of(registerBills).nonNull().map(dto -> {
@@ -355,7 +355,7 @@ public class RegisterBillService extends BaseServiceImpl<RegisterBill, Long> {
         List<ImageCert> imageCertList = registerBill.getImageCertList();
         if (!imageCertList.isEmpty()) {
             //更新报备单上图片标志位
-            this.billService.updateHasImage(registerBill.getBillId(), imageCertList,BillTypeEnum.REGISTER_BILL);
+            this.billService.updateHasImage(registerBill.getBillId(), imageCertList, BillTypeEnum.REGISTER_BILL);
         }
 
         this.processService.afterCreateBill(registerBill.getId(), registerBill.getMarketId(), processConfig, operatorUser);
@@ -862,7 +862,7 @@ public class RegisterBillService extends BaseServiceImpl<RegisterBill, Long> {
         imageCertList = StreamEx.ofNullable(imageCertList).nonNull().flatCollection(Function.identity()).nonNull().toList();
         if (!imageCertList.isEmpty()) {
             // 保存图片
-            this.billService.updateHasImage(input.getId(), imageCertList,BillTypeEnum.REGISTER_BILL);
+            this.billService.updateHasImage(input.getId(), imageCertList, BillTypeEnum.REGISTER_BILL);
         }
 
         // imageCertService.insertImageCert(imageCertList, input.getId());
@@ -1593,8 +1593,10 @@ public class RegisterBillService extends BaseServiceImpl<RegisterBill, Long> {
      */
     public void doUpdateImage(RegisterBill registerBill) {
         this.checkImageCertList(registerBill);
-        this.imageCertService.insertImageCert(registerBill.getImageCertList(),registerBill.getId(), BillTypeEnum.E_COMMERCE_BILL);
+        this.imageCertService.insertImageCert(registerBill.getImageCertList(), registerBill.getId(), BillTypeEnum.E_COMMERCE_BILL);
     }
+
+
 
     /**
      * 对上传图片数量做判断

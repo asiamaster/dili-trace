@@ -299,6 +299,21 @@ public class CheckinOutRecordService extends BaseServiceImpl<CheckinOutRecord, L
     }
 
     /**
+     * 查找已经进门的信息
+     * @param billId
+     * @return
+     */
+    public Optional<CheckinOutRecord> findAllowedCheckInRecord(Long billId) {
+
+        CheckinOutRecord q = new CheckinOutRecord();
+        q.setBillId(billId);
+        q.setStatus(CheckinStatusEnum.ALLOWED.getCode());
+        q.setInout(CheckinOutTypeEnum.IN.getCode());
+        return StreamEx.of(this.listByExample(q)).findFirst();
+
+    }
+
+    /**
      * 创建允许进门数据
      *
      * @param billItem
