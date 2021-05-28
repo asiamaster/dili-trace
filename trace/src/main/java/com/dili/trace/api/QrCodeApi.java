@@ -80,7 +80,7 @@ public class QrCodeApi {
         logger.info("generateQR:userId={},clientType={}",dto.getClientId(),clientTypeEnum.getDesc());
         try {
             UserQrStatusEnum userQrStatusEnum = StreamEx.of(dto).filter(o -> {
-                return ClientTypeEnum.SELLER == clientTypeEnum || ClientTypeEnum.BUYER == clientTypeEnum;
+                return ClientTypeEnum.MANAGER != clientTypeEnum;
             }).map(o -> {
                 return this.userInfoService.findByUserId(input.getClientId(), input.getMarketId()).map(UserInfo::getQrStatus).orElse(UserQrStatusEnum.BLACK.getCode());
             }).map(qrStatus -> {
