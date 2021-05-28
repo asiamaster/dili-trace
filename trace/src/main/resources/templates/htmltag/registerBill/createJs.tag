@@ -84,14 +84,22 @@
                         responseFn(response, file) {
                             let imageCertList=app.formData.imageCertList
                             imageCertList.push({certType: certTypeCode, uid: response.data});
+                            app.formData.imageCertList=imageCertList;
 
-                            app.formData.imageCertList=imageCertList
                             return prefix + response.data;
                         },
-                        beforeRemove: function (file, c) {
+                        beforeRemove: function (file, computedValues) {
                             let imageCertList=app.formData.imageCertList;
                             let uid=file.replace(prefix, "");
                             app.formData.imageCertList=  imageCertList.filter(item=>item.uid!=uid);
+
+                            for(var i=0;i<this.fileList.length;i++){
+                                if(this.fileList[i].response.data===uid){
+                                    this.fileList.splice(i,1)
+                                    break;
+                                }
+                            }
+                            return true;
                         },
 
                         fileType: ["jpg", "png", "bmp"],
@@ -134,8 +142,22 @@
                         let certTypeName="certType"+this.code;
                         certTypeMap[this.code.toString()]=certTypeName;
                         app.formData[certTypeName]=[];
-                    });
 
+                        try{
+                            let valueList=app.$refs.myForm.$refs[certTypeName][0]?.value
+                            if(valueList&&valueList?.length>0){
+                                valueList.splice(0,valueList.length)
+                            }
+                        }catch (e) {
+                        }
+                        try{
+                            let fileList= app.$refs.myForm.$refs[certTypeName][0]?.$children[0]?.fileList;
+                            if(fileList&&fileList?.length>0){
+                                fileList.splice(0,fileList.length)
+                            }
+                        }catch (e) {
+                        }
+                    });
                     let groupedImageList={};
                     $.each(imageCertList,function(k,v){
                         let certType=this.certType.toString();

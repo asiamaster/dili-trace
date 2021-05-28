@@ -82,7 +82,7 @@ public class ClientCommissionBillApi {
             }
             List<RegisterBill> inputBillList = StreamEx.of(inputList).map(input -> {
                 logger.info("循环保存登记单:" + JSON.toJSONString(input));
-                CustomerExtendDto customer = this.customerRpcService.findApprovedCustomerByIdOrEx(userId, sessionData.getMarketId());
+                CustomerExtendDto customer = this.customerRpcService.findCustomerByIdOrEx(userId, sessionData.getMarketId());
                 RegisterBill registerBill = input.build(customer, sessionData.getMarketId());
                 registerBill.setName(input.getName());
                 registerBill.setCorporateName(input.getCorporateName());
