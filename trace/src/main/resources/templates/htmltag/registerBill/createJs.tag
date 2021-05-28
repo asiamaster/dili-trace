@@ -52,7 +52,7 @@
         originName: "",
         originId:'',
         unitPrice: '',
-        truckTareWeight:'0',
+        truckTareWeight:'',
         remark:'',
         specName:'',
         brandName: '',
@@ -743,10 +743,10 @@
                             }
                         },
                         truckTareWeight: {
-                            type: "number",
+                            type: "input",
                             label: "皮重",
                             rules: [{
-                                pattern: /^([1-9][0-9]{0,6})$/,
+                                pattern: /^(\s{0,0}|[1-9][0-9]{0,6})$/,
                                 message: "请输入1-9999999之间的数字"
                             }],
                             required: filedNameRetMap.truckTareWeight.required === 1,
