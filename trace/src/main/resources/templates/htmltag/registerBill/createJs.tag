@@ -58,6 +58,25 @@
         brandName: '',
 
     }
+    function removeFile(fileCmp,uid){
+        for(var i=0;i<fileCmp.fileList.length;i++){
+            if(fileCmp.fileList[i].response.data===uid){
+                debugger
+                fileCmp.fileList.splice(i,1)
+                break;
+            }
+        }
+    }
+    function removeAllFiles(fileCmp,uidList){
+
+        while(true){
+            let fileList=fileCmp.fileList;
+            if(fileList.length===0){
+                break;
+            }
+            fileCmp.fileList.splice(0,1)
+        }
+    }
     var app = new Vue({
         el: '#app',
         created: function () {
@@ -85,25 +104,18 @@
                             let imageCertList=app.formData.imageCertList
                             imageCertList.push({certType: certTypeCode, uid: response.data});
                             app.formData.imageCertList=imageCertList;
-
                             return prefix + response.data;
                         },
                         beforeRemove: function (file, computedValues) {
                             let imageCertList=app.formData.imageCertList;
                             let uid=file.replace(prefix, "");
+                            removeFile(this,uid);
                             app.formData.imageCertList=  imageCertList.filter(item=>item.uid!=uid);
-
-                            for(var i=0;i<this.fileList.length;i++){
-                                if(this.fileList[i].response.data===uid){
-                                    this.fileList.splice(i,1)
-                                    break;
-                                }
-                            }
                             return true;
                         },
 
                         fileType: ["jpg", "png", "bmp"],
-                        limit: "10",
+                        limit: "2",
                     },
                     vif: function () {
                         return filedNameRetMap.imageCertList.displayed === 1;
@@ -137,26 +149,48 @@
             'formData.imageCertList': {
                 deep: true,
                 handler: function (imageCertList, oldValue) {
+                    return;
+                    let myFormRefs=this.$refs.myForm.$refs
                     let certTypeMap={};
-                    $.each(imageCertTypeEnumList,function(){
-                        let certTypeName="certType"+this.code;
-                        certTypeMap[this.code.toString()]=certTypeName;
-                        app.formData[certTypeName]=[];
+                    $.each(imageCertTypeEnumList,(i,item)=>{
 
-                        try{
-                            let valueList=app.$refs.myForm.$refs[certTypeName][0]?.value
-                            if(valueList&&valueList?.length>0){
-                                valueList.splice(0,valueList.length)
-                            }
-                        }catch (e) {
+                        let certTypeName="certType"+item.code;
+                        certTypeMap[item.code.toString()]=certTypeName;
+
+                        let imageUploader=myFormRefs[certTypeName][0]?.$children[0];
+                        if(imageUploader){
+                            let valueList=imageUploader?.value;
+                            let fileList= imageUploader?.fileList;
+
+                            let imageCertUidList=$.makeArray(imageCertList).map(v=>v.uid);
+                            let fileListUidList= $.makeArray(fileList).map(v=>v.response.data);
+                            // console.info(imageCertList)
+                            console.info(valueList)
+                            console.info(imageCertUidList)
+                            console.info(fileListUidList)
+
                         }
-                        try{
-                            let fileList= app.$refs.myForm.$refs[certTypeName][0]?.$children[0]?.fileList;
-                            if(fileList&&fileList?.length>0){
-                                fileList.splice(0,fileList.length)
-                            }
-                        }catch (e) {
-                        }
+                        console.info(imageCertList)
+                        debugger
+                        app.formData[certTypeName]=[];
+                        // try{
+                        //
+                        //     debugger
+                        //     if(valueList&&valueList?.length>0){
+                        //         //valueList.splice(0,valueList.length)
+                        //     }
+                        // }catch (e) {
+                        //     debugger
+                        // }
+                        // try{
+                        //
+                        //     debugger
+                        //     if(fileList&&fileList?.length>0){
+                        //         //fileList.splice(0,fileList.length)
+                        //     }
+                        // }catch (e) {
+                        //     debugger
+                        // }
                     });
                     let groupedImageList={};
                     $.each(imageCertList,function(k,v){
@@ -198,6 +232,17 @@
             'formData.registerHeadCode': {
                 deep: true,
                 handler: function (registerHeadCode, oldValue) {
+
+
+                    let certTypeMap={};
+                    let groupedImageList={};
+                    $.each(imageCertTypeEnumList,(i,item)=> {
+                        let certTypeName = "certType" + item.code;
+                        certTypeMap[item.code.toString()] = certTypeName;
+                        groupedImageList[item.code.toString()]=[];
+                    });
+
+                    console.info(registerHeadCode)
                     if(typeof(oldValue)=='undefined'){
                         oldValue=''
                     }
@@ -208,15 +253,21 @@
                     if(oldValue===registerHeadCode){
                         return;
                     }
-                    var newFormData = $.extend(true,{}, defaultFormData,{registType:app.formData.registType,userId:app.formData.userId});
+
                     let obj=null;
                     if(app?.registerHeadList&&app.registerHeadList.length>0){
                         let registerHeadListRef = app.registerHeadList;
                         let selectedList=registerHeadListRef.filter(item=>item.code===registerHeadCode);
                         obj=selectedList.length>0?selectedList[selectedList.length-1]:null;
                     }
+                    // debugger
                     if(obj==null){
-                        $.extend(app.formData,newFormData);
+                        var newFormData = $.extend(true,{}, defaultFormData,{registType:app.formData.registType,userId:app.formData.userId});
+                        $.each(groupedImageList,function(code,imgList){
+                            let certTypeName = certTypeMap[code];
+                            newFormData[certTypeName]=imgList.map(v=>prefix+v.uid);
+                        });
+                        app.formData=newFormData;
                         return;
                     }
                     app.formConfig.formDesc.truckType.options=truckTypeOptions.filter(item=>item.value==obj.truckType);
@@ -256,7 +307,22 @@
                             data[k]=defaultFormData[k];
                         }
                     })
+
+
                     let formData=$.extend(true,{},app.formData,data);
+                    // debugger
+                    let imageCertList=obj.imageCertList;
+                    if(imageCertList&&imageCertList.length){
+                        $.each(imageCertList,function(k,v){
+                            let certType=this.certType.toString();
+                            groupedImageList[certType].push(this);
+                        });
+                    }
+                    $.each(groupedImageList,function(code,imgList){
+                        let certTypeName = certTypeMap[code];
+                        formData[certTypeName]=imgList.map(v=>prefix+v.uid);
+                    });
+
                     app.formData=formData;
 
                 }
