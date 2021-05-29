@@ -115,7 +115,7 @@
                         },
 
                         fileType: ["jpg", "png", "bmp"],
-                        limit: "2",
+                        limit: "10",
                     },
                     vif: function () {
                         return filedNameRetMap.imageCertList.displayed === 1;
@@ -146,66 +146,6 @@
 
                 }
             },
-            'formData.imageCertList': {
-                deep: true,
-                handler: function (imageCertList, oldValue) {
-                    return;
-                    let myFormRefs=this.$refs.myForm.$refs
-                    let certTypeMap={};
-                    $.each(imageCertTypeEnumList,(i,item)=>{
-
-                        let certTypeName="certType"+item.code;
-                        certTypeMap[item.code.toString()]=certTypeName;
-
-                        let imageUploader=myFormRefs[certTypeName][0]?.$children[0];
-                        if(imageUploader){
-                            let valueList=imageUploader?.value;
-                            let fileList= imageUploader?.fileList;
-
-                            let imageCertUidList=$.makeArray(imageCertList).map(v=>v.uid);
-                            let fileListUidList= $.makeArray(fileList).map(v=>v.response.data);
-                            // console.info(imageCertList)
-                            console.info(valueList)
-                            console.info(imageCertUidList)
-                            console.info(fileListUidList)
-
-                        }
-                        console.info(imageCertList)
-                        debugger
-                        app.formData[certTypeName]=[];
-                        // try{
-                        //
-                        //     debugger
-                        //     if(valueList&&valueList?.length>0){
-                        //         //valueList.splice(0,valueList.length)
-                        //     }
-                        // }catch (e) {
-                        //     debugger
-                        // }
-                        // try{
-                        //
-                        //     debugger
-                        //     if(fileList&&fileList?.length>0){
-                        //         //fileList.splice(0,fileList.length)
-                        //     }
-                        // }catch (e) {
-                        //     debugger
-                        // }
-                    });
-                    let groupedImageList={};
-                    $.each(imageCertList,function(k,v){
-                        let certType=this.certType.toString();
-                        let key=certTypeMap[certType];
-                        if(!groupedImageList[key]){
-                            groupedImageList[key]=[];
-                        }
-                        groupedImageList[key].push(this);
-                    });
-                    $.each(groupedImageList,function(k,v){
-                        app.formData[k]=v.map(img=>prefix+img.uid);
-                    });
-                }
-            },
             'formData.truckType': {
                 deep: true,
                 handler: function (truckType, oldValue) {
@@ -232,8 +172,6 @@
             'formData.registerHeadCode': {
                 deep: true,
                 handler: function (registerHeadCode, oldValue) {
-
-
                     let certTypeMap={};
                     let groupedImageList={};
                     $.each(imageCertTypeEnumList,(i,item)=> {
