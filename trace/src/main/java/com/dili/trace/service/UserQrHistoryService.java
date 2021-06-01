@@ -112,6 +112,7 @@ public class UserQrHistoryService extends TraceBaseService<UserQrHistory, Long> 
             qrStatusEnum = UserQrStatusEnum.BLACK;
             content.append("用户待审核,变为黑码");
         }
+        Integer preQrStatus=StreamEx.ofNullable(userInfoItem.getQrHistoryId()).map(this::get).map(UserQrHistory::getQrStatus).findFirst().orElse(null);
         //插入qrhistory对象
         this.buildUserQrHistory(userInfoItem.getId(), qrStatusEnum, QrHistoryEventTypeEnum.NEW_USER, null).ifPresent(userQrHistory -> {
 
@@ -121,7 +122,7 @@ public class UserQrHistoryService extends TraceBaseService<UserQrHistory, Long> 
             //更新userinfo的qr信息
             UserInfo userInfo = new UserInfo();
             userInfo.setId(userInfoItem.getId());
-            userInfo.setPreQrStatus(userInfoItem.getQrStatus());
+            userInfo.setPreQrStatus(preQrStatus);
             userInfo.setQrHistoryId(userQrHistory.getId());
             userInfo.setQrStatus(userQrHistory.getQrStatus());
             userInfo.setQrContent(userQrHistory.getContent());
