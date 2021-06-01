@@ -403,15 +403,20 @@ class NewRegisterBillGrid extends ListPage {
     async openDetailPage() {
         var row = this.rows[0];
         var url = this.toUrl('/newRegisterBill/view.html?id=' + row.billId);
-        var dia = bs4pop.dialog({
+        layer.open({
+            type: 2,
             title: '报备单详情',
+            area: ['85%', '80%'],
+            shade: 0.8,
+            closeBtn: 0,
+            shadeClose: true,
             content: url,
-            isIframe: true,
-            closeBtn: true,
-            backdrop: 'static',
-            width: '98%',
-            height: '98%',
-            btns: []
+            btn: ['关闭'],
+            yes: function (index) {
+                if (layer) {
+                    layer.close(index);
+                }
+            },
         });
     }
     async openUploadHandleResultPage() {
