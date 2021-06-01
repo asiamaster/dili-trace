@@ -247,7 +247,7 @@
                     })
 
 
-                    let formData=$.extend(true,{},app.formData,data);
+                    let formData=$.extend(false,{},app.formData,data);
                     // debugger
                     let imageCertList=obj.imageCertList;
                     if(imageCertList&&imageCertList.length){
