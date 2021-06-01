@@ -1251,10 +1251,11 @@ public class SgRegisterBillServiceImpl implements SgRegisterBillService {
                 }
             }
         }
-
-        boolean noCheckinRecord=this.checkinOutRecordService.findAllowedCheckInRecord(item.getBillId()).isEmpty();
-        if(noCheckinRecord){
-            msgStream.add(RegisterBillMessageEvent.checkin);
+        if(!RegistTypeEnum.SUPPLEMENT.equalsToCode(item.getRegistType())){
+            boolean noCheckinRecord=this.checkinOutRecordService.findAllowedCheckInRecord(item.getBillId()).isEmpty();
+            if(noCheckinRecord){
+                msgStream.add(RegisterBillMessageEvent.checkin);
+            }
         }
 
         return msgStream;
