@@ -98,9 +98,6 @@ public class UserQrHistoryService extends TraceBaseService<UserQrHistory, Long> 
      */
     public void createUserQrHistoryForUserRegist(UserInfo userInfoItem, Long marketId) {
 
-        if (userInfoItem.getQrHistoryId() != null) {
-            return;
-        }
         UserQrStatusEnum qrStatusEnum = UserQrStatusEnum.BLACK;
 
         StringBuilder content = new StringBuilder();
