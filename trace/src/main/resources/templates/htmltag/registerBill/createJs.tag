@@ -884,6 +884,16 @@
             changePieceWeight: function (value) {
                 this.formData['pieceweight']=value;
                 this.formData['pieceWeight']=value;
+                if(this.formData.measureType!='20'){
+                    let pieceNum=this.formData.pieceNum;
+                    let pieceWeight=this.formData.pieceWeight;
+
+                    if(pieceNum!=''&&pieceWeight!=''){
+                        if(!isNaN(pieceNum)&&!isNaN(pieceWeight)&&this.formData.weight!=pieceNum * pieceWeight){
+                            this.formData.weight = pieceNum * pieceWeight;
+                        }
+                    }
+                }
             }
         }
     });
