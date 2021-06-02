@@ -1,23 +1,37 @@
-<#bodyOrigin>
-<style>
-    .fileimg-box{
-        display:inline-block;
-        margin: 5px;
-        width:8%;
-    }
-    .fileimg-box img{
-        display:inline-block;
-        vertical-align: middle;
-        width:100% !important;
-    }
-</style>
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8" />
+    <title>报备单详情</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <meta name="keywords" content="物流,智能,智能流通管理系统" />
+    <meta name="description" content="智能流通管理系统" />
+    <meta name="author" content="农丰时代科技有限公司">
+    <link rel="stylesheet" href="/resources/assets/dep/bootstrap/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="/resources/assets/css/widget/common.css" />
+    <link rel="stylesheet" href="/resources/assets/css/widget/layerDialog.css" />
+    <link rel="stylesheet" href="/resources/assets/css/widget/tmsBaseCommon.css" />
+
+    <style>
+        .fileimg-box{
+            display:inline-block;
+            margin: 5px;
+            width:8%;
+        }
+        .fileimg-box img{
+            display:inline-block;
+            vertical-align: middle;
+            width:100% !important;
+        }
+    </style>
+</head>
+
+<body>
+
 <div class="main-container" style="padding: 0">
-    <div class="topicTop">
-        <!--<div class="toppic-title">
-            <span class="topic-title-text maincolor">货品信息详情</span>
-            <button class="btn-greyweak btn-sm topic-back-btn" onclick="parent.window['RegisterBillGridObj'].removeAllAndLoadData()">返回</button>
-        </div>-->
-    </div>
+
     <div class="form-box border">
         <form id="createRecordForm" class="form-inline" role="form">
             <div class="form-item-group row row-cols-3">
@@ -286,7 +300,13 @@
     </div>
 
 </div>
-</#bodyOrigin>
+
+</body>
+
+<script type="text/javascript" src="/resources/easyui/js/jquery-3.2.1.min.js"></script>
+<script src="/resources/assets/dep/bootstrap/js/bootstrap.min.js"></script>
+<script src="/resources/assets/dep/jquery/layer/layer.js"></script>
+</html>
 <style>
 .layui-layer-btn0{
 border:1px solid #dedede!important;
@@ -327,19 +347,6 @@ color:#333!important;
             }});
         }
     });
-    /*$('.imageUpload,.show-img').on('click', function () {
-        var url = $(this).find("img").attr('src');
-        if(url){
-            layer.open({
-                title:'图片',
-                type: 1,
-                skin: 'layui-layer-rim',
-                closeBtn: 2,
-                area: ['90%', '90%'], //宽高
-                content: '<p style="text-align:center"><img src="' + url + '" alt="" class="show-image-zoom"></p>'
-            });
-        }
-    });*/
 
     $('.ssr-view').on('click', function () {
         let tradeId = $(this).attr('data-trade-id');
