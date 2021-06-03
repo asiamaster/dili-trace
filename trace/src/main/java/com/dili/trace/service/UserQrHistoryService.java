@@ -103,14 +103,14 @@ public class UserQrHistoryService extends TraceBaseService<UserQrHistory, Long> 
         StringBuilder content = new StringBuilder();
 //        String content = "完成注册,默认为" + qrStatusEnum.getDesc() + "码";
         if (CustomerEnum.ApprovalStatus.PASSED.equalsToCode(userInfoItem.getApprovalStatus())) {
-            qrStatusEnum = UserQrStatusEnum.GREEN;
-            content.append("用户审核通过,变为黑码");
+            // qrStatusEnum = UserQrStatusEnum.BLACK;
+            content.append("用户审核通过,变为"+qrStatusEnum.getDesc()+"码");
         } else if (CustomerEnum.ApprovalStatus.UN_PASS.equalsToCode(userInfoItem.getApprovalStatus())) {
             qrStatusEnum = UserQrStatusEnum.RED;
-            content.append("用户审核未通过,变为红码");
+            content.append("用户审核未通过,变为"+qrStatusEnum.getDesc()+"码");
         } else if (CustomerEnum.ApprovalStatus.WAIT_CONFIRM.equalsToCode(userInfoItem.getApprovalStatus())) {
-            qrStatusEnum = UserQrStatusEnum.BLACK;
-            content.append("用户待审核,变为黑码");
+            //qrStatusEnum = UserQrStatusEnum.BLACK;
+            content.append("用户待审核,变为"+qrStatusEnum.getDesc()+"码");
         }
         Integer preQrStatus=StreamEx.ofNullable(userInfoItem.getQrHistoryId()).map(this::get).map(UserQrHistory::getQrStatus).findFirst().orElse(null);
         //插入qrhistory对象

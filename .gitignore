@@ -24,3 +24,5 @@ trace/nb-configuration.xml
 **/application.pid
 **/package-lock.json
 **/tsconfig.tsbuildinfo
+/jrebel-classpath-16588.jar
+/trace/.factorypath
