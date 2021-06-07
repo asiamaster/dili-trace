@@ -1,6 +1,7 @@
 package com.dili.trace.api.manager;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.dili.common.annotation.AppAccess;
 import com.dili.common.annotation.Role;
 import com.dili.common.entity.LoginSessionContext;
@@ -10,13 +11,16 @@ import com.dili.commons.glossary.YesOrNoEnum;
 import com.dili.ss.domain.BaseOutput;
 import com.dili.ss.domain.BasePage;
 import com.dili.trace.api.input.CreateRegisterBillInputDto;
+import com.dili.trace.api.input.RegisterBillApiInputDto;
 import com.dili.trace.api.output.VerifyStatusCountOutputDto;
 import com.dili.trace.domain.ImageCert;
 import com.dili.trace.domain.RegisterBill;
 import com.dili.trace.domain.RegisterHead;
+import com.dili.trace.domain.RegisterTallyAreaNo;
 import com.dili.trace.dto.CreateListBillParam;
 import com.dili.trace.dto.OperatorUser;
 import com.dili.trace.dto.RegisterBillDto;
+import com.dili.trace.dto.RegisterBillOutputDto;
 import com.dili.trace.enums.BillTypeEnum;
 import com.dili.trace.enums.CreatorRoleEnum;
 import com.dili.trace.enums.RegistTypeEnum;
@@ -24,6 +28,7 @@ import com.dili.trace.rpc.service.CustomerRpcService;
 import com.dili.trace.service.ImageCertService;
 import com.dili.trace.service.RegisterBillService;
 import com.dili.trace.service.RegisterHeadService;
+import com.dili.trace.service.RegisterTallyAreaNoService;
 import com.dili.trace.service.UpStreamService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -60,6 +65,8 @@ public class ManagerRegisterBillApi {
     ImageCertService imageCertService;
     @Autowired
     RegisterHeadService registerHeadService;
+    @Autowired
+    RegisterTallyAreaNoService registerTallyAreaNoService;
 
     // @ApiOperation(value = "获得登记单详情")
     // @RequestMapping(value = "/viewRegisterBill.api", method = RequestMethod.POST)
@@ -186,6 +193,41 @@ public class ManagerRegisterBillApi {
         }).orElseGet(() -> {
             return BaseOutput.failure("没有找到数据");
         });
+    }
+    /**
+     * 通过登记单ID获取登记单详细信息
+     *
+     * @param inputDto
+     * @return
+     */
+    @ApiOperation(value = "通过登记单ID获取登记单详细信息")
+    @RequestMapping(value = "/viewTradeDetailBill.api", method = RequestMethod.POST)
+    public BaseOutput<RegisterBillOutputDto> viewTradeDetailBill(@RequestBody RegisterBillApiInputDto inputDto) {
+        if (inputDto == null || (inputDto.getBillId() == null && inputDto.getTradeDetailId() == null)) {
+            return BaseOutput.failure("参数错误");
+        }
+
+        logger.info("获取登记单详细信息->marketId:{},billId:{},tradeDetailId:{}", inputDto.getMarketId(), inputDto.getBillId(), inputDto.getTradeDetailId());
+        try {
+            SessionData sessionData=this.sessionContext.getSessionData();
+            Long userId=sessionData.getUserId();
+            if (userId == null) {
+                return BaseOutput.failure("你还未登录");
+            }
+            RegisterBillOutputDto outputdto = this.registerBillService.viewTradeDetailBill(inputDto);
+            List<RegisterTallyAreaNo> arrivalTallynos = this.registerTallyAreaNoService.findTallyAreaNoByBillIdAndType(outputdto.getBillId(), BillTypeEnum.REGISTER_BILL);
+            outputdto.setArrivalTallynos(StreamEx.of(arrivalTallynos).map(RegisterTallyAreaNo::getTallyareaNo).toList());
+
+            String data = JSON.toJSONString(outputdto, SerializerFeature.DisableCircularReferenceDetect);
+            return BaseOutput.success().setData(JSON.parse(data));
+
+        } catch (TraceBizException e) {
+            return BaseOutput.failure(e.getMessage());
+        } catch (Exception e) {
+            logger.error(e.getMessage(), e);
+            return BaseOutput.failure("查询数据出错");
+        }
+
     }
 }
 
