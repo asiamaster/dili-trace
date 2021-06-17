@@ -544,10 +544,16 @@ public class TradeOrderService extends BaseServiceImpl<TradeOrder, Long> {
                 tradeRequestDetail.setBillId(td.getBillId());
 
                 tradeDetail.setSoftWeight(td.getSoftWeight().add(trinput.getTradeWeight()));
+                tradeDetail.setStockWeight(td.getStockWeight().subtract(trinput.getTradeWeight()));
             } else {
                 throw new TraceBizException("批次参数错误");
             }
             tradeRequestDetail.setTradeWeight(trinput.getTradeWeight());
+            if (tradeDetail.getStockWeight().compareTo(BigDecimal.ZERO) == 0) {
+                tradeDetail.setSaleStatus(SaleStatusEnum.NOT_FOR_SALE.getCode());
+            } else {
+                tradeDetail.setSaleStatus(SaleStatusEnum.FOR_SALE.getCode());
+            }
             this.tradeRequestDetailService.insertSelective(tradeRequestDetail);
 
             this.tradeDetailService.updateSelective(tradeDetail);
