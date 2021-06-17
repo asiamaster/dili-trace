@@ -96,7 +96,7 @@ public class TradeService {
         logger.info("billid:{},billI.verifyStatus:{},weight:{}", billId, billItem.getVerifyStatusName(), billItem.getWeight());
 
         // 通过审核状态及进门状态判断是否可以进行销售
-        Optional<TradeOrder> tradeOrderOptional = this.tradeOrderService.createTradeFromRegisterBill(billItem);
+        Optional<TradeDetail> tradeOrderOptional = this.tradeOrderService.createTradeFromRegisterBill(billItem);
         if (!tradeOrderOptional.isPresent()) {
             //相应的tradeDetail已经存在
             return billId;

@@ -5,7 +5,6 @@ import com.dili.customer.sdk.domain.dto.CustomerExtendDto;
 import com.dili.customer.sdk.enums.CustomerEnum;
 import com.dili.customer.sdk.rpc.CustomerRpc;
 import com.dili.ss.domain.BaseOutput;
-import com.dili.ss.util.AopTargetUtils;
 import com.dili.trace.AutoWiredBaseTest;
 import com.dili.trace.api.input.ProductStockInput;
 import com.dili.trace.api.input.TradeRequestHandleDto;
@@ -21,19 +20,13 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
-import org.springframework.aop.framework.AdvisedSupport;
-import org.springframework.aop.framework.AopProxy;
 import org.springframework.aop.framework.AopProxyUtils;
-import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
-import org.springframework.test.util.AopTestUtils;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.ReflectionUtils;
 
-import java.lang.reflect.Field;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -101,12 +94,12 @@ public class TradeOrderServiceTest extends AutoWiredBaseTest {
         Mockito.when(this.customerRpc.get(1L, 8L)).thenReturn(BaseOutput.failure());
         System.out.println(this.customerRpc);
         //当调用方法时直接返回doreturn的值 ，而不调用真实方法
-        Mockito.doReturn(Optional.empty()).when(customerRpcService).findCustomerById(1L, 8L);
+        Mockito.doReturn(Optional.empty()).when(this.customerRpcService).findCustomerById(1L, 8L);
         this.customerRpcService.findCustomerById(1L, 8L).ifPresent(c -> {
             System.out.println(c);
         });
         //调用真实方法
-        Mockito.doCallRealMethod().when(customerRpcService).findCustomerById(1L, 8L);
+        Mockito.doCallRealMethod().when(this.customerRpcService).findCustomerById(1L, 8L);
         this.customerRpcService.findCustomerById(1L, 8L).ifPresent(c -> {
             System.out.println(c);
         });
@@ -128,7 +121,7 @@ public class TradeOrderServiceTest extends AutoWiredBaseTest {
             dto.getCustomerMarket().setMarketId(marketid);
             dto.getCustomerMarket().setApprovalStatus(CustomerEnum.ApprovalStatus.PASSED.getCode());
             return Optional.ofNullable(dto);
-        }).when(customerRpcService).findCustomerById(Mockito.anyLong(), Mockito.anyLong());
+        }).when(this.customerRpcService).findCustomerById(Mockito.anyLong(), Mockito.anyLong());
 
         CustomerExtendDto userDto = this.customerRpcService.findCustomerById(userId, marketId).orElse(null);
         this.deleteAllDatas(userDto);
@@ -215,7 +208,7 @@ public class TradeOrderServiceTest extends AutoWiredBaseTest {
         CustomerExtendDto cust = new CustomerExtendDto();
         cust.setId(31L);
         cust.setName("zhangsan");
-        Mockito.doReturn(Optional.of(cust)).when(customerRpcService).findCustomerById(31L, 8L);
+        Mockito.doReturn(Optional.of(cust)).when(this.customerRpcService).findCustomerById(31L, 8L);
 //        this.customerRpcService.findCustomerById(31L, 8L).ifPresent(c -> {
 //            System.out.println(c);
 //        });
@@ -278,7 +271,7 @@ public class TradeOrderServiceTest extends AutoWiredBaseTest {
             dto.getCustomerMarket().setMarketId(marketid);
             dto.getCustomerMarket().setApprovalStatus(CustomerEnum.ApprovalStatus.PASSED.getCode());
             return Optional.ofNullable(dto);
-        }).when(customerRpcService).findCustomerById(Mockito.anyLong(), Mockito.anyLong());
+        }).when(this.customerRpcService).findCustomerById(Mockito.anyLong(), Mockito.anyLong());
 
         CustomerExtendDto userDto = this.customerRpcService.findCustomerById(userId, marketId).orElse(null);
         this.deleteAllDatas(userDto);
@@ -323,7 +316,7 @@ public class TradeOrderServiceTest extends AutoWiredBaseTest {
 
     @Test
     public void createTradeFromRegisterBill() {
-        Optional<TradeOrder> tradeOrder = this.tradeOrderService.createTradeFromRegisterBill(this.registerBillService.get(4L));
+        Optional<TradeDetail> tradeOrder = this.tradeOrderService.createTradeFromRegisterBill(this.registerBillService.get(4L));
         Assertions.assertNotNull(tradeOrder);
     }
 
@@ -339,11 +332,11 @@ public class TradeOrderServiceTest extends AutoWiredBaseTest {
             Long uid = (Long) invocation.getArguments()[0];
             Long mid = (Long) invocation.getArguments()[1];
             return Optional.ofNullable(this.buildCustExt(mid, uid));
-        }).when(customerRpcService).findCustomerById(Mockito.anyLong(), Mockito.anyLong());
+        }).when(this.customerRpcService).findCustomerById(Mockito.anyLong(), Mockito.anyLong());
 
         Mockito.doAnswer(invocation -> {
             return Lists.newArrayList();
-        }).when(assetsRpcService).listCusCategory(Mockito.any(), Mockito.anyLong());
+        }).when(this.assetsRpcService).listCusCategory(Mockito.any(), Mockito.anyLong());
 
         ProductStock ps = super.buildProductStock(marketId, userId, weightList);
         BigDecimal totalWeight = StreamEx.of(weightList).reduce(BigDecimal.ZERO, BigDecimal::add);
@@ -452,11 +445,11 @@ public class TradeOrderServiceTest extends AutoWiredBaseTest {
             Long uid = (Long) invocation.getArguments()[0];
             Long mid = (Long) invocation.getArguments()[1];
             return Optional.ofNullable(this.buildCustExt(mid, uid));
-        }).when(customerRpcService).findCustomerById(Mockito.anyLong(), Mockito.anyLong());
+        }).when(this.customerRpcService).findCustomerById(Mockito.anyLong(), Mockito.anyLong());
 
         Mockito.doAnswer(invocation -> {
             return Lists.newArrayList();
-        }).when(assetsRpcService).listCusCategory(Mockito.any(), Mockito.anyLong());
+        }).when(this.assetsRpcService).listCusCategory(Mockito.any(), Mockito.anyLong());
 
         ProductStock ps = super.buildProductStock(marketId, sellerId, weightList);
         BigDecimal totalWeight = StreamEx.of(weightList).reduce(BigDecimal.ZERO, BigDecimal::add);
