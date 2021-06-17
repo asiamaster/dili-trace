@@ -1,10 +1,7 @@
 package com.dili.trace.rpc.service;
 
 
-import com.dili.trace.util.JSON;
-import com.dili.common.exception.TraceBizException;
 import com.dili.ss.domain.BaseOutput;
-import com.dili.ss.exception.BusinessException;
 import com.dili.trace.domain.ProductStock;
 import com.dili.trace.domain.RegisterBill;
 import com.dili.trace.domain.TradeDetail;
@@ -18,18 +15,16 @@ import com.dili.trace.rpc.dto.*;
 import com.dili.trace.service.BillService;
 import com.dili.trace.service.ProductStockService;
 import com.dili.trace.service.TradeDetailService;
+import com.dili.trace.util.JSON;
 import com.google.common.collect.Lists;
 import one.util.streamex.StreamEx;
-import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -381,7 +376,7 @@ public class ProductRpcService {
                         TradeDetail condition = new TradeDetail();
                         condition.setId(createDto.getTradeDetailId());
                         condition.setThirdPartyStockId(detailDto.getStockId());
-                        tradeDetailService.updateSelective(condition);
+                        this.tradeDetailService.updateSelective(condition);
                         logger.debug("createRegCreate tradeDetailId={},thirdPartyStockId={}", condition.getId(), condition.getThirdPartyStockId());
                         return;
                     }
@@ -427,7 +422,7 @@ public class ProductRpcService {
             createDto.setFirmName(firm.getName());
         });
         // 库存系统要校验InStockNo字段唯一，传报备单主键交易场景有问题，所以生成个唯一单号
-        createDto.setInStockNo(uidRestfulRpcService.bizNumber(BizNumberType.STOCK_CODE));
+        createDto.setInStockNo(this.uidRestfulRpcService.bizNumber(BizNumberType.STOCK_CODE));
         if (optUser.isPresent()) {
             createDto.setOperatorId(optUser.get().getId());
             createDto.setOperatorName(optUser.get().getName());
@@ -490,9 +485,10 @@ public class ProductRpcService {
      */
     private void lockOrRelease(LockReleaseRequestDto lockReleaseRequestDto) {
         logger.debug("lockOrRelease={}", JSON.toJSONString(lockReleaseRequestDto));
-        BaseOutput<?> baseOutput = productRpc.lockOrRelease(lockReleaseRequestDto);
+        BaseOutput<?> baseOutput = this.productRpc.lockOrRelease(lockReleaseRequestDto);
         if (!baseOutput.isSuccess()) {
-            throw new TraceBizException("锁定or释放库存接口失败：" + baseOutput.getMessage());
+            logger.error("锁定or释放库存接口失败：" + baseOutput.getMessage());
+//            throw new TraceBizException("锁定or释放库存接口失败：" + baseOutput.getMessage());
         }
     }
 
