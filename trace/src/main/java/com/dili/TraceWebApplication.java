@@ -3,6 +3,7 @@ package com.dili;
 import com.dili.ss.retrofitful.annotation.RestfulScan;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.ApplicationPidFileWriter;
@@ -20,6 +21,8 @@ import org.springframework.context.annotation.Import;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.web.client.RestTemplate;
+import org.zalando.logbook.Logbook;
+import org.zalando.logbook.spring.LogbookClientHttpRequestInterceptor;
 import tk.mybatis.spring.annotation.MapperScan;
 import uk.org.lidalia.sysoutslf4j.context.SysOutOverSLF4J;
 
@@ -54,8 +57,11 @@ public class TraceWebApplication extends SpringBootServletInitializer {
 
     @LoadBalanced
     @Bean
-    public RestTemplate restTemplate() {
-        return new RestTemplate();
+    public RestTemplate restTemplate(@Autowired Logbook logbook) {
+        LogbookClientHttpRequestInterceptor interceptor = new LogbookClientHttpRequestInterceptor(logbook);
+        RestTemplate restTemplate = new RestTemplate();
+        restTemplate.getInterceptors().add(interceptor);
+        return restTemplate;
     }
 
     public static void main(String[] args) {
@@ -69,7 +75,6 @@ public class TraceWebApplication extends SpringBootServletInitializer {
 //        System.out.println(dtp);
         logger.info("====================溯源成功启动====================");
     }
-
 
 
 }

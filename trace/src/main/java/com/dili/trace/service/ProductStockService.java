@@ -189,17 +189,17 @@ public class ProductStockService extends BaseServiceImpl<ProductStock, Long> {
         List<TradeDetail> notForSaleList = StreamEx.of(tradeDetailList)
                 .filter(tradeDetail -> SaleStatusEnum.NOT_FOR_SALE.equalsToCode(tradeDetail.getSaleStatus()))
                 .toList();
-        List<TradeDetail> forSaleList = StreamEx.of(tradeDetailList)
-                .filter(tradeDetail -> SaleStatusEnum.NOT_FOR_SALE.equalsToCode(tradeDetail.getSaleStatus()))
-                .toList();
-
-
-        List<Long> billIdList = StreamEx.of(notForSaleList)
-                .filter(tradeDetail -> SaleStatusEnum.NOT_FOR_SALE.equalsToCode(tradeDetail.getSaleStatus()))
-                .map(TradeDetail::getBillId).nonNull().toList();
+        List<Long> billIdList = StreamEx.of(notForSaleList).map(TradeDetail::getBillId).nonNull().toList();
         RegisterBillDto q = new RegisterBillDto();
         q.setIdList(billIdList);
         Map<Long, RegisterBill> idBillMap = StreamEx.of(q).filter(v -> v.getIdList().size() > 0).flatCollection(v -> this.registerBillService.listByExample(v)).toMap(r -> r.getBillId(), Function.identity());
+
+
+        List<TradeDetail> forSaleList = StreamEx.of(tradeDetailList)
+                .filter(tradeDetail -> SaleStatusEnum.FOR_SALE.equalsToCode(tradeDetail.getSaleStatus()))
+                .toList();
+
+
 
         BigDecimal detectFailedWeight = StreamEx.of(notForSaleList).map(tradeDetail -> {
             RegisterBill rb = idBillMap.get(tradeDetail.getBillId());
