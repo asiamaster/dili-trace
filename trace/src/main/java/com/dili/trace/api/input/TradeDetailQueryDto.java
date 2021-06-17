@@ -36,7 +36,17 @@ public class TradeDetailQueryDto extends TradeDetail {
     private List<Long> tradeRequestIdList;
 
 
+    @Column(name = "`id`")
+    @Operator(Operator.IN)
+    private List<Long> idList;
 
+    public List<Long> getIdList() {
+        return this.idList;
+    }
+
+    public void setIdList(List<Long> idList) {
+        this.idList = idList;
+    }
 
     public List<Long> getTradeRequestIdList() {
         return this.tradeRequestIdList;

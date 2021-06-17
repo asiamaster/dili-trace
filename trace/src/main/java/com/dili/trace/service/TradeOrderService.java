@@ -200,9 +200,9 @@ public class TradeOrderService extends BaseServiceImpl<TradeOrder, Long> {
         TradeDetail tdq = new TradeDetail();
         tdq.setBillId(registerBill.getBillId());
         tdq.setTradeType(TradeTypeEnum.NONE.getCode());
-        List<TradeDetail>tradeDetailList=this.tradeDetailService.listByExample(tdq);
-        TradeDetail tradeDetail= StreamEx.of(tradeDetailList).findFirst().orElse(null);
-        if (tradeDetail!=null) {
+        List<TradeDetail> tradeDetailList = this.tradeDetailService.listByExample(tdq);
+        TradeDetail tradeDetail = StreamEx.of(tradeDetailList).findFirst().orElse(null);
+        if (tradeDetail != null) {
             return Optional.ofNullable(tradeDetail);
         }
 
@@ -275,7 +275,7 @@ public class TradeOrderService extends BaseServiceImpl<TradeOrder, Long> {
 
         List<TradeRequest> tradeRequestList = StreamEx.of(productStockInputList).map(productStockInput -> {
             TradeRequest tradeRequest = this.createTradeRequest(tradeDto, productStockInput, tradeOrder, productStockInput.getTradeWeight());
-            List<TradeRequestDetail> tradeRequestDetailList = this.createTradeRequestDetailForInput(productStockInput.getTradeDetailInputList(), tradeRequest);
+            List<TradeRequestDetail> tradeRequestDetailList = this.createTradeRequestDetailList(tradeRequest, productStockInput.getTradeDetailInputList());
             return tradeRequest;
         }).toList();
         this.dealTradeOrder(tradeOrder, TradeOrderStatusEnum.FINISHED, tradeRequestList);
@@ -299,7 +299,7 @@ public class TradeOrderService extends BaseServiceImpl<TradeOrder, Long> {
 
         List<TradeRequest> tradeRequestList = StreamEx.of(productStockInputList).map(productStockInput -> {
             TradeRequest tradeRequest = this.createTradeRequest(tradeDto, productStockInput, tradeOrder, productStockInput.getTradeWeight());
-            List<TradeRequestDetail> tradeRequestDetailList = this.createTradeRequestDetail(tradeRequest);
+            List<TradeRequestDetail> tradeRequestDetailList = this.createTradeRequestDetailList(tradeRequest, productStockInput.getTradeDetailInputList());
             return tradeRequest;
         }).toList();
         this.dealTradeOrder(tradeOrder, TradeOrderStatusEnum.FINISHED, tradeRequestList);
@@ -338,7 +338,7 @@ public class TradeOrderService extends BaseServiceImpl<TradeOrder, Long> {
 
         List<TradeRequest> tradeRequestList = StreamEx.of(productStockInputList).map(productStockInput -> {
             TradeRequest tradeRequest = this.createTradeRequest(tradeDto, productStockInput, tradeOrder, productStockInput.getTradeWeight());
-            List<TradeRequestDetail> tradeRequestDetailList = this.createTradeRequestDetail(tradeRequest);
+            List<TradeRequestDetail> tradeRequestDetailList = this.createTradeRequestDetailList(tradeRequest, productStockInput.getTradeDetailInputList());
             return tradeRequest;
         }).toList();
         return tradeOrder;
@@ -502,9 +502,9 @@ public class TradeOrderService extends BaseServiceImpl<TradeOrder, Long> {
         return tradeOrder;
     }
 
-    /**
+    /* *//**
      * @param tradeDetailInputList
-     */
+     *//*
     private List<TradeRequestDetail> createTradeRequestDetailForInput(List<TradeDetailInputDto> tradeDetailInputList, TradeRequest tradeRequest) {
         List<TradeDetailInputDto> detailInputList = StreamEx.ofNullable(tradeDetailInputList).flatCollection(Function.identity())
                 .nonNull().toList();
@@ -563,67 +563,114 @@ public class TradeOrderService extends BaseServiceImpl<TradeOrder, Long> {
         this.productStockService.updateProductStock(productStockItem.getProductStockId());
 
         return tradeRequestDetailList;
-    }
+    }*/
 
     /**
      * @param tradeRequest
      * @param tradeRequest
      * @return
      */
-    public List<TradeRequestDetail> createTradeRequestDetail(TradeRequest tradeRequest) {
+    public List<TradeRequestDetail> createTradeRequestDetailList(TradeRequest tradeRequest, List<TradeDetailInputDto> tradeDetailInputList) {
+        if (tradeRequest == null || tradeRequest.getId() == null) {
+            throw new TraceBizException("交易请求参数不能为空");
+        }
+        List<TradeRequestDetail> tradeRequestDetailList = this.tradeRequestDetailService.findByTradeRequestIdList(Arrays.asList(tradeRequest.getId()));
+        if (!tradeRequestDetailList.isEmpty()) {
+            return tradeRequestDetailList;
+        }
+
+        BigDecimal remainTradingWeight = tradeRequest.getTradeWeight();
+        if (remainTradingWeight == null) {
+            throw new TraceBizException("交易重量参数错误");
+        }
+        if (BigDecimal.ZERO.compareTo(remainTradingWeight) >= 0) {
+            throw new TraceBizException("购买重量要大于0");
+        }
+        tradeDetailInputList = StreamEx.ofNullable(tradeDetailInputList).flatCollection(Function.identity()).nonNull()
+
+                .toList();
+        boolean hasInvalidTradeDetailId = StreamEx.of(tradeDetailInputList).anyMatch(input -> input.getTradeDetailId() == null);
+        if (hasInvalidTradeDetailId) {
+            throw new TraceBizException("交易批次ID参数错误");
+        }
+        boolean hasInvalidTradeWeight = StreamEx.of(tradeDetailInputList).anyMatch(input -> input.getTradeWeight() == null
+                || BigDecimal.ZERO.compareTo(input.getTradeWeight()) >= 0);
+        if (hasInvalidTradeWeight) {
+            throw new TraceBizException("交易重量参数错误");
+        }
+
+        List<Long> tradeDetailIdList = StreamEx.of(tradeDetailInputList).map(TradeDetailInputDto::getTradeDetailId).distinct().toList();
+        if (tradeDetailIdList.size() != tradeDetailInputList.size()) {
+            throw new TraceBizException("交易批次ID重复");
+        }
+        BigDecimal totalTradeWeight = StreamEx.of(tradeDetailInputList).map(TradeDetailInputDto::getTradeWeight).reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        Map<Long, TradeDetailInputDto> tradeDetailIdInputDtoMap = StreamEx.of(tradeDetailInputList).toMap(TradeDetailInputDto::getTradeDetailId, Function.identity());
+
+        if (!tradeDetailInputList.isEmpty()) {
+            if (BigDecimal.ZERO.compareTo(totalTradeWeight) <= 0) {
+                throw new TraceBizException("交易重量参数错误");
+            }
+            if (tradeRequest.getTradeWeight().compareTo(totalTradeWeight) != 0) {
+                throw new TraceBizException("交易重量参数错误");
+            }
+        }
 
         ProductStock productStockItem = this.productStockService.selectByIdForUpdate(tradeRequest.getProductStockId())
                 .orElseThrow(() -> {
                     return new TraceBizException("操作库存失败");
                 });
-        BigDecimal remainTradingWeight = tradeRequest.getTradeWeight();
-        if (BigDecimal.ZERO.compareTo(remainTradingWeight) >= 0) {
-            throw new TraceBizException("购买重量要大于0");
-        }
         if (productStockItem.getStockWeight().compareTo(remainTradingWeight) < 0) {
             throw new TraceBizException("购买重量不能超过总库存重量");
         }
-        List<TradeRequestDetail> tradeRequestDetailList = this.tradeRequestDetailService.findByTradeRequestIdList(Arrays.asList(tradeRequest.getId()));
-
-
-        if (!tradeRequestDetailList.isEmpty()) {
-            return tradeRequestDetailList;
-        }
-
         TradeDetailQueryDto tradeDetailQuery = new TradeDetailQueryDto();
         tradeDetailQuery.setSaleStatus(SaleStatusEnum.FOR_SALE.getCode());
-        tradeDetailQuery.setProductStockId(productStockItem.getId());
+        tradeDetailQuery.setProductStockId(tradeRequest.getProductStockId());
         tradeDetailQuery.setSort("created,id");
         tradeDetailQuery.setOrder("asc,asc");
         tradeDetailQuery.setMinStockWeight(BigDecimal.ZERO);
-
+        tradeDetailQuery.setIdList(tradeDetailIdList);
         List<TradeDetail> tradeDetailList = this.tradeDetailService.listByExample(tradeDetailQuery);
+
+        if (tradeDetailList.size() < tradeDetailIdList.size()) {
+            throw new TraceBizException("不能出售非正常库存商品");
+        }
         for (TradeDetail tradeDetail : tradeDetailList) {
             if (BigDecimal.ZERO.compareTo(remainTradingWeight) >= 0) {
                 break;
+            }
+            BigDecimal subWeight = BigDecimal.ZERO;
+
+            if (tradeDetailIdInputDtoMap.containsKey(tradeDetail.getId())) {
+                subWeight = tradeDetailIdInputDtoMap.get(tradeDetail.getId()).getTradeWeight();
+                if (subWeight.compareTo(tradeDetail.getStockWeight()) < 0) {
+                    throw new TraceBizException("批次重量不足,不能扣减成功");
+                }
+            } else {
+                if (remainTradingWeight.compareTo(tradeDetail.getStockWeight()) >= 0) {
+                    subWeight = tradeDetail.getStockWeight();
+                } else {
+                    subWeight = remainTradingWeight;
+                }
             }
 
             TradeRequestDetail tradeRequestDetail = new TradeRequestDetail();
             tradeRequestDetail.setTradeDetailId(tradeDetail.getTradeDetailId());
             tradeRequestDetail.setTradeRequestId(tradeRequest.getTradeRequestId());
-
-            if (remainTradingWeight.compareTo(tradeDetail.getStockWeight()) >= 0) {
-                tradeRequestDetail.setTradeWeight(tradeDetail.getStockWeight());
-            } else {
-                tradeRequestDetail.setTradeWeight(remainTradingWeight);
-            }
+            tradeRequestDetail.setTradeWeight(subWeight);
 
             remainTradingWeight = remainTradingWeight.subtract(tradeRequestDetail.getTradeWeight());
 
             TradeDetail td = new TradeDetail();
             td.setId(tradeDetail.getId());
             td.setStockWeight(tradeDetail.getStockWeight().subtract(tradeRequestDetail.getTradeWeight()));
+            td.setSoftWeight(tradeDetail.getSoftWeight().add(tradeRequestDetail.getTradeWeight()));
             if (td.getStockWeight().compareTo(BigDecimal.ZERO) == 0) {
                 td.setSaleStatus(SaleStatusEnum.NOT_FOR_SALE.getCode());
             } else {
                 td.setSaleStatus(SaleStatusEnum.FOR_SALE.getCode());
             }
-            td.setSoftWeight(tradeDetail.getSoftWeight().add(tradeRequestDetail.getTradeWeight()));
+
             this.tradeRequestDetailService.insertSelective(tradeRequestDetail);
 
             this.tradeDetailService.updateSelective(td);
@@ -632,11 +679,82 @@ public class TradeOrderService extends BaseServiceImpl<TradeOrder, Long> {
             this.productRpcService.lock(tradeDetail.getThirdPartyStockId(), productStockItem.getMarketId(), tradeRequestDetail.getTradeWeight());
 
         }
-
-//        this.productStockService.updateSelective(productStock);
         this.productStockService.updateProductStock(productStockItem.getId());
         return tradeRequestDetailList;
     }
+
+//    /**
+//     * @param tradeRequest
+//     * @param tradeRequest
+//     * @return
+//     */
+//    public List<TradeRequestDetail> createTradeRequestDetail(TradeRequest tradeRequest) {
+//
+//        ProductStock productStockItem = this.productStockService.selectByIdForUpdate(tradeRequest.getProductStockId())
+//                .orElseThrow(() -> {
+//                    return new TraceBizException("操作库存失败");
+//                });
+//        BigDecimal remainTradingWeight = tradeRequest.getTradeWeight();
+//        if (BigDecimal.ZERO.compareTo(remainTradingWeight) >= 0) {
+//            throw new TraceBizException("购买重量要大于0");
+//        }
+//        if (productStockItem.getStockWeight().compareTo(remainTradingWeight) < 0) {
+//            throw new TraceBizException("购买重量不能超过总库存重量");
+//        }
+//        List<TradeRequestDetail> tradeRequestDetailList = this.tradeRequestDetailService.findByTradeRequestIdList(Arrays.asList(tradeRequest.getId()));
+//
+//
+//        if (!tradeRequestDetailList.isEmpty()) {
+//            return tradeRequestDetailList;
+//        }
+//
+//        TradeDetailQueryDto tradeDetailQuery = new TradeDetailQueryDto();
+//        tradeDetailQuery.setSaleStatus(SaleStatusEnum.FOR_SALE.getCode());
+//        tradeDetailQuery.setProductStockId(productStockItem.getId());
+//        tradeDetailQuery.setSort("created,id");
+//        tradeDetailQuery.setOrder("asc,asc");
+//        tradeDetailQuery.setMinStockWeight(BigDecimal.ZERO);
+//
+//        List<TradeDetail> tradeDetailList = this.tradeDetailService.listByExample(tradeDetailQuery);
+//        for (TradeDetail tradeDetail : tradeDetailList) {
+//            if (BigDecimal.ZERO.compareTo(remainTradingWeight) >= 0) {
+//                break;
+//            }
+//
+//            TradeRequestDetail tradeRequestDetail = new TradeRequestDetail();
+//            tradeRequestDetail.setTradeDetailId(tradeDetail.getTradeDetailId());
+//            tradeRequestDetail.setTradeRequestId(tradeRequest.getTradeRequestId());
+//
+//            if (remainTradingWeight.compareTo(tradeDetail.getStockWeight()) >= 0) {
+//                tradeRequestDetail.setTradeWeight(tradeDetail.getStockWeight());
+//            } else {
+//                tradeRequestDetail.setTradeWeight(remainTradingWeight);
+//            }
+//
+//            remainTradingWeight = remainTradingWeight.subtract(tradeRequestDetail.getTradeWeight());
+//
+//            TradeDetail td = new TradeDetail();
+//            td.setId(tradeDetail.getId());
+//            td.setStockWeight(tradeDetail.getStockWeight().subtract(tradeRequestDetail.getTradeWeight()));
+//            if (td.getStockWeight().compareTo(BigDecimal.ZERO) == 0) {
+//                td.setSaleStatus(SaleStatusEnum.NOT_FOR_SALE.getCode());
+//            } else {
+//                td.setSaleStatus(SaleStatusEnum.FOR_SALE.getCode());
+//            }
+//            td.setSoftWeight(tradeDetail.getSoftWeight().add(tradeRequestDetail.getTradeWeight()));
+//            this.tradeRequestDetailService.insertSelective(tradeRequestDetail);
+//
+//            this.tradeDetailService.updateSelective(td);
+//            tradeRequestDetailList.add(tradeRequestDetail);
+//
+//            this.productRpcService.lock(tradeDetail.getThirdPartyStockId(), productStockItem.getMarketId(), tradeRequestDetail.getTradeWeight());
+//
+//        }
+//
+////        this.productStockService.updateSelective(productStock);
+//        this.productStockService.updateProductStock(productStockItem.getId());
+//        return tradeRequestDetailList;
+//    }
 
     /**
      * @param tradeRequest
