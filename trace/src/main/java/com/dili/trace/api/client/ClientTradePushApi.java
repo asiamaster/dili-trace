@@ -89,11 +89,15 @@ public class ClientTradePushApi extends AbstractApi {
             Long upStreamId = registerBill.getUpStreamId();
             String upStreamName = StreamEx.ofNullable(this.upStreamService.get(upStreamId)).map(UpStream::getName).findFirst().orElse("");
             registerBill.setUpStreamName(upStreamName);
-            if (pushType.equals(PushTypeEnum.DOWN.getCode())) {
-                registerBill.setWeight(tradeDetail.getStockWeight());
-            } else {
-                registerBill.setWeight(tradeDetail.getPushawayWeight());
+
+            if(tradeDetail.getParentId()!=null){
+                registerBill.setWeight(tradeDetail.getTotalWeight());
             }
+//            if (pushType.equals(PushTypeEnum.DOWN.getCode())) {
+//                registerBill.setWeight(tradeDetail.getStockWeight());
+//            } else {
+//                registerBill.setWeight(tradeDetail.getPushawayWeight());
+//            }
 
             List<ImageCert> imageCerts = this.imageCertService.findImageCertListByBillId(tradeDetail.getBillId(), BillTypeEnum.fromCode(registerBill.getBillType()).orElse(null));
             registerBill.setImageCertList(imageCerts);

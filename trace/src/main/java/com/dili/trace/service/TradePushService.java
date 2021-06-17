@@ -24,7 +24,7 @@ import java.util.Optional;
  */
 @Service
 @EnableRetry
-public class TradePushService extends TraceBaseService<TradePushLog, Long>   {
+public class TradePushService extends TraceBaseService<TradePushLog, Long> {
 
     private static final Logger logger = LoggerFactory.getLogger(TradePushService.class);
 
@@ -45,6 +45,7 @@ public class TradePushService extends TraceBaseService<TradePushLog, Long>   {
 
     /**
      * 处理上下架请求
+     *
      * @param tradePushLog
      */
     @Transactional
@@ -55,11 +56,10 @@ public class TradePushService extends TraceBaseService<TradePushLog, Long>   {
         ProductStock productStock = this.productStockService.selectByIdForUpdate(tradeDetail.getProductStockId())
                 .orElseThrow(() -> {
                     return new TraceBizException("操作库存失败");
-                });;
+                });
         // 下架
-        if(tradePushLog.getLogType().equals(PushTypeEnum.DOWN.getCode())) {
-            if(pushAwayWeight.compareTo(BigDecimal.ZERO) <= 0)
-            {
+        if (tradePushLog.getLogType().equals(PushTypeEnum.DOWN.getCode())) {
+            if (pushAwayWeight.compareTo(BigDecimal.ZERO) <= 0) {
                 throw new TraceBizException("下架数量必须大于0");
             }
             if (pushAwayWeight.compareTo(tradeDetail.getStockWeight()) > 0) {
@@ -68,21 +68,17 @@ public class TradePushService extends TraceBaseService<TradePushLog, Long>   {
         }
 
         // 上架
-        if(tradePushLog.getLogType().equals(PushTypeEnum.UP.getCode()))
-        {
-            if(pushAwayWeight.compareTo(BigDecimal.ZERO) <= 0)
-            {
+        if (tradePushLog.getLogType().equals(PushTypeEnum.UP.getCode())) {
+            if (pushAwayWeight.compareTo(BigDecimal.ZERO) <= 0) {
                 throw new TraceBizException("上架数量必须大于0");
             }
-            if(pushAwayWeight.compareTo(tradeDetail.getPushawayWeight()) > 0)
-            {
+            if (pushAwayWeight.compareTo(tradeDetail.getPushawayWeight()) > 0) {
                 throw new TraceBizException("上架数量不能大于已下架数量");
             }
             pushAwayWeight = pushAwayWeight.negate();
         }
         BigDecimal tradeDetailStockWeight = tradeDetail.getStockWeight().subtract(pushAwayWeight);
-        if(tradeDetail.getPushawayWeight() == null)
-        {
+        if (tradeDetail.getPushawayWeight() == null) {
             tradeDetail.setPushawayWeight(BigDecimal.ZERO);
         }
         BigDecimal tradeDetailPushAwayWeight = tradeDetail.getPushawayWeight().add(pushAwayWeight);
@@ -91,36 +87,25 @@ public class TradePushService extends TraceBaseService<TradePushLog, Long>   {
         tradeDetailForUpdate.setStockWeight(tradeDetailStockWeight);
         tradeDetailForUpdate.setPushawayWeight(tradeDetailPushAwayWeight);
 
-        BigDecimal stockWeight = productStock.getStockWeight();
-        stockWeight = stockWeight.subtract(pushAwayWeight);
-        productStock.setStockWeight(stockWeight);
-        if(tradeDetailStockWeight.compareTo(BigDecimal.ZERO) <= 0)
-        {
-            productStock.setTradeDetailNum(productStock.getTradeDetailNum()-1);
+        if (tradeDetailStockWeight.compareTo(BigDecimal.ZERO) <= 0) {
             tradeDetailForUpdate.setSaleStatus(SaleStatusEnum.NOT_FOR_SALE.getCode());
-        }
-        else
-        {
+        } else {
             // 之前stockWeight<=0,上架后大于0
-            if(tradeDetail.getStockWeight().compareTo(BigDecimal.ZERO) <= 0)
-            {
-                productStock.setTradeDetailNum(productStock.getTradeDetailNum()+1);
+            if (tradeDetail.getStockWeight().compareTo(BigDecimal.ZERO) <= 0) {
                 tradeDetailForUpdate.setSaleStatus(SaleStatusEnum.FOR_SALE.getCode());
             }
         }
 
         this.tradeDetailService.updateExact(tradeDetailForUpdate);
-        this.productStockService.update(productStock);
+        this.productStockService.updateProductStock(productStock.getProductStockId());
         tradePushLog.setProductName(tradeDetail.getProductName());
         tradePushLog.setProductStockId(tradeDetail.getProductStockId());
         tradePushLog.setOrderType(tradeDetail.getTradeType());
-        if(tradeDetail.getTradeType().equals(TradeTypeEnum.NONE.getCode())){
+        if (tradeDetail.getTradeType().equals(TradeTypeEnum.NONE.getCode())) {
             tradePushLog.setOrderId(tradeDetail.getBillId());
             RegisterBill bill = this.registerBillService.get(tradeDetail.getBillId());
             tradePushLog.setOrderCode(bill.getCode());
-        }
-        else
-        {
+        } else {
             TradeRequest tradeRequest = this.tradeRequestService.get(tradeDetail.getTradeRequestId());
             tradePushLog.setOrderId(tradeRequest.getId());
             tradePushLog.setOrderCode(tradeRequest.getCode());
@@ -130,26 +115,27 @@ public class TradePushService extends TraceBaseService<TradePushLog, Long>   {
         this.getDao().insert(tradePushLog);
 
 
-        RegisterBill rb=this.registerBillService.get(tradeDetail.getBillId());
-        Long marketId=(rb==null?null:rb.getMarketId());
-        BigDecimal changedWeight=pushAwayWeight.abs();
-        if(tradePushLog.getLogType().equals(PushTypeEnum.DOWN.getCode())) {
+        RegisterBill rb = this.registerBillService.get(tradeDetail.getBillId());
+        Long marketId = (rb == null ? null : rb.getMarketId());
+        BigDecimal changedWeight = pushAwayWeight.abs();
+        if (tradePushLog.getLogType().equals(PushTypeEnum.DOWN.getCode())) {
             // 下架
-            this.productRpcService.deductRegDetail(tradeDetail.getTradeDetailId(),marketId,changedWeight, Optional.empty());
-        }else if(tradePushLog.getLogType().equals(PushTypeEnum.UP.getCode())){
+            this.productRpcService.deductRegDetail(tradeDetail.getTradeDetailId(), marketId, changedWeight, Optional.empty());
+        } else if (tradePushLog.getLogType().equals(PushTypeEnum.UP.getCode())) {
             // 上架
-            this.productRpcService.increaseRegDetail(tradeDetail.getTradeDetailId(),marketId,changedWeight, Optional.empty());
+            this.productRpcService.increaseRegDetail(tradeDetail.getTradeDetailId(), marketId, changedWeight, Optional.empty());
         }
     }
 
     /**
      * 查询上下架信息
+     *
      * @param tradeDetailId
      * @param pushTypeEnum
      * @return
      */
-    public List<TradePushLog> findTradePushByTradeDetailId(Long tradeDetailId, PushTypeEnum pushTypeEnum){
-        TradePushLog q=new TradePushLog();
+    public List<TradePushLog> findTradePushByTradeDetailId(Long tradeDetailId, PushTypeEnum pushTypeEnum) {
+        TradePushLog q = new TradePushLog();
         q.setTradeDetailId(tradeDetailId);
         q.setLogType(pushTypeEnum.getCode());
         q.setSort("id");
