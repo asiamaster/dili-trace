@@ -1,13 +1,10 @@
 package com.dili.trace.api.input;
 
-import javax.persistence.Column;
-
 import com.dili.ss.domain.annotation.Operator;
 import com.dili.trace.domain.TradeDetail;
-
 import io.swagger.annotations.ApiModelProperty;
-import io.swagger.models.auth.In;
 
+import javax.persistence.Column;
 import java.math.BigDecimal;
 import java.util.List;
 
@@ -39,20 +36,10 @@ public class TradeDetailQueryDto extends TradeDetail {
     private List<Long> tradeRequestIdList;
 
 
-    @Column(name = "`detect_result`")
-    @Operator(Operator.IN)
-    private List<Integer> detectResultList;
 
-    public List<Integer> getDetectResultList() {
-        return detectResultList;
-    }
-
-    public void setDetectResultList(List<Integer> detectResultList) {
-        this.detectResultList = detectResultList;
-    }
 
     public List<Long> getTradeRequestIdList() {
-        return tradeRequestIdList;
+        return this.tradeRequestIdList;
     }
 
     public void setTradeRequestIdList(List<Long> tradeRequestIdList) {
@@ -62,13 +49,15 @@ public class TradeDetailQueryDto extends TradeDetail {
     /**
      * @return String return the createdStart
      */
+    @Override
     public String getCreatedStart() {
-        return createdStart;
+        return this.createdStart;
     }
 
     /**
      * @param createdStart the createdStart to set
      */
+    @Override
     public void setCreatedStart(String createdStart) {
         this.createdStart = createdStart;
     }
@@ -76,19 +65,21 @@ public class TradeDetailQueryDto extends TradeDetail {
     /**
      * @return String return the createdEnd
      */
+    @Override
     public String getCreatedEnd() {
-        return createdEnd;
+        return this.createdEnd;
     }
 
     /**
      * @param createdEnd the createdEnd to set
      */
+    @Override
     public void setCreatedEnd(String createdEnd) {
         this.createdEnd = createdEnd;
     }
 
     public BigDecimal getMinStockWeight() {
-        return minStockWeight;
+        return this.minStockWeight;
     }
 
     public void setMinStockWeight(BigDecimal minStockWeight) {
