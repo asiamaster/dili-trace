@@ -3,10 +3,12 @@ package com.dili.trace.service;
 
 import com.dili.common.exception.TraceBizException;
 import com.dili.trace.domain.*;
+import com.dili.trace.enums.DetectResultEnum;
 import com.dili.trace.enums.PushTypeEnum;
 import com.dili.trace.enums.SaleStatusEnum;
 import com.dili.trace.enums.TradeTypeEnum;
 import com.dili.trace.rpc.service.ProductRpcService;
+import one.util.streamex.StreamEx;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,6 +44,8 @@ public class TradePushService extends TraceBaseService<TradePushLog, Long> {
 
     @Autowired
     ProductRpcService productRpcService;
+    @Autowired
+    DetectRequestService detectRequestService;
 
     /**
      * 处理上下架请求
@@ -53,6 +57,11 @@ public class TradePushService extends TraceBaseService<TradePushLog, Long> {
         logger.info("push, param:{}", super.toJSONString(tradePushLog));
         BigDecimal pushAwayWeight = tradePushLog.getOperationWeight();
         TradeDetail tradeDetail = this.tradeDetailService.get(tradePushLog.getTradeDetailId());
+        RegisterBill rb = this.registerBillService.get(tradeDetail.getBillId());
+        DetectResultEnum detectResultEnum = StreamEx.ofNullable(rb).map(RegisterBill::getDetectRequestId).nonNull().map(this.detectRequestService::get)
+                .nonNull().map(DetectRequest::getDetectResult)
+                .map(DetectResultEnum::fromCodeOrEx).findFirst().orElse(DetectResultEnum.NONE);
+
         ProductStock productStock = this.productStockService.selectByIdForUpdate(tradeDetail.getProductStockId())
                 .orElseThrow(() -> {
                     return new TraceBizException("操作库存失败");
@@ -92,7 +101,11 @@ public class TradePushService extends TraceBaseService<TradePushLog, Long> {
         } else {
             // 之前stockWeight<=0,上架后大于0
             if (tradeDetail.getStockWeight().compareTo(BigDecimal.ZERO) <= 0) {
-                tradeDetailForUpdate.setSaleStatus(SaleStatusEnum.FOR_SALE.getCode());
+                if(DetectResultEnum.FAILED!=detectResultEnum){
+                    tradeDetailForUpdate.setSaleStatus(SaleStatusEnum.FOR_SALE.getCode());
+                }else{
+                    tradeDetailForUpdate.setSaleStatus(SaleStatusEnum.NOT_FOR_SALE.getCode());
+                }
             }
         }
 
@@ -103,8 +116,7 @@ public class TradePushService extends TraceBaseService<TradePushLog, Long> {
         tradePushLog.setOrderType(tradeDetail.getTradeType());
         if (tradeDetail.getTradeType().equals(TradeTypeEnum.NONE.getCode())) {
             tradePushLog.setOrderId(tradeDetail.getBillId());
-            RegisterBill bill = this.registerBillService.get(tradeDetail.getBillId());
-            tradePushLog.setOrderCode(bill.getCode());
+            tradePushLog.setOrderCode(rb.getCode());
         } else {
             TradeRequest tradeRequest = this.tradeRequestService.get(tradeDetail.getTradeRequestId());
             tradePushLog.setOrderId(tradeRequest.getId());
@@ -115,7 +127,7 @@ public class TradePushService extends TraceBaseService<TradePushLog, Long> {
         this.getDao().insert(tradePushLog);
 
 
-        RegisterBill rb = this.registerBillService.get(tradeDetail.getBillId());
+
         Long marketId = (rb == null ? null : rb.getMarketId());
         BigDecimal changedWeight = pushAwayWeight.abs();
         if (tradePushLog.getLogType().equals(PushTypeEnum.DOWN.getCode())) {
