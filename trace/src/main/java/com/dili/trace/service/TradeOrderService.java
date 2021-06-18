@@ -643,7 +643,7 @@ public class TradeOrderService extends BaseServiceImpl<TradeOrder, Long> {
 
             if (tradeDetailIdInputDtoMap.containsKey(tradeDetail.getId())) {
                 subWeight = tradeDetailIdInputDtoMap.get(tradeDetail.getId()).getTradeWeight();
-                if (subWeight.compareTo(tradeDetail.getStockWeight()) < 0) {
+                if (subWeight.compareTo(tradeDetail.getStockWeight()) > 0) {
                     throw new TraceBizException("批次重量不足,不能扣减成功");
                 }
             } else {
