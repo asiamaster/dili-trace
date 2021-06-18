@@ -6,11 +6,11 @@ import com.dili.ss.domain.BaseOutput;
 import com.dili.trace.domain.DetectRecord;
 import com.dili.trace.domain.DetectRequest;
 import com.dili.trace.domain.RegisterBill;
+import com.dili.trace.domain.TradeDetail;
 import com.dili.trace.enums.BillTypeEnum;
 import com.dili.trace.enums.DetectResultEnum;
-import com.dili.trace.service.DetectRecordService;
-import com.dili.trace.service.DetectRequestService;
-import com.dili.trace.service.RegisterBillService;
+import com.dili.trace.enums.TradeTypeEnum;
+import com.dili.trace.service.*;
 import one.util.streamex.StreamEx;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,6 +30,10 @@ public class ManullyController {
     DetectRequestService detectRequestService;
     @Autowired
     DetectRecordService detectRecordService;
+    @Autowired
+    ProductStockService productStockService;
+    @Autowired
+    TradeDetailService tradeDetailService;
 
     @RequestMapping(value = "/detectFailed.action", method = RequestMethod.GET)
     @ResponseBody
@@ -64,6 +68,13 @@ public class ManullyController {
             if (detectResultEnum == toDetectResult) {
                 return BaseOutput.failure("检测结果没有变化,不做处理");
             }
+            TradeDetail tdq=new TradeDetail();
+            tdq.setBillId(registerBill.getBillId());
+            tdq.setTradeType(TradeTypeEnum.NONE.getCode());
+            TradeDetail td=StreamEx.of(this.tradeDetailService.listByExample(tdq)).findFirst().orElse(null);
+            if(td==null){
+                return BaseOutput.failure("还没有入库,不做处理");
+            }
             DetectRequest detectRequestUp = new DetectRequest();
             detectRequestUp.setId(detectRequest.getId());
             detectRequestUp.setDetectResult(toDetectResult.getCode());
@@ -90,7 +101,7 @@ public class ManullyController {
                 this.detectRecordService.updateSelective(detectRecord);
             }
             this.detectRequestService.updateSelective(detectRequestUp);
-
+            this.productStockService.updateProductStock(td.getProductStockId());
         } catch (TraceBizException e) {
             return BaseOutput.failure(e.getMessage());
         }
