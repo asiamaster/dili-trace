@@ -17,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import java.util.Date;
 
@@ -31,6 +32,7 @@ public class ManullyController {
     DetectRecordService detectRecordService;
 
     @RequestMapping(value = "/detectFailed.action", method = RequestMethod.GET)
+    @ResponseBody
     public BaseOutput detectFailed(String billCode, Integer detectResult) {
         if (StringUtils.isBlank(billCode) || detectResult == null) {
             return BaseOutput.failure("参数不能为空");
