@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import java.util.Date;
+import java.util.Optional;
 
 @Controller
 @RequestMapping("/manully")
@@ -68,11 +69,11 @@ public class ManullyController {
             if (detectResultEnum == toDetectResult) {
                 return BaseOutput.failure("检测结果没有变化,不做处理");
             }
-            TradeDetail tdq=new TradeDetail();
+            TradeDetail tdq = new TradeDetail();
             tdq.setBillId(registerBill.getBillId());
             tdq.setTradeType(TradeTypeEnum.NONE.getCode());
-            TradeDetail td=StreamEx.of(this.tradeDetailService.listByExample(tdq)).findFirst().orElse(null);
-            if(td==null){
+            TradeDetail td = StreamEx.of(this.tradeDetailService.listByExample(tdq)).findFirst().orElse(null);
+            if (td == null) {
                 return BaseOutput.failure("还没有入库,不做处理");
             }
             DetectRequest detectRequestUp = new DetectRequest();
@@ -101,7 +102,7 @@ public class ManullyController {
                 this.detectRecordService.updateSelective(detectRecord);
             }
             this.detectRequestService.updateSelective(detectRequestUp);
-            this.productStockService.updateProductStock(td.getProductStockId());
+            this.productStockService.updateProductStockAndTradeDetailAfterDetect(registerBill.getBillId(), Optional.empty());
         } catch (TraceBizException e) {
             return BaseOutput.failure(e.getMessage());
         }
