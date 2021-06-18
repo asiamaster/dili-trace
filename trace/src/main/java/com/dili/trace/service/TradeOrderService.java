@@ -608,7 +608,7 @@ public class TradeOrderService extends BaseServiceImpl<TradeOrder, Long> {
         Map<Long, TradeDetailInputDto> tradeDetailIdInputDtoMap = StreamEx.of(tradeDetailInputList).toMap(TradeDetailInputDto::getTradeDetailId, Function.identity());
 
         if (!tradeDetailInputList.isEmpty()) {
-            if (BigDecimal.ZERO.compareTo(totalTradeWeight) <= 0) {
+            if (BigDecimal.ZERO.compareTo(totalTradeWeight) >= 0) {
                 throw new TraceBizException("交易重量参数错误");
             }
             if (tradeRequest.getTradeWeight().compareTo(totalTradeWeight) != 0) {
